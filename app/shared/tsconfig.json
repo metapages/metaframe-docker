@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["es6", "es2018"],
+    "module": "es6",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "target": "es2018",
+  },
+  "include": ["./src/**/*"],
+  "exclude": [
+    "node_modules",
+    // https://github.com/microsoft/TypeScript/issues/14538#issuecomment-654933955
+    "dist"
+  ],
+  "references": []
+}

@@ -1,0 +1,52 @@
+# Template docker-compose application
+
+version: "2.4"
+
+services:
+
+  https:
+    image: openresty/openresty:1.15.8.3-1-buster-fat-nosse42
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      # point to both the application and the auth domain
+      # they are separate because it makes auth logistically easier
+      - "APP_FQDN=${APP_FQDN:-docker-run.dev}"
+      - "APP_PORT=${APP_PORT:-443}"
+    command: /start.sh
+    volumes:
+      - ./ingress/https/conf.d:/etc/nginx/conf.d
+      - ./ingress/https:/app/https
+      - ./ingress/https/start.sh:/start.sh
+    networks:
+      - default
+    ports:
+      - "${APP_PORT:-443}:${APP_PORT:-443}"
+    logging:
+      driver: ${LOGGING_HTTPS:-none}
+
+  server:
+    command: just dev
+    volumes:
+      - .:/app
+      # - ./shared:/app/shared
+      # - ./server/.cache:/app/server/.cache
+      # - ./server/src:/app/server/src
+      # - ./server/justfile:/app/server/justfile
+      # - ./server/package.json:/app/server/package.json
+      # - ./server/package-lock.json:/app/server/package-lock.json
+      # - ./server/tsconfig.json:/app/server/tsconfig.json
+    ports:
+      - "${PORT_SERVER:-8081}:8080"
+
+  worker:
+    command: just dev
+    volumes:
+      - ./shared:/app/shared
+      - ./worker/.cache:/app/worker/.cache
+      - ./worker/src:/app/worker/src
+      - ./worker/justfile:/app/worker/justfile
+      - ./worker/package.json:/app/worker/package.json
+      - ./worker/package-lock.json:/app/worker/package-lock.json
+      - ./worker/tsconfig.json:/app/worker/tsconfig.json

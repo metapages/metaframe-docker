@@ -1,0 +1,35 @@
+# See app/justfile#_build_browser
+# Used standalone to generate the browser client on a development machine
+# NOT for CI (since uses local host mounts)
+
+version: "2.4"
+
+services:
+
+  browser-builder:
+    build:
+      context: ..
+      # target: browser-builder
+      target: browser
+      dockerfile: browser/Dockerfile
+    command: just build
+    environment:
+      # point to both the application and the auth domain
+      # they are separate because it makes auth logistically easier
+      - "APP_FQDN=${APP_FQDN:-docker-run.dev}"
+      - "APP_PORT=${APP_PORT:-443}"
+    volumes:
+      - ../../.cloudseed:/.cloudseed
+      - ../ingress/https/conf.d:/app/ingress/https/conf.d
+      # You cannot just mount the whole browser directory
+      # because of node_modules installed there and are not compatible
+      # between host and container
+      - ../server/src/shared:/app/server/src/shared
+      - ./public:/app/browser/public
+      - ./src:/app/browser/src
+      - ./justfile:/app/browser/justfile
+      - ./package.json:/app/browser/package.json
+      - ./package-lock.json:/app/browser/package-lock.json
+      - ./tsconfig.json:/app/browser/tsconfig.json
+      - ./.cache:/app/browser/.cache
+      - ./dist:/app/browser/dist

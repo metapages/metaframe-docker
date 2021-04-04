@@ -1,0 +1,101 @@
+set shell := ["bash", "-c"]
+# minimal formatting
+bold     := '\033[1m'
+normal   := '\033[0m'
+green    := '\033[92m'
+export GLITCH_BUILD_ROOT := "/tmp/glitch"
+
+@_help:
+    just --list --unsorted --list-heading $'Commands: \n'
+
+# Do these steps first!
+@playbook:
+    echo -e ""
+    echo -e "    Build and Deploy one time setup steps (reference: https://support.glitch.com/t/possible-to-code-locally-and-push-to-glitch-with-git/2704/12 )"
+    echo -e "    Run these BEFORE attempting to deploy:"
+    echo -e "      - 👉 Run these commands locally:"
+    echo -e "           {{bold}}git checkout --orphan glitch{{normal}}"
+    echo -e "           {{bold}}git rm -rf .{{normal}}"
+    echo -e "           {{bold}}git commit --allow-empty -m "root commit"{{normal}}"
+    echo -e "           {{bold}}git checkout --force main{{normal}}"
+    echo -e "      - 👉 🔗 Go to your glitch app: {{green}}https://glitch.com{{normal}}"
+    echo -e "        - 👉 Click: {{green}}Tools{{normal}}"
+    echo -e "        - 👉 Click: {{green}}Terminal{{normal}}"
+    echo -e "        - 👉 Run these commands (copy paste in the Terminal):"
+    echo -e ""
+    echo -e "           {{bold}}git config receive.denyCurrentBranch updateInstead{{normal}}"
+    echo -e "           {{bold}}echo '/usr/bin/refresh' > .git/hooks/post-receive{{normal}}"
+    echo -e "           {{bold}}chmod +x .git/hooks/post-receive{{normal}}"
+
+# 🌱 deploy to glitch.com. Requires (just playbook). Currently only works on a local host computer (not in CI/cloud, yet)
+build:
+    #!/usr/bin/env bash
+    # Took a hammer to this: create a ./glitch directory and build/copy the app in there
+    # Note that '<app/server/> npm run start' will not work outside of this deploy because
+    # glitch needs a 'package.json' in the repository root, but our entry point is in <app/server/>
+    set -e
+    cd ../..
+    for component in browser server
+    do
+        just app/$component/build
+    done
+    mkdir -p $GLITCH_BUILD_ROOT
+    rm -rf $GLITCH_BUILD_ROOT/*
+    for component in browser server shared
+    do
+        mkdir -p $GLITCH_BUILD_ROOT/$component
+    done
+    for component in browser server
+    do
+        rm -rf $GLITCH_BUILD_ROOT/$component/dist
+    done
+    rsync -a app/server/node_modules $GLITCH_BUILD_ROOT/
+    echo "node_modules" >            $GLITCH_BUILD_ROOT/.gitignore
+    for component in browser server shared
+    do
+        cp -r app/$component/dist              $GLITCH_BUILD_ROOT/$component/
+        cp -r app/$component/package.json      $GLITCH_BUILD_ROOT/$component/package.json
+        cp -r app/$component/package-lock.json $GLITCH_BUILD_ROOT/$component/package-lock.json
+    done
+    cp -r app/server/package*    $GLITCH_BUILD_ROOT/
+
+# Builds locally, commits compiled code on a new branch, and pushes glitch branch to your glitch.com app
+deploy: _check_git_clean _check_on_glitch_branch _delete_and_recreate_glitch_branch build _deploy
+
+# deploy without any time-consume prerequisites to help debug/fast iterate
+_deploy:
+    #!/usr/bin/env bash
+    cd ../..
+    CURRENT_BRANCH=$(git branch --show-current)
+    for component in browser server shared
+    do
+        git add -f app/$component/dist || true
+    done
+    git commit -m 'deploy to glitch'
+    git config remote.glitchdotcom.url >&- || git remote add glitchdotcom https://19c0daa9-ca0b-4e17-b7fd-60fba2999b09@api.glitch.com/git/docker-metapage-io
+    git push --force --set-upstream glitchdotcom glitch:master
+    git checkout $CURRENT_BRANCH
+
+# Build and run the app locally that will run on glitch.com
+start: build
+    #!/usr/bin/env bash
+    set -e
+    cd $GLITCH_BUILD_ROOT
+    npm run start
+
+@_check_git_clean:
+    if [ "$(git status --porcelain=v1 2>/dev/null)" != "" ]; then \
+        echo "Uncommitted changes, deploy will not match local system. Commit, or throw away changes."; \
+        exit 1; \
+    fi
+
+@_check_on_glitch_branch:
+    if [ "$(git branch --show-current)" = "glitch" ]; then \
+        echo "You cannot deploy from the 'glitch' branch. Suggestion: 'git checkout main'"; \
+        exit 1; \
+    fi
+
+# This deletes existing "dist" directories, ruining caching
+@_delete_and_recreate_glitch_branch:
+    git branch --delete -D glitch &>/dev/null || true
+    git checkout -b glitch

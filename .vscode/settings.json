@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        "**/.cache": true,
+        "**/.parcel-cache": true,
+        "**/*.tsbuildinfo": true,
+        "**/dist": true,
+        "**/node_modules": true,
+        "**/package-lock.json": true
+    },
+    "typescript.tsdk": "server/node_modules/typescript/lib",
+    "files.watcherExclude": {
+        "**/.parcel-cache": true
+    },
+    "search.exclude": {
+        "**/.parcel-cache": true
+    }
+}

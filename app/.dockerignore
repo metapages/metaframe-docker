@@ -1,0 +1,8 @@
+**/.cache
+**/.dockerignore
+**/.env
+**/.gitignore
+**/.parcel-cache
+**/dist
+**/Dockerfile
+**/node_modules

@@ -1,0 +1,22 @@
+# just docs: https://github.com/casey/just
+set shell := ["bash", "-c"]
+tsc                                := "node_modules/typescript/bin/tsc"
+
+# If not in docker, 🚪 get inside 🚪
+@_help:
+    just --list --unsorted
+
+# 🌱 Build the library => ./dist
+@build: clean
+    {{tsc}} --build
+
+# 🌱 Watch and compile on changes
+@dev:
+    @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
+    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/src -- bash -c '{{tsc}} --build --verbose --watch'
+
+
+clean:
+    mkdir -p dist
+    rm -rf dist/*
+    rm -rf tsconfig.tsbuildinfo

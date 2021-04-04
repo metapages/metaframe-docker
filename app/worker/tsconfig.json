@@ -1,0 +1,23 @@
+{
+    "extends": "../shared/tsconfig-base.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "baseUrl": "./src",
+        "target": "es6",
+        "module": "es6",
+        "moduleResolution": "node",
+        "typeRoots": [ "./node_modules/@types", "./src/types"],
+    },
+  "include": ["./src/**/*"],
+  "exclude": [
+    "node_modules",
+    // https://github.com/microsoft/TypeScript/issues/14538#issuecomment-654933955
+    "dist"
+  ],
+    "references": [
+        {
+            // https://stackoverflow.com/questions/47729344/how-to-share-code-between-typescript-projects
+            "path": "../shared",
+        }
+    ]
+}

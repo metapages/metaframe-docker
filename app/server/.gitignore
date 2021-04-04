@@ -1,0 +1,3 @@
+node_modules
+# This file is created on startup, the content is embedded in src/modules/routes/git/index.ts
+git.sh

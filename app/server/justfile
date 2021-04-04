@@ -1,0 +1,42 @@
+
+# Always use locally installed tools (always pin versions)
+tsc                                := "node_modules/typescript/bin/tsc"
+
+# minimal formatting, bold is very useful
+bold     := '\033[1m'
+normal   := '\033[0m'
+
+_help:
+    @just --unsorted --list
+
+# Build the production code
+build: clean (_tsc "--build --verbose")
+
+# Run in development mode (automatic reloading)
+dev:
+    @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
+    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run
+
+# Build then run node script
+run: build
+    @# Not using ts-node because https://github.com/TypeStrong/ts-node/issues/1007
+    @# --experimental-specifier-resolution=node: https://stackoverflow.com/questions/64453859/directory-import-is-not-supported-resolving-es-modules-with-node-js
+    node --experimental-specifier-resolution=node ./dist/index.js
+
+test:
+    NODE_ENV=test npx jest --verbose --runInBand
+
+# Development: install npm packages locally and *also* inside the running docker container
+npm +args="":
+    npm {{args}}
+    export TARGET=$(basename "$PWD") && cd .. && docker-compose exec $TARGET npm {{args}}
+    export TARGET=$(basename "$PWD") && cd .. && just build $TARGET
+
+# compile typescript src, may or may not emit artifacts
+_tsc +args="":
+    {{tsc}} {{args}}
+
+# I don't just remove 'dist/' itself because it might be moutned into a docker-compose container
+@clean:
+    rm -rf dist/*
+    rm -rf tsconfig.tsbuildinfo

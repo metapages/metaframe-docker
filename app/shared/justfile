@@ -1,0 +1,21 @@
+# just docs: https://github.com/casey/just
+set shell := ["bash", "-c"]
+tsc                                := "node_modules/typescript/bin/tsc"
+ts_node_dev                        := "node_modules/ts-node-dev/lib/bin.js"
+# minimal formatting, bold is very useful
+bold     := '\033[1m'
+normal   := '\033[0m'
+
+
+# If not in docker, 🚪 get inside 🚪
+@_help:
+    just --list --unsorted
+
+# 🌱 Build the shared library
+@build: clean
+    {{tsc}} --build
+
+clean:
+    mkdir -p dist
+    rm -rf dist/*
+    rm -rf tsconfig.tsbuildinfo

@@ -1,0 +1,10 @@
+**/.cache
+**/.parcel-cache
+**/dist
+**/node_modules
+**/tsconfig.tsbuildinfo
+/.env
+# Persistent storage, never commit
+.data
+# When we deploy
+# /glitch
