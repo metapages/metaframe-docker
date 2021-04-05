@@ -9,7 +9,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "doc": "npm run start ONLY works with `just build`",
-    "start": "DATABASE_DIRECTORY=.data/db BROWSER_ASSETS_DIRECTORY=app/browser/dist node --experimental-specifier-resolution=node ./app/server/dist/index.js"
+    "start": "DATABASE_DIRECTORY=.data/db BROWSER_ASSETS_DIRECTORY=browser/dist node --experimental-specifier-resolution=node ./server/dist/index.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.9.0",
