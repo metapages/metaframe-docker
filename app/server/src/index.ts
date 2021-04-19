@@ -4,6 +4,7 @@ sourceMapSupport.install();
 
 import { Server, IncomingMessage, ServerResponse } from "http";
 import path from "path";
+import fs from "fs";
 import * as fastify from "fastify";
 import fastifyws from "fastify-websocket";
 import fastifyBlipp from "fastify-blipp";
@@ -51,6 +52,7 @@ async function start() {
 
   // serve browser assets
   // even if using a CDN, likely makes sense to serve index.html from the main app
+  console.log('readdirSync', fs.readdirSync(BROWSER_ASSETS_DIRECTORY))
   api.register(fastifyStatic, {
     root:BROWSER_ASSETS_DIRECTORY,
     wildcard: false,

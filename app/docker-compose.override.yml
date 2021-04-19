@@ -28,15 +28,19 @@ services:
 
   server:
     command: just dev
+    environment:
+      # point to both the application and the auth domain
+      # they are separate because it makes auth logistically easier
+      - "BROWSER_ASSETS_DIRECTORY=/app/browser/dist/"
     volumes:
-      - .:/app
-      # - ./shared:/app/shared
-      # - ./server/.cache:/app/server/.cache
-      # - ./server/src:/app/server/src
-      # - ./server/justfile:/app/server/justfile
-      # - ./server/package.json:/app/server/package.json
-      # - ./server/package-lock.json:/app/server/package-lock.json
-      # - ./server/tsconfig.json:/app/server/tsconfig.json
+      - ./shared:/app/shared
+      - ./browser/dist:/app/browser/dist
+      - ./server/.cache:/app/server/.cache
+      - ./server/src:/app/server/src
+      - ./server/justfile:/app/server/justfile
+      - ./server/package.json:/app/server/package.json
+      - ./server/package-lock.json:/app/server/package-lock.json
+      - ./server/tsconfig.json:/app/server/tsconfig.json
     ports:
       - "${PORT_SERVER:-8081}:8080"
 
@@ -50,3 +54,22 @@ services:
       - ./worker/package.json:/app/worker/package.json
       - ./worker/package-lock.json:/app/worker/package-lock.json
       - ./worker/tsconfig.json:/app/worker/tsconfig.json
+
+
+  # Contains browser files, can be published many different ways
+  # Currently served via the service: api-public
+  browser-builder:
+    build:
+      context: .
+      dockerfile: browser/Dockerfile
+      target: browser-builder
+    command: just watch
+    volumes:
+      - ./shared:/app/shared
+      - ./browser/dist:/app/browser/dist
+      - ./browser/.cache:/app/browser/.cache
+      - ./browser/src:/app/browser/src
+      - ./browser/justfile:/app/browser/justfile
+      - ./browser/package.json:/app/browser/package.json
+      - ./browser/package-lock.json:/app/browser/package-lock.json
+      - ./browser/tsconfig.json:/app/browser/tsconfig.json
