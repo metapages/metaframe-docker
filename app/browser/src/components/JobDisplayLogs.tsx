@@ -77,7 +77,7 @@ const JustLogs: FunctionalComponent<{
     <Stack spacing={3}>
       {logsNewlineHandled.map(line => (
         <Fragment>
-          <Text lineHeight="30%" fontFamily="monospace">{line}</Text>
+          <Text lineHeight="60%" fontFamily="monospace">{line}</Text>
         </Fragment>
       ))}
     </Stack>

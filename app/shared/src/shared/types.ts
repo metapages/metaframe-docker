@@ -12,6 +12,8 @@ export interface DockerJobDefinitionInputsBase64 {
     image?: Image;
     command?: Command;
     env?: Env;
+    entrypoint?: string[];
+    workdir?:string;
     inputs?: InputsBase64String;
     durationMax?: number;
 }
@@ -69,12 +71,6 @@ export interface StateChangeValueQueued {
 export interface StateChangeValueReQueued {
     time: Date;
 }
-
-// export interface StateChangeValueQueuedInternal {
-//     definition: DockerJobDefinitionInputRefs;
-//     time: Date;
-//     nocache?:boolean;
-// }
 
 export interface StateChangeValueRunning {
     worker: string;

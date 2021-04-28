@@ -63,7 +63,7 @@ services:
       context: .
       dockerfile: browser/Dockerfile
       target: browser-builder
-    command: just watch
+    command: just build
     volumes:
       - ./shared:/app/shared
       - ./browser/dist:/app/browser/dist

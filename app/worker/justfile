@@ -1,5 +1,6 @@
 
 # Always use locally installed tools (always pin versions)
+export SERVER_ORIGIN  := env_var_or_default("SERVER_ORIGIN", "http://server:8080")
 tsc                                := "node_modules/typescript/bin/tsc"
 
 # minimal formatting, bold is very useful

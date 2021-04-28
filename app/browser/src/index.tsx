@@ -1,4 +1,4 @@
-import { render } from "preact";
+import { h, render } from 'preact';
 import { ChakraProvider } from "@chakra-ui/react";
 import { App } from "./App";
 

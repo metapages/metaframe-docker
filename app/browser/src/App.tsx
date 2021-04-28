@@ -1,4 +1,4 @@
-import { FunctionalComponent } from "preact";
+import { h, FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import {
   BrowserRouter as Router,

@@ -108,6 +108,7 @@ export class DockerJobQueue {
         const executionArgs: DockerJobArgs = {
             image: definition.image!,
             command: definition.command,
+            entrypoint: definition.entrypoint,
             env: definition.env,
             volumes: [volumes.inputs, volumes.outputs],
             // outStream?: Writable;

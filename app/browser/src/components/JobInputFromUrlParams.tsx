@@ -39,6 +39,8 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     setJobDefinitionBlob,
   ] = useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
 
+  console.log('jobDefinitionBlob', jobDefinitionBlob);
+
   const [
     nocacheString,
     setnocacheString,
@@ -64,6 +66,19 @@ export const JobInputFromUrlParams: FunctionalComponent<{
       : undefined
   );
 
+  const [localEntrypointString, setLocalEntrypointString] = useState<
+    string | undefined
+  >(
+    jobDefinitionBlob?.entrypoint
+      ? jobDefinitionBlob?.entrypoint.join(" ")
+      : undefined
+  );
+
+  const [localWorkdir, setLocalWorkdir] = useState<string | undefined>(
+    jobDefinitionBlob?.workdir
+      ? jobDefinitionBlob?.workdir
+      : undefined);
+
   const [localnoCache, setLocalNoCache] = useState<boolean>(
     nocacheString === "1"
   );
@@ -79,9 +94,15 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     if (localImage) {
       newJobDefinitionBlob.image = localImage;
     }
-    let maybeArray: string[] | undefined;
+
+    if (localWorkdir) {
+      newJobDefinitionBlob.workdir = localWorkdir;
+    }
+
+    // CMD
+    let maybeCommandArray: string[] | undefined;
     try {
-      maybeArray =
+      maybeCommandArray =
         localCommandString && localCommandString !== ""
           ? (parse(localCommandString) as string[])
           : undefined;
@@ -89,14 +110,29 @@ export const JobInputFromUrlParams: FunctionalComponent<{
       // ignore parsing errors
     }
 
-    maybeArray = maybeArray?.map(s => typeof(s) === 'object' ? (s as {op:string}).op : s );
-    newJobDefinitionBlob.command = maybeArray;
+    maybeCommandArray = maybeCommandArray?.map(s => typeof(s) === 'object' ? (s as {op:string}).op : s );
+    newJobDefinitionBlob.command = maybeCommandArray;
+
+
+    // ENTRYPOINT
+    let maybeEntrypointArray: string[] | undefined;
+    try {
+      maybeEntrypointArray =
+        localEntrypointString && localEntrypointString !== ""
+          ? (parse(localEntrypointString) as string[])
+          : undefined;
+    } catch (err) {
+      // ignore parsing errors
+    }
+    maybeEntrypointArray = maybeEntrypointArray?.map(s => typeof(s) === 'object' ? (s as {op:string}).op : s );
+    newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
+
     setJobDefinitionBlob(newJobDefinitionBlob);
     setnocacheString(localnoCache ? "1" : undefined);
-    if (localInputsMode !== undefined && localInputsMode !== DataMode.base64) {
+    if (localInputsMode !== undefined && inputsMode !== DataMode.base64) {
       setInputsMode(localInputsMode);
     }
-  }, [setOpen, isOpen, localImage, localCommandString, localnoCache, localInputsMode, setJobDefinitionBlob, setnocacheString, setInputsMode]);
+  }, [setOpen, isOpen, localImage, localCommandString, localEntrypointString, localWorkdir, localnoCache, localInputsMode, setJobDefinitionBlob, setnocacheString, setInputsMode]);
 
   const onChangeImage = useCallback(
     // this typing/casting is awful but the only thing I found that works
@@ -104,6 +140,14 @@ export const JobInputFromUrlParams: FunctionalComponent<{
       setLocalImage((event.target as HTMLInputElement).value);
     },
     [setJobDefinitionBlob, setLocalImage]
+  );
+
+  const onChangeWorkdir = useCallback(
+    // this typing/casting is awful but the only thing I found that works
+    (event: any) => {
+      setLocalWorkdir((event.target as HTMLInputElement).value);
+    },
+    [setJobDefinitionBlob, setLocalWorkdir]
   );
 
   const onChangeNoCache = useCallback(
@@ -121,6 +165,16 @@ export const JobInputFromUrlParams: FunctionalComponent<{
       setLocalCommandString(inputString);
     },
     [setJobDefinitionBlob, setLocalCommandString]
+  );
+
+  const onChangeEntrypoint = useCallback(
+    // this typing/casting is awful but the only thing I found that works
+    (event: any) => {
+      const inputString: string | undefined = (event.target as HTMLInputElement)
+        .value;
+      setLocalEntrypointString(inputString);
+    },
+    [setJobDefinitionBlob, setLocalEntrypointString]
   );
 
   // preact complains in dev mode if this is moved out of a functional component
@@ -200,6 +254,57 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                       placeholder=""
                       value={localCommandString}
                       onInput={onChangeCommand}
+                    />
+                  </Box>
+                </GridItem>
+
+                <GridItem rowSpan={1} colSpan={2}>
+                  <Box
+                    w="100%"
+                    h="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="flex-end"
+                  >
+                    <Text textAlign={"right"} verticalAlign="bottom">
+                      Workdir:
+                    </Text>
+                  </Box>
+                </GridItem>
+                <GridItem rowSpan={1} colSpan={10}>
+                  {" "}
+                  <Box w="100%" h="10">
+                    <Input
+                      type="text"
+                      placeholder=""
+                      value={localWorkdir}
+                      onInput={onChangeWorkdir}
+                    />
+                  </Box>
+                </GridItem>
+
+
+                <GridItem rowSpan={1} colSpan={2}>
+                  <Box
+                    w="100%"
+                    h="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="flex-end"
+                  >
+                    <Text textAlign={"right"} verticalAlign="bottom">
+                      Docker image entrypoint:
+                    </Text>
+                  </Box>
+                </GridItem>
+                <GridItem rowSpan={1} colSpan={10}>
+                  {" "}
+                  <Box w="100%" h="10">
+                    <Input
+                      type="text"
+                      placeholder=""
+                      value={localEntrypointString}
+                      onInput={onChangeEntrypoint}
                     />
                   </Box>
                 </GridItem>

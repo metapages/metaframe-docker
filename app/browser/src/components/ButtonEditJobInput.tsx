@@ -8,7 +8,6 @@ export const ButtonEditJobInput: FunctionalComponent = () => {
   const [open, setOpen] = useState<boolean>(false);
 
   const onClick = useCallback(() => {
-    console.log('button edit click')
     setOpen(!open);
   }, [open]);
 

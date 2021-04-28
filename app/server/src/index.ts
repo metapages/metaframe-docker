@@ -10,6 +10,7 @@ import fastifyws from "fastify-websocket";
 import fastifyBlipp from "fastify-blipp";
 import fastifyCors from "fastify-cors";
 import fastifyStatic from "fastify-static"
+import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
 import envVar from "env-var"
 import healthz from "./modules/routes/healthz";
 import { wsHandlerBrowser, wsHandlerWorker, WebsocketUrlParameters } from "./modules/websocket";
@@ -28,10 +29,13 @@ async function start() {
   const api: fastify.FastifyInstance<Server,
     IncomingMessage,
     ServerResponse> = fastify.fastify({
+      disableRequestLogging: true,
       logger: {
         level: LOG_LEVEL
       }
     });
+
+  api.register(fastifyRequestLogger);
 
   // The websocket handler needs to be added before all other routes/handlers
   // https://github.com/fastify/fastify-websocket#attaching-event-handlers

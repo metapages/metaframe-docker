@@ -1,12 +1,11 @@
 import * as path from "path"
 import fse from "fs-extra"
 import klaw from "klaw";
-import through2 from "through2"
-import { dockerJobExecute, DockerJobArgs, DockerJobExecution, Volume } from './DockerJob'
-import { InputsRefs, InputsBase64String, BroadcastState, WorkerRegistration, WebsocketMessageType, WebsocketMessageSender, DockerJobDefinitionRow, DockerJobState, StateChangeValueWorkerFinished, StateChangeValueRunning, DockerJobFinishedReason } from '../../../shared/dist/shared/types.js';
+import { Volume } from './DockerJob'
+import { InputsRefs, DockerJobDefinitionRow } from '../../../shared/dist/shared/types.js';
 import { asyncForEach } from '../../../shared/dist/shared/util.js'
 import { DataRef } from '../../../shared/dist/dataref/index.js'
-import { dataRefToFile, dataRefToBuffer, bufferToBase64Ref } from "./DataRefUtil"
+import { dataRefToFile, bufferToBase64Ref } from "./DataRefUtil"
 
 
 const TMPDIR = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || '/tmp';

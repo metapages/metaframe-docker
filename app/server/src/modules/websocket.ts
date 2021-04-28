@@ -18,7 +18,7 @@ export function wsHandlerBrowser(connection: SocketStream, request: fastify.Fast
     const params = request.params as WebsocketUrlParameters;
     const token = params.token;
     console.log('token', token);
-    if (!token) {
+    if (!token || token === "" || token === 'undefined' || token === 'null') {
       console.log('No token, closing socket');
       connection.end();
       return;

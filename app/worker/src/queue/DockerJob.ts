@@ -42,6 +42,8 @@ export interface DockerJobArgs {
   image: string;
   command?: string[] | undefined;
   env?: any;
+  entrypoint?: string[] | undefined;
+  workdir?:string;
   // volumes?: Array<MountedDockerVolumeDef>;
   volumes?: Array<Volume>;
   outStream?: Writable;
@@ -65,7 +67,7 @@ export interface DockerRunResult {
 
 export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobExecution> => {
 
-  const { image, command, env, volumes, outStream, errStream } = args;
+  const { image, command, env, workdir, entrypoint, volumes, outStream, errStream } = args;
 
   const result: DockerRunResult = {
     stdout: [],
@@ -83,6 +85,8 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
   const createOptions: Docker.ContainerCreateOptions = {
     Image: image,
     Cmd: command,
+    WorkingDir: workdir,
+    Entrypoint: entrypoint,
     HostConfig: {},
     Env: env != null
       ? Object.keys(env).map(key => `${key}=${env[key]}`)
