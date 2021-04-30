@@ -35,7 +35,6 @@ async function start() {
       }
     });
 
-  api.register(fastifyRequestLogger);
 
   // The websocket handler needs to be added before all other routes/handlers
   // https://github.com/fastify/fastify-websocket#attaching-event-handlers
@@ -44,6 +43,8 @@ async function start() {
       console.log(error)
     }
   });
+
+  api.register(fastifyRequestLogger);
 
   api.register(fastifyBlipp);
   api.register(fastifyCors);

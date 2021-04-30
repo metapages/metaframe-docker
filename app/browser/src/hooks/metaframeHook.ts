@@ -4,8 +4,6 @@
 
 // Can we export a react AND preact compatible module?
 import { useContext, useEffect, useState, createContext } from "react"
-// import { createContext } from "preact";
-// import { useContext, useEffect, useState } from "preact/hooks";
 import { Metaframe, MetaframeInputMap } from "@metapages/metapage";
 
 
@@ -23,52 +21,64 @@ const defaultMetaframeObject: MetaframeObject = {
 
 export const MetaframeContext = createContext<MetaframeObject>(defaultMetaframeObject);
 
-
 export const useMetaframe = () => {
   return useContext(MetaframeContext);
 };
 
-export const useMetaframeObject = () => {
-  // ALL this before the render is to set up the metaframe provider
-  // I tried pulling the metaframProvider out into a separate class
-  // but preact crashed
-  const [metaframeObject, setMetaframeObject] = useState<MetaframeObject>({
-    inputs: {},
-  });
-  // const children = args?.children;
-  // const metaframe:Metaframe|undefined = undefined;
-  const [metaframe, setMetaframe] = useState<Metaframe | undefined>(undefined);
-  const [inputs, setInputs] = useState<MetaframeInputMap>(
-    metaframeObject.inputs
-  );
+// export const useMetaframeObject = () => {
+//   // ALL this before the render is to set up the metaframe provider
+//   // I tried pulling the metaframProvider out into a separate class
+//   // but preact crashed
+//   const [metaframeObject, setMetaframeObject] = useState<MetaframeObject>({
+//     inputs: {},
+//   });
+//   // const children = args?.children;
+//   // const metaframe:Metaframe|undefined = undefined;
+//   const [metaframe, setMetaframe] = useState<Metaframe | undefined>(undefined);
+//   const [inputs, setInputs] = useState<MetaframeInputMap>(
+//     metaframeObject.inputs
+//   );
 
-  useEffect(() => {
-    const newMetaframe = new Metaframe();
-    setMetaframe(newMetaframe);
-    return () => {
-      newMetaframe.dispose();
-    }
-  }, []);
+//   useEffect(() => {
+//     const newMetaframe = new Metaframe();
+//     setMetaframe(newMetaframe);
 
-  useEffect(() => {
-    if (inputs && metaframe) {
-      setMetaframeObject({ metaframe, inputs });
-    }
-  }, [inputs, metaframe]);
+//     const onInputs = (newinputs: MetaframeInputMap) => {
+//       console.log('newinputs', newinputs);
+//       // this has to be a copy, since internally the metaframe keeps a single object for
+//       // imagined but untested performance concerns
+//       setInputs({...newinputs});
+//     };
+//     const disposer = newMetaframe.onInputs(onInputs);
 
-  useEffect(() => {
-    if (!metaframe) {
-      return;
-    }
-    const onInputs = (newinputs: MetaframeInputMap) => {
-      setInputs(newinputs);
-    };
-    const disposer = metaframe.onInputs(onInputs);
-    return () => {
-      // If the metaframe is cleaned up, also remove the inputs listener
-      disposer();
-    };
-  }, [metaframe, setInputs]);
 
-  return [metaframeObject];
-};
+//     return () => {
+//       // If the metaframe is cleaned up, also remove the inputs listener
+//       disposer();
+//       newMetaframe.dispose();
+//     }
+//   }, [setInputs, setMetaframe]);
+
+//   useEffect(() => {
+//     if (inputs && metaframe) {
+//       setMetaframeObject({ metaframe, inputs });
+//     }
+//   }, [inputs, metaframe]);
+
+//   // useEffect(() => {
+//   //   if (!metaframe) {
+//   //     return;
+//   //   }
+//   //   const onInputs = (newinputs: MetaframeInputMap) => {
+//   //     console.log('newinputs', newinputs);
+//   //     setInputs(newinputs);
+//   //   };
+//   //   const disposer = metaframe.onInputs(onInputs);
+//   //   return () => {
+//   //     // If the metaframe is cleaned up, also remove the inputs listener
+//   //     disposer();
+//   //   };
+//   // }, [metaframe, setInputs]);
+
+//   return [metaframeObject];
+// };

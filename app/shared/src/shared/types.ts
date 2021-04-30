@@ -31,7 +31,7 @@ export interface DockerRunResultWithOutputs {
     stdout?: string[];
     stderr?: string[];
     error?: any;
-    outputs ?:InputsRefs;
+    outputs :InputsRefs;
 }
 
 export enum DockerJobState {

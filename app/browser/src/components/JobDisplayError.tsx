@@ -20,7 +20,7 @@ export const JobDisplayError: FunctionalComponent<{
   }
 
 
-  console.log('job', job);
+  // console.log('job', job);
 
   let content: JSX.Element | undefined;
   switch (state) {

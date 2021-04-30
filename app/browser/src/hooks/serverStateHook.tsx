@@ -14,9 +14,9 @@ import {
   WebsocketMessageType,
 } from "../../../shared/dist/shared/types";
 
-interface RouteParams {
-  address: string;
-}
+// interface RouteParams {
+//   address: string;
+// }
 
 type Props = {
   children: React.ReactNode;

@@ -1,6 +1,6 @@
 import { FunctionalComponent } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
-import { useQueryParam, StringParam } from 'use-query-params';
+import { useQueryParam, StringParam } from "use-query-params";
 import { Box } from "@chakra-ui/react";
 import { Metaframe, MetaframeInputMap, isIframe } from "@metapages/metapage";
 import { useDockerJobDefinition } from "../hooks/jobDefinitionHook";
@@ -22,10 +22,16 @@ import {
 import { JobDisplayState } from "./JobDisplayState";
 import { JobDisplayLogs } from "./JobDisplayLogs";
 import { JobDisplayError } from "./JobDisplayError";
+import { JobDisplayId } from "./JobDisplayId";
+
 // import { MetaframeContext } from '../../../metaframe-react-hook/src/metaframe/preact/metaframeHook';
 // import { MetaframeContext } from '../../../metaframe-react-hook/src/metaframe/preact/metaframeHook';
 import { MetaframeContext } from "../hooks/metaframeHook";
-import { convertJobOutputDataRefsToExpectedFormat, DataMode, DataModeDefault } from '../utils/dataref';
+import {
+  convertJobOutputDataRefsToExpectedFormat,
+  DataMode,
+  DataModeDefault,
+} from "../utils/dataref";
 
 export const JobProcessor: FunctionalComponent<{}> = () => {
   // this is where two complex hooks are threaded together:
@@ -36,11 +42,14 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
   const dockerJob = useDockerJobDefinition();
   const serverState = useServerState();
   const [jobHash, setJobHash] = useState<string | undefined>(undefined);
+  const [jobHashCurrentOutputs, setJobHashCurrentOutputs] = useState<
+    string | undefined
+  >(undefined);
   const [job, setJob] = useState<DockerJobDefinitionRow | undefined>(undefined);
   const metaframe = useContext(MetaframeContext);
   const [nocacheString] = useHashParam("nocache");
-  const [inputsMode ] = useQueryParam('inputsmode', StringParam);
-  const outputsMode :DataMode = inputsMode as DataMode || DataModeDefault
+  const [inputsMode] = useQueryParam("inputsmode", StringParam);
+  const outputsMode: DataMode = (inputsMode as DataMode) || DataModeDefault;
 
   // Update the local job hash (id) on change
   useEffect(() => {
@@ -48,6 +57,7 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
       const jobHashCurrent = shaJobDefinition(
         dockerJob.definitionMeta.definition
       );
+
       if (jobHash !== jobHashCurrent) {
         setJobHash(jobHashCurrent);
       }
@@ -59,12 +69,17 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
   // Update the local job definition on change
   useEffect(() => {
     if (!jobHash) {
-      setJob(undefined);
+      if (job !== undefined) {
+        setJob(undefined);
+      }
       return;
     }
     const newJobState = serverState?.state?.state?.jobs[jobHash];
     if (!newJobState) {
-      setJob(undefined);
+      // only clear the job IF it's different from our last inputs
+      if (jobHash !== jobHashCurrentOutputs) {
+        setJob(undefined);
+      }
     } else if (!job) {
       setJob(newJobState);
     } else {
@@ -77,7 +92,6 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
     }
   }, [jobHash, serverState, job, setJob]);
 
-  // temporary while i figure out compilation issue from upgraden
   // only maybe update metaframe outputs if the job updates and is finished (with outputs)
   useEffect(() => {
     if (
@@ -87,53 +101,31 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
       job.state === DockerJobState.Finished
     ) {
       const stateFinished: StateChangeValueWorkerFinished = job.value as StateChangeValueWorkerFinished;
-      console.log("stateFinished", stateFinished);
+      // console.log("stateFinished", stateFinished);
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
         console.log("outputs", outputs);
         (async () => {
-          const metaframeOutputs: MetaframeInputMap|undefined = await convertJobOutputDataRefsToExpectedFormat(outputs, outputsMode);
-          console.log("Setting metaframe outputs", metaframeOutputs);
+          const metaframeOutputs:
+            | MetaframeInputMap
+            | undefined = await convertJobOutputDataRefsToExpectedFormat(
+            outputs,
+            outputsMode
+          );
+          console.log("metaframeOutputs", metaframeOutputs);
+          // console.log("Setting metaframe outputs", metaframeOutputs);
           if (metaframeOutputs) {
-            metaframe.setOutputs!(metaframeOutputs);
+            try {
+              metaframe.setOutputs!(metaframeOutputs);
+            } catch (err) {
+              console.error("Failed to send metaframe outputs", err);
+            }
           }
-        })()
-
+          setJobHashCurrentOutputs(job.hash);
+        })();
       }
     }
-  }, [job, metaframe]);
-
-  // Update the local job on change
-  // useEffect(() => {
-  //   if (jobHash && serverState?.state?.state?.jobs[jobHash]?.state && serverState?.state?.state?.jobs[jobHash]?.state !== jobState) {
-  //     setJobState(serverState?.state?.state?.jobs[jobHash].state);
-  //   }
-  // }, [jobHash, job, setJob, serverState?.state, setJobState]);
-
-  // // If the job state is finished, push the outputs (if any) to the metaframe outputs
-  // useEffect(() => {
-  //   if (metaframe.setOutputs && jobHash && serverState?.state?.state?.jobs[jobHash].state && serverState?.state?.state?.jobs[jobHash].state === DockerJobState.Finished) {
-  //     const job :DockerJobDefinitionRow = serverState.state.state.jobs[jobHash];
-  //     const stateFinished = job.value as StateChangeValueWorkerFinished;
-  //     if (stateFinished?.result?.outputs) {
-  //       const outputs :InputsRefs = stateFinished!.result!.outputs;
-  //       const metaframeOutputs :MetaframeInputMap = {};
-  //       Object.keys(outputs).forEach(key => {
-  //         // TODO: ensure base64, right now we're assuming, but this could change
-  //         if (outputs[key].type !== DataRefType.Base64) {
-  //           throw 'Currently we are assuming base64 strings as outputs SORRY pls fix me';
-  //         }
-  //         metaframeOutputs[key] = outputs[key].value;
-  //       });
-  //       console.log("Setting metaframe outputs", metaframeOutputs)
-  //       metaframe?.setOutputs(metaframeOutputs);
-  //     }
-  //   }
-  // }, [jobHash, jobState, serverState, metaframe]);
-
-  // console.log('JobProcessor dockerJob', dockerJob);
-
-  // let x :DockerJobDefinitionInputRefs = {} as DockerJobDefinitionInputRefs;
+  }, [job, metaframe, setJobHashCurrentOutputs]);
 
   // track the job state that matches our job definition (created by URL query params and inputs)
   // when we get the correct job state, it's straightforward to just show it
@@ -152,33 +144,37 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
       } else {
         if (serverState && serverState.stateChange) {
           // no job found, let's add it
-          // inputs are already minified (fat blobs uploaded to the cloud)
-          const definition: DockerJobDefinitionInputRefs = dockerJob.definitionMeta!
-            .definition!;
-          const value: StateChangeValueQueued = {
-            definition,
-            nocache: nocacheString === "1",
-            time: new Date(),
-          };
-          const payload: StateChange = {
-            state: DockerJobState.Queued,
-            value,
-            job: jobHashCurrent,
-            tag: "", // document the meaning of this. It's the worker claim. Might be unneccesary due to history
-          };
+          // BUT only if our last outputs aren't this jobId
+          // because the server eventually deletes our job, but we can know we have already computed it
+          if (jobHashCurrentOutputs !== jobHashCurrent) {
+            // inputs are already minified (fat blobs uploaded to the cloud)
+            const definition: DockerJobDefinitionInputRefs = dockerJob.definitionMeta!
+              .definition!;
+            const value: StateChangeValueQueued = {
+              definition,
+              nocache: nocacheString === "1",
+              time: new Date(),
+            };
+            const payload: StateChange = {
+              state: DockerJobState.Queued,
+              value,
+              job: jobHashCurrent,
+              tag: "", // document the meaning of this. It's the worker claim. Might be unneccesary due to history
+            };
 
-          const message: WebsocketMessage = {
-            payload,
-            type: WebsocketMessageType.StateChange,
-          };
+            const message: WebsocketMessage = {
+              payload,
+              type: WebsocketMessageType.StateChange,
+            };
 
-          serverState!.stateChange!(message);
+            serverState!.stateChange!(message);
+          }
         } else {
           console.error("Why no state change?");
         }
       }
     }
-  }, [dockerJob, serverState]);
+  }, [dockerJob, serverState, jobHashCurrentOutputs]);
 
   // TODO: streaming logs
 
@@ -188,6 +184,7 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
 
   return (
     <Box>
+      <JobDisplayId job={job} />
       <JobDisplayState job={job} />
       <JobDisplayError job={job} />
       <JobDisplayLogs job={job} />

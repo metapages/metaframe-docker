@@ -17,23 +17,25 @@ import StrictEventEmitter from 'strict-event-emitter-types';
 import * as WebSocket from 'ws';
 import { assert } from 'console';
 import {
-    DockerJobDefinitionInputRefs,
     DockerJobFinishedReason,
     DockerJobDefinitionRow,
     DockerJobState,
     StateChangeValueQueued,
     StateChangeValueRunning,
     StateChangeValueWorkerFinished,
-    DockerJobDefinitionInputsBase64,
     State,
     StateChange,
     BroadcastState, WebsocketMessageType, WebsocketMessage, WorkerRegistration
 } from '../../../shared/dist/shared/types';
 // import {inputsBase64ToInputsDataRefs } from "../../../shared/dist/dataref"
-import {
-    shaJobDefinition,
-} from '../../../shared/dist/shared/util';
+// import {
+//     shaJobDefinition,
+// } from '../../../shared/dist/shared/util';
 import { db } from "../modules/db"
+
+// 60 seconds
+// const MAX_TIME_FINISHED_JOB_IN_QUEUE = 60 * 1000;
+const MAX_TIME_FINISHED_JOB_IN_QUEUE = 4 * 1000;
 
 // define your events
 interface Events {
@@ -67,7 +69,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
 
     stateChange(change: StateChange) {
 
-        // console.log('🌘stateChange', JSON.stringify(change, null, '  '));
+        console.log('🌘stateChange', JSON.stringify(change, null, '  '));
         // console.log('this.state.jobs', JSON.stringify(this.state.jobs, null, '  '));
 
         let sendBroadcast = false;
@@ -244,17 +246,16 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
     removeOldFinishedJobsFromQueue() {
         // check for finished jobs around longer than a minute
         const now = Date.now();
-        const oneMinute = 60000;
         let sendBroadcast = false;
         Object.keys(this.state.jobs).forEach(jobId => {
             if (this.state.jobs[jobId].state === DockerJobState.Finished) {
 
                 const stateChange = this.state.jobs[jobId].value as StateChangeValueWorkerFinished;
-                console.log('typeof(stateChange.time)', typeof(stateChange.time));
+                // console.log('typeof(stateChange.time)', typeof(stateChange.time));
                 if (typeof(stateChange.time) !== 'object') {
                     stateChange.time = new Date(stateChange.time);
                 }
-                if ((now - stateChange.time.getTime()) > oneMinute) {
+                if ((now - stateChange.time.getTime()) > MAX_TIME_FINISHED_JOB_IN_QUEUE) {
                     console.log(`🪓 removing finished job from queue id=${jobId}`);
                     delete this.state.jobs[jobId];
                     sendBroadcast = true;
@@ -268,12 +269,12 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
     }
 
     connectWorker(connection: { socket: WebSocket }) {
-        console.log('🔌 Connecting a worker');
+        console.log('⏯️ 🔌 Connected a worker');
 
         let worker: WorkerRegistration;
 
         connection.socket.addEventListener('close', () => {
-            console.log(`🌪 Removing ${worker ? worker.id : "unknown worker"}`);
+            console.log(`⏹️ 🔌 Removing ${worker ? worker.id : "unknown worker"}`);
             var index = this.workers.findIndex(w => w.connection === connection.socket);
             if (index > -1) {
                 assert(worker === this.workers[index].registration);
@@ -318,11 +319,12 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
     }
 
     connectBrowser(connection: { socket: WebSocket }) {
-        console.log('Connecting a browser');
+        console.log('⏯️ 👁️ Connected a browser');
         this.browsers.push(connection.socket);
         connection.socket.addEventListener('close', () => {
             var index = this.browsers.indexOf(connection.socket);
             if (index > -1) {
+                console.log(`⏹️ 🔌 Removing browser`);
                 this.browsers.splice(index, 1);
             }
         });

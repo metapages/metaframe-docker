@@ -24,6 +24,8 @@ export const dataRefToBuffer = async (ref: DataRef): Promise<Buffer> => {
 export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void> => {
     const dir = path.dirname(filename);
     await fse.ensureDir(dir);
+    console.log('ref', ref);
+    let errString:string;
     switch(ref.type) {
         case DataRefType.base64:
             await fse.writeFile(filename, Buffer.from(ref.value as string, 'base64'));
@@ -35,34 +37,54 @@ export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void
             await fse.writeFile(filename, JSON.stringify(ref.value));
             return;
         case DataRefType.url:
-            let fileStream = fse.createWriteStream(filename);
-            let response = await fetch(ref.value, {redirect:'follow'});
-            if (!response.ok) {
-                throw new Error(`Failed to download="${ref.value}" status=${response.status} statusText=${response.statusText}`);
+
+            const responseUrl = await fetch(ref.value, {redirect:'follow'});
+            if (!responseUrl.ok) {
+                errString = `Failed to download="${ref.value}" status=${responseUrl.status} statusText=${responseUrl.statusText}`;
+                console.error(errString);
+                throw new Error(errString);
             }
-            if (!response.body) {
-                throw new Error(`Failed to download="${ref.value}" status=${response.status} no body in response`);
+
+            console.log(`fse.createWriteStream url ${filename}`)
+            const fileStreamUrl = fse.createWriteStream(filename);
+            console.log(`👍 fse.createWriteStream url ${filename}`)
+
+            if (!responseUrl.body) {
+                errString = `Failed to download="${ref.value}" status=${responseUrl.status} no body in response`
+                console.error(errString);
+                throw new Error(errString);
             }
-            await streamPipeline(response.body, fileStream);
+            await streamPipeline(responseUrl.body, fileStreamUrl);
             return;
         case DataRefType.hash:
             // we know how to get this internal cloud referenced
             const cloudRefUrl = `${SERVER_ORIGIN}/download/${ref.hash || ref.value}`;
             console.log('cloudRefUrl', cloudRefUrl);
-            const resp = await fetch(cloudRefUrl);
-            const json : { url:string, ref: DataRef} = await resp.json();
+            const responseHash = await fetch(cloudRefUrl);
+
+            console.log(`fse.createWriteStream hash ${filename}`)
+            const fileStreamHash = fse.createWriteStream(filename);
+            console.log(`👍 fse.createWriteStream hash ${filename}`)
+            fileStreamHash.on('error', (err) => {
+                fileStreamHash.close();
+                console.error('fileStream error', err)
+            });
+
+            const json : { url:string, ref: DataRef} = await responseHash.json();
             console.log('json', json);
             console.log('json.url', json.url);
 
-            fileStream = fse.createWriteStream(filename);
-            response = await fetch(json.url, {redirect:'follow'});
-            if (!response.ok) {
-                throw new Error(`Failed to download="${json.url}" status=${response.status} statusText=${response.statusText}`);
+
+            console.log('fetching')
+            const responseHashUrl = await fetch(json.url, {redirect:'follow'});
+            console.log('fetched ok', responseHashUrl.ok)
+            if (!responseHashUrl.ok) {
+                throw new Error(`Failed to download="${json.url}" status=${responseHashUrl.status} statusText=${responseHashUrl.statusText}`);
             }
-            if (!response.body) {
-                throw new Error(`Failed to download="${json.url}" status=${response.status} no body in response`);
+            if (!responseHashUrl.body) {
+                throw new Error(`Failed to download="${json.url}" status=${responseHashUrl.status} no body in response`);
             }
-            await streamPipeline(response.body, fileStream);
+            await streamPipeline(responseHashUrl.body, fileStreamHash);
             break;
         default: // undefined assume DataRefType.Base64
             throw `Not yet implemented: DataRef.type === undefined or unrecognized value="${ref.type}"`;

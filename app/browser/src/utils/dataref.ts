@@ -64,9 +64,8 @@ export const copyLargeBlobsToCloud = async (inputs: InputsRefs | undefined): Pro
   return result;
 }
 
-// Takes map of DataRefs and checks if any are too big, if so
-// uploads the data to the cloud, and replaces the too large DataRef
-// with a smaller DataRef pointing to the cloud blob
+// Takes map of DataRefs and converts all to desired DataMode
+// e.g. gets urls and downloads to local ArrayBuffers
 export const convertJobOutputDataRefsToExpectedFormat = async (outputs: InputsRefs | undefined, mode: DataMode): Promise<MetaframeInputMap | undefined> => {
   if (!outputs) {
     return;

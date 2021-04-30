@@ -30,14 +30,19 @@ export const convertIOToVolumeMounts = async (job: DockerJobDefinitionRow): Prom
     const inputs = job.definition.inputs;
 
     if (inputs) {
-        await asyncForEach(Object.keys(inputs), async (name: string) => {
-            const ref: DataRef = inputs[name];
-            // mkdir if paths
-            // dataRefToFile
-            await dataRefToFile(ref, path.join(inputsDir, name))
-            // const buffer = await dataRefToBuffer(ref);
-            // await fse.writeFile(path.join(inputsDir, name), buffer);
-        })
+        // try {
+
+            await asyncForEach(Object.keys(inputs), async (name: string) => {
+                const ref: DataRef = inputs[name];
+                // mkdir if paths
+                // dataRefToFile
+                await dataRefToFile(ref, path.join(inputsDir, name))
+                // const buffer = await dataRefToBuffer(ref);
+                // await fse.writeFile(path.join(inputsDir, name), buffer);
+            });
+        // } catch(err) {
+
+        // }
     }
 
     const result = {

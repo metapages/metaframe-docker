@@ -16,6 +16,7 @@
     "reconnecting-websocket": "^4.4.0",
     "source-map-support": "^0.5.19",
     "through2": "^4.0.2",
+    "ts-custom-error": "^3.2.0",
     "ws": "^7.4.2"
   },
   "devDependencies": {

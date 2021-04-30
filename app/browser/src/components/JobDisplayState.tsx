@@ -71,6 +71,7 @@ const JobStatusDisplay: FunctionalComponent<{
   switch (state) {
     case DockerJobState.Finished:
       const resultFinished = job.value as StateChangeValueWorkerFinished;
+      console.log('resultFinished', resultFinished);
       if (!resultFinished) {
         return (
           <Alert status="error">

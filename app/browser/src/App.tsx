@@ -1,29 +1,24 @@
 import { h, FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import {
-  BrowserRouter as Router,
-  Route,
-} from "react-router-dom";
-import { QueryParamProvider } from 'use-query-params';
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import { QueryParamProvider } from "use-query-params";
 import { Address } from "./routes/address";
-import {
-  MetaframeObject,
-  MetaframeContext,
-} from "./hooks/metaframeHook";
+import { MetaframeObject, MetaframeContext } from "./hooks/metaframeHook";
 import { Metaframe, MetaframeInputMap } from "@metapages/metapage";
 
 export const App: FunctionalComponent = () => {
   const [metaframeObject] = useMetaframe();
 
   return (
-      /* I tried to pull this out into it's own file but preact hates it */
-      <MetaframeContext.Provider value={metaframeObject}>
-        <Router>
+    /* I tried to pull this out into it's own file but preact hates it */
+    <MetaframeContext.Provider value={metaframeObject}>
+      <Router>
         <QueryParamProvider ReactRouterRoute={Route}>
           <Address />
         </QueryParamProvider>
-      </Router>,
-      </MetaframeContext.Provider>
+      </Router>
+      ,
+    </MetaframeContext.Provider>
   );
 };
 
@@ -40,33 +35,32 @@ const useMetaframe = () => {
   );
 
   useEffect(() => {
+    // console.log('🌱 NEW METAFRAME')
     const newMetaframe = new Metaframe();
+    newMetaframe.debug = true;
+
+    const onInputs = (newinputs: MetaframeInputMap): void => {
+      // console.log('newinputs', newinputs);
+      setInputs(newinputs);
+    };
+    newMetaframe.onInputs(onInputs);
     setMetaframe(newMetaframe);
     return () => {
+      // If the metaframe is cleaned up, also remove the inputs listener
+      newMetaframe.removeListener(Metaframe.INPUTS, onInputs);
       newMetaframe.dispose();
-    }
-  }, []);
+    };
+  }, [setMetaframe, setInputs]);
 
   useEffect(() => {
     if (inputs && metaframe) {
-      setMetaframeObject({ metaframe, inputs, setOutputs:metaframe.setOutputs });
+      setMetaframeObject({
+        metaframe,
+        inputs,
+        setOutputs: metaframe.setOutputs,
+      });
     }
   }, [inputs, metaframe]);
-
-  useEffect(() => {
-    if (!metaframe) {
-      return;
-    }
-    const onInputs = (newinputs: MetaframeInputMap) => {
-      setInputs(newinputs);
-    };
-    metaframe.onInputs(onInputs);
-
-    return () => {
-      // If the metaframe is cleaned up, also remove the inputs listener
-      metaframe.removeListener(Metaframe.INPUTS, onInputs);
-    };
-  }, [metaframe, setInputs]);
 
   return [metaframeObject];
 };

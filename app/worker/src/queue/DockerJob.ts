@@ -192,12 +192,12 @@ const ensureDockerImage = async (image: string, pullOptions?: any): Promise<void
     throw new Error('ensureDockerImage missing image');
   }
   if (CACHED_DOCKER_IMAGES[image]) {
-    console.log('FOUND IMAGE IN MY FAKE CACHE')
+    // console.log('FOUND IMAGE IN MY FAKE CACHE')
     return;
   }
 
   const imageExists = await hasImage(image);
-  console.log('imageExists', imageExists);
+  // console.log('imageExists', imageExists);
   if (imageExists) {
     CACHED_DOCKER_IMAGES[image] = true;
     return;

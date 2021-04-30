@@ -77,5 +77,5 @@ COPY server/src ./src
 RUN just build
 
 ENV PORT 8080
-CMD node --experimental-specifier-resolution=node ./dist/index.js
+CMD just _run
 HEALTHCHECK --interval=8s --timeout=2s --retries=60 --start-period=10s CMD curl --fail http://localhost:8080/healthz || exit 1

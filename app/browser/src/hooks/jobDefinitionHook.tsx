@@ -66,8 +66,8 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
   // if the URL inputs change, or the metaframe inputs change, maybe update the dockerJobDefinitionMeta
   useEffect(() => {
     let cancelled = false;
-    console.log('metaframe.inputs', metaframe.inputs);
-    console.log('getInputs', metaframe.metaframe?.getInputs());
+    // console.log('metaframe.inputs', metaframe.inputs);
+    // console.log('getInputs', metaframe.metaframe?.getInputs());
     // we DO NOT process inputs, pass them along. The job consumer expects base64 encoded strings
     // but maybe we can be graceful and convert objects to JSON strings?
     // TODO: validate inputs as strings
@@ -108,7 +108,7 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
       }
 
       // at this point, these inputs could be very large blobs.
-      // any big things are uploaded to cloud storage the input is replaced with a reference to the cloud lump
+      // any big things are uploaded to cloud storage, then the input is replaced with a reference to the cloud lump
       definition.inputs = await copyLargeBlobsToCloud(definition.inputs);
 
       // if uploading a large blob means new inputs have arrived and replaced this set, break out
