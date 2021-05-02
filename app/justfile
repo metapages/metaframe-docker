@@ -18,6 +18,8 @@ export DOCKER_TAG               := env_var_or_default("DOCKER_TAG", "local")
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "docker-run.dev")
 # Default to the local development stack, publishing typically is only DOCKER_COMPOSE="docker-compose -f docker-compose.yml"
 export DOCKER_COMPOSE              := env_var_or_default("DOCKER_COMPOSE", "docker-compose -f docker-compose.yml -f docker-compose.override.yml")
+# If this isn't custom to the project, then conflicts occur
+export COMPOSE_PROJECT_NAME        := `basename $(dirname $PWD)`
 # App level env vars for ports etc
 # Changing APP_PORT requires the corresponding file in app/vouch/oauth/$APP_FQDN:$APP_PORT.yaml
 # This line is duplicated in ci/justfile
