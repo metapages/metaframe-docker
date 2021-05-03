@@ -3,7 +3,7 @@ import objectHash from "object-hash"
 import { Unibabel } from "unibabel";
 import { MetaframeInputMap } from "@metapages/metapage";
 import { DataRef, DataRefType, DataRefTypeDefault } from "../../../shared/src/dataref";
-import { InputsBase64String, InputsRefs } from "../../../shared/src/index";
+import { InputsRefs } from "../../../shared/src/index";
 import { APP_ORIGIN } from "../utils/origin";
 
 const ENV_VAR_DATA_ITEM_LENGTH_MAX = 200;
@@ -52,7 +52,11 @@ export const copyLargeBlobsToCloud = async (inputs: InputsRefs | undefined): Pro
     if (uint8ArrayIfBig) {
       // upload and replace the dataref
       const hash = objectHash.sha1(uint8ArrayIfBig);
-      const resp = await fetch(`${APP_ORIGIN}/upload/${hash}`);
+      const urlGetUpload = `${APP_ORIGIN}/upload/${hash}`;
+      const resp = await fetch(urlGetUpload);
+      if (!resp.ok) {
+        throw new Error(`Failed to get upload URL from ${urlGetUpload} status=${resp.status}`);
+      }
       const json: { url: string, ref: DataRef } = await resp.json();
       const responseUpload = await fetch(json.url, { method: 'PUT', redirect: 'follow', body: uint8ArrayIfBig, headers: { 'Content-Type': "application/octet-stream" } });
       await responseUpload.text();

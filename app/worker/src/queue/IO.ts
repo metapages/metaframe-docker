@@ -8,7 +8,8 @@ import { DataRef } from '../../../shared/dist/dataref/index.js'
 import { dataRefToFile, bufferToBase64Ref } from "./DataRefUtil"
 
 
-const TMPDIR = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || '/tmp';
+// const TMPDIR = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || '/tmp';
+const TMPDIR = '/tmp';
 
 /**
  *
@@ -83,7 +84,7 @@ export const getOutputs = async (job: DockerJobDefinitionRow): Promise<InputsRef
         const ref: DataRef = await bufferToBase64Ref(fileBuffer);
         outputs[file.replace(`${outputsDir}/`, '')] = ref;
     });
-    console.log('outputs', outputs);
+    console.log('outputs', JSON.stringify(outputs, null, '  ').substr(0, 100));
     return outputs;
 }
 

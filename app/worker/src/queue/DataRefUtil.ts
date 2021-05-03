@@ -4,7 +4,7 @@ import fetch from "node-fetch"
 import {pipeline} from "stream";
 import {promisify} from "util";
 import { DataRef, DataRefType } from '../../../shared/dist/dataref/index.js';
-import { SERVER_ORIGIN } from '../util/origin';
+import { args } from "../args";
 const streamPipeline = promisify(pipeline);
 
 export const dataRefToBuffer = async (ref: DataRef): Promise<Buffer> => {
@@ -24,7 +24,7 @@ export const dataRefToBuffer = async (ref: DataRef): Promise<Buffer> => {
 export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void> => {
     const dir = path.dirname(filename);
     await fse.ensureDir(dir);
-    console.log('ref', ref);
+    // console.log('ref', ref);
     let errString:string;
     switch(ref.type) {
         case DataRefType.base64:
@@ -45,9 +45,9 @@ export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void
                 throw new Error(errString);
             }
 
-            console.log(`fse.createWriteStream url ${filename}`)
+            // console.log(`fse.createWriteStream url ${filename}`)
             const fileStreamUrl = fse.createWriteStream(filename);
-            console.log(`👍 fse.createWriteStream url ${filename}`)
+            // console.log(`👍 fse.createWriteStream url ${filename}`)
 
             if (!responseUrl.body) {
                 errString = `Failed to download="${ref.value}" status=${responseUrl.status} no body in response`
@@ -58,26 +58,26 @@ export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void
             return;
         case DataRefType.hash:
             // we know how to get this internal cloud referenced
-            const cloudRefUrl = `${SERVER_ORIGIN}/download/${ref.hash || ref.value}`;
-            console.log('cloudRefUrl', cloudRefUrl);
+            const cloudRefUrl = `${args.server}/download/${ref.hash || ref.value}`;
+            // console.log('cloudRefUrl', cloudRefUrl);
             const responseHash = await fetch(cloudRefUrl);
 
-            console.log(`fse.createWriteStream hash ${filename}`)
+            // console.log(`fse.createWriteStream hash ${filename}`)
             const fileStreamHash = fse.createWriteStream(filename);
-            console.log(`👍 fse.createWriteStream hash ${filename}`)
+            // console.log(`👍 fse.createWriteStream hash ${filename}`)
             fileStreamHash.on('error', (err) => {
                 fileStreamHash.close();
                 console.error('fileStream error', err)
             });
 
             const json : { url:string, ref: DataRef} = await responseHash.json();
-            console.log('json', json);
-            console.log('json.url', json.url);
+            // console.log('json', json);
+            // console.log('json.url', json.url);
 
 
-            console.log('fetching')
+            // console.log('fetching')
             const responseHashUrl = await fetch(json.url, {redirect:'follow'});
-            console.log('fetched ok', responseHashUrl.ok)
+            // console.log('fetched ok', responseHashUrl.ok)
             if (!responseHashUrl.ok) {
                 throw new Error(`Failed to download="${json.url}" status=${responseHashUrl.status} statusText=${responseHashUrl.statusText}`);
             }

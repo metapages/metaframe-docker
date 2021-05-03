@@ -1,6 +1,5 @@
 import { Writable } from "stream"
 import fse from "fs-extra"
-import * as assert from "assert"
 import * as Docker from 'dockerode'
 // import { DockerRunResultWithOutputs } from '../../../shared/dist/shared/types.js';
 import * as StreamTools from "../docker/streamtools"
@@ -34,8 +33,8 @@ import * as execa from "execa"
 // }
 
 export interface Volume {
-  host:string;
-  container:string;
+  host: string;
+  container: string;
 }
 
 // this goes in
@@ -44,7 +43,7 @@ export interface DockerJobArgs {
   command?: string[] | undefined;
   env?: any;
   entrypoint?: string[] | undefined;
-  workdir?:string;
+  workdir?: string;
   // volumes?: Array<MountedDockerVolumeDef>;
   volumes?: Array<Volume>;
   outStream?: Writable;
@@ -147,12 +146,12 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
     const stream = await container!.attach({ stream: true, stdout: true, stderr: true });
     container!.modem.demuxStream(stream, grabberOutStream, grabberErrStream);
 
-    const startData :Buffer = await container!.start();
+    const startData: Buffer = await container!.start();
 
-    console.log('startData', startData.toString('utf8'));
+    // console.log('startData', startData.toString('utf8'));
 
     const dataWait = await container!.wait();
-    console.log('dataWait', dataWait);
+    // console.log('dataWait', dataWait);
 
     result.StatusCode = dataWait != null
       ? dataWait.StatusCode
@@ -218,7 +217,7 @@ const ensureDockerImage = async (image: string, pullOptions?: any): Promise<void
 
 const hasImage = async (imageUrl: string): Promise<boolean> => {
   const images = await docker.listImages();
-  return images.some((e:any) => {
+  return images.some((e: any) => {
     return e.RepoTags != null && e.RepoTags.some((tag: string) => {
       return tag != null && dockerUrlMatches(parseDockerUrl(imageUrl), parseDockerUrl(tag));
     });

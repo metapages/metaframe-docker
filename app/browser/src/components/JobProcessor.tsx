@@ -135,6 +135,7 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
         dockerJob.definitionMeta.definition
       );
       if (jobHash !== jobHashCurrent) {
+        console.log('setJobHash jobHashCurrent', jobHashCurrent);
         setJobHash(jobHashCurrent);
       }
       if (serverState.state.state.jobs[jobHashCurrent]) {

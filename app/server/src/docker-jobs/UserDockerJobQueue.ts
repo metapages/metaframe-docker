@@ -27,15 +27,10 @@ import {
     StateChange,
     BroadcastState, WebsocketMessageType, WebsocketMessage, WorkerRegistration
 } from '../../../shared/dist/shared/types';
-// import {inputsBase64ToInputsDataRefs } from "../../../shared/dist/dataref"
-// import {
-//     shaJobDefinition,
-// } from '../../../shared/dist/shared/util';
 import { db } from "../modules/db"
 
 // 60 seconds
-// const MAX_TIME_FINISHED_JOB_IN_QUEUE = 60 * 1000;
-const MAX_TIME_FINISHED_JOB_IN_QUEUE = 4 * 1000;
+const MAX_TIME_FINISHED_JOB_IN_QUEUE = 60 * 1000;
 
 // define your events
 interface Events {

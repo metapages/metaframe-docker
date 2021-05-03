@@ -55,6 +55,9 @@ const serverStateMachine = (): [
   // console.log('🌵 serverStateMachine sendMessageTest', sendMessageTest);
 
   useEffect(() => {
+    if (!address || address === '') {
+      return;
+    }
     const url = `${APP_ORIGIN.replace("http", "ws")}/browser/${address}`;
     console.log("url", url);
     setConnected(false);
@@ -94,21 +97,23 @@ const serverStateMachine = (): [
       }
     };
 
+    const sender = (m: WebsocketMessage) => {
+      console.log('✨✨✨✨ actually sending message!', m)
+      rws.send(JSON.stringify(m));
+    };
+
     const onError = (error: any) => {
       console.error(error);
     };
 
     const onOpen = () => {
       setConnected(true);
+      setSendMessage({sender});
     };
 
     const onClose = () => {
       setConnected(false);
-    };
-
-    const sender = (m: WebsocketMessage) => {
-      console.log('✨✨✨✨ actually sending message!', m)
-      rws.send(JSON.stringify(m));
+      setSendMessage({sender:FAKESENDER});
     };
 
     rws.addEventListener("message", onMessage);
@@ -118,7 +123,7 @@ const serverStateMachine = (): [
 
     // console.log('💥setSendMessage', sender);
     // setSendMessage(sender);
-    setSendMessage({sender});
+
 
     // setSendMessageTest('inside')
     // console.log('🏓🏓🏓 end')
@@ -128,6 +133,7 @@ const serverStateMachine = (): [
       rws.removeEventListener("open", onOpen);
       rws.removeEventListener("close", onClose);
       rws.close();
+      setConnected(false);
       setSendMessage({sender:FAKESENDER});
     };
   }, [address, setState, setSendMessage, setConnected]);

@@ -147,7 +147,7 @@ export class DockerJobQueue {
         this.queue[jobBlob.hash].execution = dockerExecution;
 
         dockerExecution.finish.then(async (result: DockerRunResult) => {
-            console.log('result', result);
+            console.log('result', JSON.stringify(result, null, '  ').substr(0, 200));
 
             const resultWithOutputs: DockerRunResultWithOutputs = result as DockerRunResultWithOutputs;
             resultWithOutputs.outputs = {};

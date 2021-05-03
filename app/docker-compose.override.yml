@@ -45,7 +45,8 @@ services:
       - "${PORT_SERVER:-8081}:8080"
 
   worker:
-    command: just dev
+    command: just dev --cpus=1 --queue=public1 --server=http://server:8080
+    entrypoint: ''
     volumes:
       - ./shared:/app/shared
       - ./worker/.cache:/app/worker/.cache

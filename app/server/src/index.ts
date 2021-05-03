@@ -19,7 +19,6 @@ import download from "./modules/routes/download";
 
 const BROWSER_ASSETS_DIRECTORY :string = path.resolve(envVar.get('BROWSER_ASSETS_DIRECTORY').default("../browser/dist/").asString());
 
-
 const LOG_LEVEL = 'info';
 
 console.log(`BROWSER_ASSETS_DIRECTORY=${BROWSER_ASSETS_DIRECTORY}`);

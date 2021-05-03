@@ -26,6 +26,7 @@ services:
   worker:
     x-publish: true
     image: ${DOCKER_REGISTRY:-}${DOCKER_IMAGE_PREFIX:-}worker:${DOCKER_TAG:-cache}
+    command: --cpus=1 --queue=public1 --server=http://server:8080
     build:
       context: .
       dockerfile: worker/Dockerfile
