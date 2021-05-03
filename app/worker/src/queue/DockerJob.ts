@@ -1,4 +1,5 @@
 import { Writable } from "stream"
+import fse from "fs-extra"
 import * as assert from "assert"
 import * as Docker from 'dockerode'
 // import { DockerRunResultWithOutputs } from '../../../shared/dist/shared/types.js';
@@ -54,6 +55,11 @@ export interface DockerJobArgs {
 export interface DockerJobExecution {
   finish: Promise<DockerRunResult>;
   kill: () => Promise<void>;
+}
+
+if (!fse.existsSync("/var/run/docker.sock")) {
+  console.error('You must give access to the local docker daemon via: " -v /var/run/docker.sock:/var/run/docker.sock"');
+  process.exit(1);
 }
 
 const docker = new Docker.default({ socketPath: "/var/run/docker.sock" });

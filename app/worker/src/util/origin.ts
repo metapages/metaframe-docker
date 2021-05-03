@@ -1,2 +1,3 @@
 // TODO: get this from argument
-export const SERVER_ORIGIN = process.env.SERVER_ORIGIN ? process.env.SERVER_ORIGIN : "http://server:8080";
+export const DEFAULT_SERVER_ORIGIN = "https://docker-metapage-io.glitch.me";
+export const SERVER_ORIGIN = process.env.SERVER_ORIGIN ? process.env.SERVER_ORIGIN : DEFAULT_SERVER_ORIGIN;

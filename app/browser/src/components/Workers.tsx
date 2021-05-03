@@ -49,6 +49,7 @@ export const Workers: FunctionalComponent = () => {
           {state?.workers?.map((worker) => (
             <WorkerComponent
               key={worker.id}
+              cpus={worker.cpus}
               workerId={worker.id}
               state={state}
             />
@@ -61,8 +62,9 @@ export const Workers: FunctionalComponent = () => {
 
 const WorkerComponent: FunctionalComponent<{
   workerId: string;
+  cpus: number;
   state: BroadcastState;
-}> = ({ workerId, state }) => {
+}> = ({ workerId, cpus, state }) => {
   // How many jobs is this worker running
   const jobCount = Object.keys(state.state.jobs)
     .filter((jobId) => state.state.jobs[jobId].state === DockerJobState.Running)
@@ -83,7 +85,7 @@ const WorkerComponent: FunctionalComponent<{
   return (
     <Tr>
       <Td>{workerId}</Td>
-      <Td>1</Td>
+      <Td>{cpus}</Td>
       <Td>0</Td>
       <Td>{jobCount}</Td>
     </Tr>

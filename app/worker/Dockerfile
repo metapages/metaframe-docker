@@ -6,17 +6,8 @@ FROM node:15.11.0-alpine3.10 as worker
 RUN apk --no-cache add \
     bash \
     curl \
+    jq \
     docker
-    # docker \
-    # g++ \
-    # gcc \
-    # libgcc \
-    # libstdc++ \
-    # linux-headers \
-    # make \
-    # python \
-    # libffi-dev \
-    # openssl-dev
 
 # justfile https://github.com/casey/just
 RUN VERSION=0.8.4 ; \
@@ -27,7 +18,7 @@ RUN VERSION=0.8.4 ; \
     tar -xzf just-v$VERSION-x86_64-unknown-linux-musl.tar.gz && \
     mkdir -p /usr/local/bin && mv /tmp/just/just /usr/local/bin/ && rm -rf /tmp/just
 # just tweak: unify the just binary location on host and container platforms because otherwise the shebang doesn't work properly due to no string token parsing (it gets one giant string)
-ENV PATH $PATH:/usr/local/bin
+ENV PATH $PATH:/usr/local/binq
 
 # watchexec for live reloading in development https://github.com/watchexec/watchexec
 RUN VERSION=1.14.1 ; \
@@ -85,6 +76,7 @@ WORKDIR /app/worker
 COPY worker/justfile ./justfile
 COPY worker/tsconfig.json ./tsconfig.json
 COPY worker/src ./src
+COPY worker/bin ./bin
 RUN just build
 
-CMD node --experimental-specifier-resolution=node ./dist/index.js
+ENTRYPOINT ["node", "--experimental-specifier-resolution=node", "./dist/bin/index.js"]

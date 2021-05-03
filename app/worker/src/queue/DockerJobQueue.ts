@@ -1,20 +1,14 @@
-import * as path from "path"
-import * as fse from "fs-extra"
 import { DockerRunResult, dockerJobExecute, DockerJobArgs, DockerJobExecution, Volume } from './DockerJob'
-import { InputsRefs, InputsBase64String, BroadcastState, WorkerRegistration, WebsocketMessageType, WebsocketMessageSender, DockerJobDefinitionRow, DockerJobState, StateChangeValueWorkerFinished, StateChangeValueRunning, DockerJobFinishedReason } from '../../../shared/dist/shared/types.js';
-import { asyncForEach } from '../../../shared/dist/shared/util.js'
-import { DataRef } from '../../../shared/dist/dataref/index.js'
-import {dataRefToBuffer} from "./DataRefUtil"
-import {convertIOToVolumeMounts , getOutputs} from "./IO"
+import { BroadcastState, WorkerRegistration, WebsocketMessageType, WebsocketMessageSender, DockerJobDefinitionRow, DockerJobState, StateChangeValueWorkerFinished, StateChangeValueRunning, DockerJobFinishedReason } from '../../../shared/dist/shared/types.js';
+import { convertIOToVolumeMounts, getOutputs } from "./IO"
 import { DockerRunResultWithOutputs } from '../../../shared/src/shared/types';
 
-export interface DockerJobQueueArgs {
+export interface DockerJobQueueArgs extends WorkerRegistration {
     sender: WebsocketMessageSender;
-    cpus: number;
 }
 
 type WorkerJobQueueItem = {
-    execution:DockerJobExecution|null;
+    execution: DockerJobExecution | null;
     // TODO: put local state
 }
 
@@ -32,15 +26,16 @@ export class DockerJobQueue {
     sender: WebsocketMessageSender;
 
     constructor(args: DockerJobQueueArgs) {
-        const { sender, cpus } = args;
-        this.cpus = cpus || 1;
+        const { sender, cpus, id } = args;
+        this.cpus = cpus;
         this.sender = sender;
-        this.workerId = 'docker-compose-worker';
+        this.workerId = id;
     }
 
     register() {
         const registration: WorkerRegistration = {
             id: this.workerId,
+            cpus: this.cpus,
         };
         this.sender({
             type: WebsocketMessageType.WorkerRegistration,
@@ -82,12 +77,12 @@ export class DockerJobQueue {
         }
     }
 
-    async _startJob(jobBlob: DockerJobDefinitionRow) :Promise<void> {
+    async _startJob(jobBlob: DockerJobDefinitionRow): Promise<void> {
         console.log(`${jobBlob.hash} starting job `)
         const definition = jobBlob.definition;
 
         // add a placeholder on the queue for this job
-        this.queue[jobBlob.hash] = {execution:null};
+        this.queue[jobBlob.hash] = { execution: null };
 
         // tell the server we've started the job
         const valueRunning: StateChangeValueRunning = {
@@ -104,10 +99,10 @@ export class DockerJobQueue {
             }
         });
 
-        let volumes:{ inputs: Volume, outputs: Volume };
+        let volumes: { inputs: Volume, outputs: Volume };
         try {
             volumes = await convertIOToVolumeMounts(jobBlob);
-        } catch(err) {
+        } catch (err) {
             console.error('💥', err);
             // TODO too much code duplication here
             // Delete from our local queue before sending
@@ -120,7 +115,7 @@ export class DockerJobQueue {
                 time: new Date(),
                 result: ({
                     error: `${err}`,
-                } as DockerRunResultWithOutputs) ,
+                } as DockerRunResultWithOutputs),
             };
 
             this.sender({
@@ -148,13 +143,13 @@ export class DockerJobQueue {
             // errStream?: Writable;
         }
 
-        const dockerExecution :DockerJobExecution = await dockerJobExecute(executionArgs);
+        const dockerExecution: DockerJobExecution = await dockerJobExecute(executionArgs);
         this.queue[jobBlob.hash].execution = dockerExecution;
 
-        dockerExecution.finish.then(async (result :DockerRunResult) => {
+        dockerExecution.finish.then(async (result: DockerRunResult) => {
             console.log('result', result);
 
-            const resultWithOutputs :DockerRunResultWithOutputs = result as DockerRunResultWithOutputs;
+            const resultWithOutputs: DockerRunResultWithOutputs = result as DockerRunResultWithOutputs;
             resultWithOutputs.outputs = {};
 
             let valueFinished: StateChangeValueWorkerFinished | undefined;
@@ -176,7 +171,7 @@ export class DockerJobQueue {
                         reason: DockerJobFinishedReason.Success,
                         worker: this.workerId,
                         time: new Date(),
-                        result: {...result, outputs},
+                        result: { ...result, outputs },
                     };
                 } catch (err) {
                     console.log('failed to getOutputs', err)
@@ -184,7 +179,7 @@ export class DockerJobQueue {
                         reason: DockerJobFinishedReason.Error,
                         worker: this.workerId,
                         time: new Date(),
-                        result: {...resultWithOutputs, error:`${err}`},
+                        result: { ...resultWithOutputs, error: `${err}` },
                     };
                 }
 
@@ -216,7 +211,7 @@ export class DockerJobQueue {
                 time: new Date(),
                 result: ({
                     error: err,
-                } as DockerRunResultWithOutputs) ,
+                } as DockerRunResultWithOutputs),
             };
 
             this.sender({

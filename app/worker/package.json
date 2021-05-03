@@ -1,22 +1,31 @@
 {
-  "name": "metaframe-local-server",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@metapages/asman-worker",
+  "public": true,
+  "version": "0.0.3",
+  "description": "Execute docker compute jobs within the asman metaframe",
+  "repository": "",
   "type": "module",
+  "bin": {
+    "asman-worker": "./bin/index.js"
+  },
   "main": "src/index.ts",
   "dependencies": {
     "@types/klaw": "^3.0.1",
+    "bufferutil": "^4.0.3",
     "dev-null": "^0.1.1",
     "dockerode": "^3.2.1",
     "execa": "^5.0.0",
     "fs-extra": "^9.1.0",
     "klaw": "^3.0.0",
     "node-fetch": "^2.6.1",
+    "node-machine-id": "^1.1.12",
     "object-hash": "^2.1.1",
     "reconnecting-websocket": "^4.4.0",
     "source-map-support": "^0.5.19",
     "through2": "^4.0.2",
+    "ts-command-line-args": "^1.8.1",
     "ts-custom-error": "^3.2.0",
+    "utf-8-validate": "^5.0.4",
     "ws": "^7.4.2"
   },
   "devDependencies": {
@@ -31,9 +40,5 @@
     "typescript": "4.2.3"
   },
   "author": "",
-  "license": "ISC",
-  "optionalDependencies": {
-    "bufferutil": "^4.0.3",
-    "utf-8-validate": "^5.0.4"
-  }
+  "license": "ISC"
 }

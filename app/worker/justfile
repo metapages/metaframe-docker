@@ -1,43 +1,88 @@
 
 # Always use locally installed tools (always pin versions)
-export SERVER_ORIGIN  := env_var_or_default("SERVER_ORIGIN", "http://server:8080")
-tsc                                := "node_modules/typescript/bin/tsc"
-
+set shell := ["bash", "-c"]
+# export SERVER_ORIGIN  := env_var_or_default("SERVER_ORIGIN", "http://server:8080")
+export CI             := env_var_or_default("CI", "")
+NPM_MODULE            := `cat package.json | jq -r .name`
+NPM_TOKEN             := env_var_or_default("NPM_TOKEN", "")
+tsc                   := "node_modules/typescript/bin/tsc"
 # minimal formatting, bold is very useful
-bold     := '\033[1m'
-normal   := '\033[0m'
+bold                  := '\033[1m'
+normal                := '\033[0m'
 
-_help:
-    @just --unsorted --list
+@_help:
+    just --list --unsorted --list-heading $'Commands:\n'
+    echo -e ""
+    echo -e "    Example command to start a worker:"
+    echo -e ""
+    echo -e "        docker run --rm -ti -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapage/asman-worker:$(cat package.json | jq -r '.version') --cpus=2 --queue=my-custom-queue"
+    echo -e ""
 
 # Build the production code
 build: clean (_tsc "--build --verbose")
+    cp package.json ./dist/
+    cp -r bin ./dist/
 
 # Run in development mode (automatic reloading)
-dev:
+dev +args="":
     @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
-    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run
+    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run "{{args}}"
 
 # Build then run node script
-run: build
+run +args="": build
     @# Not using ts-node because https://github.com/TypeStrong/ts-node/issues/1007
     @# --experimental-specifier-resolution=node: https://stackoverflow.com/questions/64453859/directory-import-is-not-supported-resolving-es-modules-with-node-js
-    node --experimental-specifier-resolution=node ./dist/index.js
+    node --experimental-specifier-resolution=node ./dist/bin/index.js {{args}}
 
-test:
-    NODE_ENV=test npx jest --verbose --runInBand
+# test:
+#     NODE_ENV=test npx jest --verbose --runInBand
 
-# Development: install npm packages locally and *also* inside the running docker container
-npm +args="":
-    npm {{args}}
-    export TARGET=$(basename "$PWD") && cd .. && docker-compose exec $TARGET npm {{args}}
-    export TARGET=$(basename "$PWD") && cd .. && just build $TARGET
+# Publish npm module
+publish: (_require "NPM_TOKEN")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "$CI" != "true" ]; then
+        # This check is here to prevent publishing if there are uncommitted changes, but this check does not work in CI environments
+        # because it starts as a clean checkout and git is not installed and it is not a full checkout, just the tip
+        if [[ $(git status --short) != '' ]]; then
+            git status
+            echo -e '💥 Cannot publish with uncommitted changes'
+            exit 2
+        fi
+    fi
+    VERSION=$(cat package.json | jq -r '.version')
+    INDEX=`npm view {{NPM_MODULE}} versions --json | jq "index( \"$VERSION\" )"`
+    if [ "$INDEX" != "null" ]; then
+        echo -e '🌳 Version exists, not publishing'
+        exit 0
+    fi
+    just build
+    echo "PUBLISHING npm version $VERSION"
+    cd ./dist && \
+        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc && \
+        npm publish --access public .
 
-# compile typescript src, may or may not emit artifacts
-_tsc +args="":
-    {{tsc}} {{args}}
+# Unpublish version https://docs.npmjs.com/cli/v7/commands/npm-unpublish
+unpublish version:
+    @echo "❗ If this fails: you cannot use .npmrc or NPM_TOKEN, you must 'npm login' 🤷‍♀️"
+    npm unpublish {{NPM_MODULE}}@{{version}}
+
+# Push docker image to metapage/asman-worker. This is just for prototyping
+@publish_docker: (_require "DOCKER_TOKEN")
+    echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin
+    cd .. && \
+        DOCKER_IMAGE_PREFIX=metapage/asman- DOCKER_TAG=$(cat package.json | jq -r '.version') docker-compose -f docker-compose.yml build worker && \
+        DOCKER_IMAGE_PREFIX=metapage/asman- DOCKER_TAG=$(cat package.json | jq -r '.version') docker-compose -f docker-compose.yml push worker
+
 
 # I don't just remove 'dist/' itself because it might be moutned into a docker-compose container
 @clean:
     rm -rf dist/*
     rm -rf tsconfig.tsbuildinfo
+
+# compile typescript src, may or may not emit artifacts
+_tsc +args="":
+    {{tsc}} {{args}}
+
+@_require env:
+    if [ -z "{{env}}" ]; then echo "Missing {{env}}"; exit 1; fi

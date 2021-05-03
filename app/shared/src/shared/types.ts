@@ -108,6 +108,7 @@ export interface BroadcastState {
 
 export interface WorkerRegistration {
     id: string;
+    cpus: number;
 }
 
 export enum WebsocketMessageType {
