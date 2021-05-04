@@ -58,7 +58,7 @@ export const ButtonCancel: FunctionalComponent<ButtonCancelProps> = ({
         time: new Date(),
         nocache: nocacheString === "1",
       };
-      console.log('attempting stateChange')
+
       serverState.stateChange({
         type: WebsocketMessageType.StateChange,
         payload: {

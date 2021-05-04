@@ -44,7 +44,6 @@ export const useMetaframe = () => {
 //     setMetaframe(newMetaframe);
 
 //     const onInputs = (newinputs: MetaframeInputMap) => {
-//       console.log('newinputs', newinputs);
 //       // this has to be a copy, since internally the metaframe keeps a single object for
 //       // imagined but untested performance concerns
 //       setInputs({...newinputs});
@@ -70,7 +69,6 @@ export const useMetaframe = () => {
 //   //     return;
 //   //   }
 //   //   const onInputs = (newinputs: MetaframeInputMap) => {
-//   //     console.log('newinputs', newinputs);
 //   //     setInputs(newinputs);
 //   //   };
 //   //   const disposer = metaframe.onInputs(onInputs);

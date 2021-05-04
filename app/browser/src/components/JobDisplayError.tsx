@@ -19,9 +19,6 @@ export const JobDisplayError: FunctionalComponent<{
     return null;
   }
 
-
-  // console.log('job', job);
-
   let content: JSX.Element | undefined;
   switch (state) {
     case DockerJobState.Finished:

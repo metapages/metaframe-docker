@@ -44,7 +44,6 @@ export const Jobs: FunctionalComponent = () => {
 
     const timeA = state!.state!.jobs[jobA].value.time;
     const timeB = state!.state!.jobs[jobB].value.time;
-    // console.log("timeB", timeB);
     return new Date(timeB).getTime() - new Date(timeA).getTime();
   });
 

@@ -101,10 +101,8 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
       job.state === DockerJobState.Finished
     ) {
       const stateFinished: StateChangeValueWorkerFinished = job.value as StateChangeValueWorkerFinished;
-      // console.log("stateFinished", stateFinished);
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
-        console.log("outputs", outputs);
         (async () => {
           const metaframeOutputs:
             | MetaframeInputMap
@@ -112,8 +110,6 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
             outputs,
             outputsMode
           );
-          console.log("metaframeOutputs", metaframeOutputs);
-          // console.log("Setting metaframe outputs", metaframeOutputs);
           if (metaframeOutputs) {
             try {
               metaframe.setOutputs!(metaframeOutputs);
@@ -135,7 +131,6 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
         dockerJob.definitionMeta.definition
       );
       if (jobHash !== jobHashCurrent) {
-        console.log('setJobHash jobHashCurrent', jobHashCurrent);
         setJobHash(jobHashCurrent);
       }
       if (serverState.state.state.jobs[jobHashCurrent]) {

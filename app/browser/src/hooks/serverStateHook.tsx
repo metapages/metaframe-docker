@@ -28,9 +28,7 @@ interface ServerStateObject {
   connected: boolean;
 }
 
-const FAKESENDER = (_: WebsocketMessage)=> {
-  console.log('💥💥💥✨✨✨✨ NOT sending message!')
-}
+const FAKESENDER = (_: WebsocketMessage)=> {}
 
 const serverStateMachine = (): [
   BroadcastState | undefined,
@@ -47,19 +45,11 @@ const serverStateMachine = (): [
     {sender:WebsocketMessageSender}
   >({sender:FAKESENDER});
 
-  // const [sendMessageTest, setSendMessageTest] = useState<
-  //   string
-  // >('start');
-
-  // console.log('🌵 serverStateMachine sendMessage', sendMessage);
-  // console.log('🌵 serverStateMachine sendMessageTest', sendMessageTest);
-
   useEffect(() => {
     if (!address || address === '') {
       return;
     }
     const url = `${APP_ORIGIN.replace("http", "ws")}/browser/${address}`;
-    console.log("url", url);
     setConnected(false);
     const rws = new ReconnectingWebSocket(url);
 
@@ -71,9 +61,7 @@ const serverStateMachine = (): [
     const onMessage = (message: MessageEvent) => {
       try {
         const messageString = message.data.toString();
-        // console.log(messageString);
         if (!messageString.startsWith("{")) {
-          console.log("message not JSON");
           return;
         }
         const possibleMessage: WebsocketMessage = JSON.parse(messageString);
@@ -98,7 +86,6 @@ const serverStateMachine = (): [
     };
 
     const sender = (m: WebsocketMessage) => {
-      console.log('✨✨✨✨ actually sending message!', m)
       rws.send(JSON.stringify(m));
     };
 
@@ -121,12 +108,6 @@ const serverStateMachine = (): [
     rws.addEventListener("open", onOpen);
     rws.addEventListener("close", onClose);
 
-    // console.log('💥setSendMessage', sender);
-    // setSendMessage(sender);
-
-
-    // setSendMessageTest('inside')
-    // console.log('🏓🏓🏓 end')
     return () => {
       rws.removeEventListener("message", onMessage);
       rws.removeEventListener("error", onError);
@@ -154,7 +135,6 @@ const ServerStateContext = createContext<ServerStateObject>(
 export const ServerStateProvider = ({ children }: Props) => {
   const [state, stateChange, connected] = serverStateMachine();
 
-  // console.log('ServerStateProvider stateChange', stateChange);
   return (
     <ServerStateContext.Provider
       value={{ state: state, stateChange: stateChange, connected }}

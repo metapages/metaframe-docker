@@ -6,8 +6,6 @@ import { useHashParam } from "./useHashParam"
  */
 export const useHashParamJson = <T,>(key:string):[T|undefined,(v:T|undefined)=>void] => {
   const [hashParamString, setHashParamString] = useHashParam(key);
-  // const s :string|undefined = hashParamString;
-  // console.log('setHashParamString', setHashParamString);
   const [hashBlob, setHashBlob] = useState<T>(blobFromBase64String(hashParamString));
 
   // if the hash string value changes

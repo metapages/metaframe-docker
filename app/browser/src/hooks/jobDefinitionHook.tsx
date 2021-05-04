@@ -58,16 +58,11 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
 
   const nocache = nocacheString === "1" ? true : false;
 
-
-  // console.log('metaframe', metaframe);
-
   const [definitionMeta, setDefinitionMeta] = useState<DockerJobDefinitionMetadata|undefined>(undefined);
 
   // if the URL inputs change, or the metaframe inputs change, maybe update the dockerJobDefinitionMeta
   useEffect(() => {
     let cancelled = false;
-    // console.log('metaframe.inputs', metaframe.inputs);
-    // console.log('getInputs', metaframe.metaframe?.getInputs());
     // we DO NOT process inputs, pass them along. The job consumer expects base64 encoded strings
     // but maybe we can be graceful and convert objects to JSON strings?
     // TODO: validate inputs as strings

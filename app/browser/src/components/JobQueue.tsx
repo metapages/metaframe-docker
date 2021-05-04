@@ -50,7 +50,6 @@ export const JobQueue: FunctionalComponent<{
   // preact complains in dev mode if this is moved out of a functional component
   useEffect(() => {
     const onKeyup = (e: KeyboardEvent) => {
-      console.log(e.key)
       if (e.key === "Enter" && isOpen) onCloseAndAccept();
     };
     window.addEventListener("keyup", onKeyup);
