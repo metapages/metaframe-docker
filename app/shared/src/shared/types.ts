@@ -8,7 +8,7 @@ export type InputsRefs = { [name in string]: DataRef };
 export type InputsBase64String = { [name in string]: string };
 
 // inputs values are base64 encoded strings
-export interface DockerJobDefinitionInputsBase64 {
+export type DockerJobDefinitionInputsBase64 = {
     image?: Image;
     command?: Command;
     env?: Env;

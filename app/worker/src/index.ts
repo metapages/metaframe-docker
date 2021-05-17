@@ -37,6 +37,9 @@ export async function start() {
     rws.send(JSON.stringify(message));
   }
 
+  let timeLastPong = Date.now();
+  let timeLastPing = Date.now();
+
   const dockerJobQueueArgs: DockerJobQueueArgs = { sender, cpus: args.cpus, id: args.id.toString() };
   const dockerJobQueue = new DockerJobQueue(dockerJobQueueArgs);
 
@@ -46,6 +49,8 @@ export async function start() {
 
   rws.addEventListener('open', () => {
     console.log(`🚀 connected! ${url} `)
+    rws.send('PING');
+    timeLastPing = Date.now();
     dockerJobQueue.register();
   });
 
@@ -56,7 +61,26 @@ export async function start() {
   rws.addEventListener('message', (message: MessageEvent) => {
     try {
       const messageString = message.data.toString();
-      // console.log(messageString)
+      if (messageString === 'PONG') {
+        timeLastPong = Date.now();
+
+        // wait a bit then send a ping
+        setTimeout(() => {
+          if ((Date.now() - timeLastPing) >= 5000) {
+            rws.send('PING');
+            timeLastPing = Date.now();
+          }
+          setTimeout(() => {
+            if ((Date.now() - timeLastPong) >= 10000 && rws.readyState === rws.OPEN) {
+              console.log(`Reconnecting because no PONG since ${Date.now() - timeLastPong}ms `);
+              rws.reconnect();
+            }
+          }, 10000);
+        }, 5000);
+
+        return;
+      }
+
       if (!messageString.startsWith('{')) {
         console.log('message not JSON')
         return;

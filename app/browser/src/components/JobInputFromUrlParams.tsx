@@ -1,12 +1,15 @@
 import { FunctionalComponent } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { useQueryParam, StringParam } from 'use-query-params';
-import {useHashParam} from "../hooks/useHashParam";
+import { useQueryParam, StringParam } from "use-query-params";
+import {
+  useHashParam,
+  useHashParamJson,
+  useHashParamBoolean,
+} from "@metapages/metaframe-hook";
 import { parse } from "shell-quote";
 import {
   Box,
-  Button,
-  ButtonGroup,
+  IconButton,
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -16,17 +19,13 @@ import {
   GridItem,
   Input,
   Select,
-  Stack,
   Switch,
   Text,
 } from "@chakra-ui/react";
 // https://chakra-ui.com/docs/media-and-icons/icon
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
-import { useHashParamJson } from "../hooks/useHashParamJson";
-import { DockerJobDefinitionParamsInUrlHash, DockerJobDefinitionMetadata } from "./types";
-import { DataMode, DataModeDefault } from "../utils/dataref"
-// import { DataRefType } from  "../../../shared/dist/dataref";
-
+import { DockerJobDefinitionParamsInUrlHash } from "./types";
+import { DataMode, DataModeDefault } from "../utils/dataref";
 
 export const JobInputFromUrlParams: FunctionalComponent<{
   isOpen: boolean;
@@ -34,27 +33,23 @@ export const JobInputFromUrlParams: FunctionalComponent<{
 }> = ({ isOpen, setOpen }) => {
   // isOpen = true;
 
-  const [
-    jobDefinitionBlob,
-    setJobDefinitionBlob,
-  ] = useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
+  const [jobDefinitionBlob, setJobDefinitionBlob] =
+    useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
 
-  const [
-    nocacheString,
-    setnocacheString,
-  ] = useHashParam("nocache");
+  const [nocacheString, setnocacheString] = useHashParam("nocache");
+  const [debug, setDebug] = useHashParamBoolean("debug");
 
   // something like: ?x=123&foo=bar in the URL
   // const [num, setNum] = useQueryParam('x', NumberParam);
   // Allow the user to define what format the inputs are. If they can
   // tell us, then we can make data move better/faster
-  const [inputsMode, setInputsMode] = useQueryParam('inputsmode', StringParam);
-  const [localInputsMode, setLocalInputsMode] = useState<DataMode|undefined>(inputsMode as DataMode);
+  const [inputsMode, setInputsMode] = useQueryParam("inputsmode", StringParam);
+  const [localInputsMode, setLocalInputsMode] = useState<DataMode | undefined>(
+    inputsMode as DataMode
+  );
 
   const [localImage, setLocalImage] = useState<string | undefined>(
-    jobDefinitionBlob?.image
-      ? jobDefinitionBlob?.image
-      : undefined
+    jobDefinitionBlob?.image ? jobDefinitionBlob?.image : undefined
   );
   const [localCommandString, setLocalCommandString] = useState<
     string | undefined
@@ -73,13 +68,14 @@ export const JobInputFromUrlParams: FunctionalComponent<{
   );
 
   const [localWorkdir, setLocalWorkdir] = useState<string | undefined>(
-    jobDefinitionBlob?.workdir
-      ? jobDefinitionBlob?.workdir
-      : undefined);
+    jobDefinitionBlob?.workdir ? jobDefinitionBlob?.workdir : undefined
+  );
 
   const [localnoCache, setLocalNoCache] = useState<boolean>(
     nocacheString === "1"
   );
+
+  const [localDebug, setLocalDebug] = useState<boolean | undefined>(debug);
 
   const onClose = useCallback(() => {
     setOpen(!isOpen);
@@ -88,7 +84,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
   const onCloseAndAccept = useCallback(() => {
     setOpen(!isOpen);
 
-    const newJobDefinitionBlob = ({} as DockerJobDefinitionParamsInUrlHash)
+    const newJobDefinitionBlob = {} as DockerJobDefinitionParamsInUrlHash;
     if (localImage) {
       newJobDefinitionBlob.image = localImage;
     }
@@ -108,9 +104,10 @@ export const JobInputFromUrlParams: FunctionalComponent<{
       // ignore parsing errors
     }
 
-    maybeCommandArray = maybeCommandArray?.map(s => typeof(s) === 'object' ? (s as {op:string}).op : s );
+    maybeCommandArray = maybeCommandArray?.map((s) =>
+      typeof s === "object" ? (s as { op: string }).op : s
+    );
     newJobDefinitionBlob.command = maybeCommandArray;
-
 
     // ENTRYPOINT
     let maybeEntrypointArray: string[] | undefined;
@@ -122,7 +119,9 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     } catch (err) {
       // ignore parsing errors
     }
-    maybeEntrypointArray = maybeEntrypointArray?.map(s => typeof(s) === 'object' ? (s as {op:string}).op : s );
+    maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
+      typeof s === "object" ? (s as { op: string }).op : s
+    );
     newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
 
     setJobDefinitionBlob(newJobDefinitionBlob);
@@ -130,14 +129,30 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     if (localInputsMode !== undefined && inputsMode !== DataMode.base64) {
       setInputsMode(localInputsMode);
     }
-  }, [setOpen, isOpen, localImage, localCommandString, localEntrypointString, localWorkdir, localnoCache, localInputsMode, setJobDefinitionBlob, setnocacheString, setInputsMode]);
+
+    setDebug(localDebug);
+  }, [
+    setOpen,
+    isOpen,
+    localImage,
+    localCommandString,
+    localEntrypointString,
+    localWorkdir,
+    localnoCache,
+    localInputsMode,
+    localDebug,
+    setJobDefinitionBlob,
+    setnocacheString,
+    setInputsMode,
+    setDebug,
+  ]);
 
   const onChangeImage = useCallback(
     // this typing/casting is awful but the only thing I found that works
     (event: any) => {
       setLocalImage((event.target as HTMLInputElement).value);
     },
-    [setJobDefinitionBlob, setLocalImage]
+    [setLocalImage]
   );
 
   const onChangeWorkdir = useCallback(
@@ -145,15 +160,16 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     (event: any) => {
       setLocalWorkdir((event.target as HTMLInputElement).value);
     },
-    [setJobDefinitionBlob, setLocalWorkdir]
+    [setLocalWorkdir]
   );
 
-  const onChangeNoCache = useCallback(
-    () => {
-      setLocalNoCache(!localnoCache)
-    },
-    [setJobDefinitionBlob, localnoCache, setLocalNoCache]
-  );
+  const onChangeNoCache = useCallback(() => {
+    setLocalNoCache(!localnoCache);
+  }, [localnoCache, setLocalNoCache]);
+
+  const onChangeDebug = useCallback(() => {
+    setLocalDebug(!localDebug);
+  }, [localDebug, setLocalDebug]);
 
   const onChangeCommand = useCallback(
     // this typing/casting is awful but the only thing I found that works
@@ -162,7 +178,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
         .value;
       setLocalCommandString(inputString);
     },
-    [setJobDefinitionBlob, setLocalCommandString]
+    [setLocalCommandString]
   );
 
   const onChangeEntrypoint = useCallback(
@@ -172,7 +188,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
         .value;
       setLocalEntrypointString(inputString);
     },
-    [setJobDefinitionBlob, setLocalEntrypointString]
+    [setLocalEntrypointString]
   );
 
   // preact complains in dev mode if this is moved out of a functional component
@@ -186,9 +202,12 @@ export const JobInputFromUrlParams: FunctionalComponent<{
     };
   }, [onCloseAndAccept, isOpen]);
 
-  useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
-    setLocalInputsMode(e.target.value as DataMode)
-  }, [setLocalInputsMode])
+  useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalInputsMode(e.target.value as DataMode);
+    },
+    [setLocalInputsMode]
+  );
 
   return (
     <Drawer placement="top" onClose={onCloseAndAccept} isOpen={isOpen}>
@@ -199,14 +218,14 @@ export const JobInputFromUrlParams: FunctionalComponent<{
           </DrawerHeader>
           <DrawerBody>
             <Box
-              maxW="80%"
+              maxW="100%"
               p={2}
               borderWidth="4px"
               borderRadius="lg"
               overflow="hidden"
             >
               <Grid templateColumns="repeat(12, 1fr)" gap={6}>
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -219,7 +238,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                     </Text>
                   </Box>
                 </GridItem>
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   {" "}
                   <Box w="100%" h="10">
                     <Input
@@ -231,7 +250,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -244,7 +263,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                     </Text>
                   </Box>
                 </GridItem>
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   {" "}
                   <Box w="100%" h="10">
                     <Input
@@ -256,7 +275,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -269,7 +288,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                     </Text>
                   </Box>
                 </GridItem>
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   {" "}
                   <Box w="100%" h="10">
                     <Input
@@ -281,8 +300,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -295,7 +313,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                     </Text>
                   </Box>
                 </GridItem>
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   {" "}
                   <Box w="100%" h="10">
                     <Input
@@ -307,7 +325,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -321,7 +339,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   <Switch
                     // @ts-ignore
                     rightIcon={<CheckIcon />}
@@ -331,7 +349,7 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   />
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -345,40 +363,71 @@ export const JobInputFromUrlParams: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={10}>
-                <Select value={localInputsMode} onChange={(e) => setLocalInputsMode(e.target.value as DataMode)} placeholder="Select option" >
-                  {
-                    Object.keys(DataMode).map(datamode => <option value={datamode}>{datamode + (datamode === DataModeDefault ? " (default)": "")}</option>)
-                  }
+                <GridItem rowSpan={1} colSpan={9}>
+                  <Select
+                    value={localInputsMode}
+                    onChange={(e) =>
+                      setLocalInputsMode(e.target.value as DataMode)
+                    }
+                    placeholder="Select option"
+                  >
+                    {Object.keys(DataMode).map((datamode) => (
+                      <option value={datamode}>
+                        {datamode +
+                          (datamode === DataModeDefault ? " (default)" : "")}
+                      </option>
+                    ))}
                   </Select>
+                </GridItem>
+
+                <GridItem rowSpan={1} colSpan={3}>
+                  <Box
+                    w="100%"
+                    h="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="flex-end"
+                  >
+                    <Text textAlign={"right"} verticalAlign="bottom">
+                      Show extra info:
+                    </Text>
+                  </Box>
+                </GridItem>
+                <GridItem rowSpan={1} colSpan={9}>
+                  <Switch
+                    // @ts-ignore
+                    rightIcon={<CheckIcon />}
+                    onChange={onChangeDebug}
+                    isChecked={localDebug}
+                    value={localDebug ? 0 : 1}
+                  />
                 </GridItem>
 
                 <GridItem rowSpan={1} colSpan={12}></GridItem>
                 <GridItem rowSpan={1} colSpan={12}></GridItem>
                 <GridItem rowSpan={1} colSpan={12}></GridItem>
-                <GridItem rowSpan={1} colSpan={2}></GridItem>
+                <GridItem rowSpan={1} colSpan={10}></GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}>
-                  <Stack spacing={4}>
-                    <ButtonGroup variant="outline" spacing="6">
-                      <Button
-                        colorScheme="red"
-                        // @ts-ignore
-                        rightIcon={<CloseIcon />}
-                        onClick={onClose}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        colorScheme="green"
-                        // @ts-ignore
-                        rightIcon={<CheckIcon />}
-                        onClick={onCloseAndAccept}
-                      >
-                        Run
-                      </Button>
-                    </ButtonGroup>
-                  </Stack>
+                <GridItem rowSpan={1} colSpan={1}>
+                  {/*
+                      // @ts-ignore */}
+                  <IconButton
+                    size="lg"
+                    color="red"
+                    icon={(<CloseIcon />) as any}
+                    onClick={onClose}
+                  />
+                </GridItem>
+
+                <GridItem rowSpan={1} colSpan={1}>
+                  {/*
+                      // @ts-ignore */}
+                  <IconButton
+                    size="lg"
+                    color="green"
+                    icon={(<CheckIcon />) as any}
+                    onClick={onCloseAndAccept}
+                  />
                 </GridItem>
               </Grid>
             </Box>

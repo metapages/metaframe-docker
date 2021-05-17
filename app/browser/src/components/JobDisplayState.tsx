@@ -1,4 +1,14 @@
-import { FunctionalComponent } from "preact";
+import { Fragment, FunctionalComponent } from "preact";
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Box,
+  CircularProgress,
+  HStack,
+} from "@chakra-ui/react";
+import { useHashParam } from "@metapages/metaframe-hook";
 import { ButtonCancel } from "../components/ButtonCancel";
 import { ButtonEditJobInput } from "../components/ButtonEditJobInput";
 import { ButtonEditQueue } from "../components/ButtonEditQueue";
@@ -9,19 +19,11 @@ import {
   DockerJobState,
   StateChangeValueWorkerFinished,
 } from "../../../shared/dist/shared/types";
-import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  Box,
-  CircularProgress,
-  HStack,
-} from "@chakra-ui/react";
 
 export const JobDisplayState: FunctionalComponent<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
+  const [queue] = useHashParam("queue");
   return (
     <Box
       maxW="100%"
@@ -31,14 +33,16 @@ export const JobDisplayState: FunctionalComponent<{
       overflow="hidden"
     >
       <HStack spacing="24px">
-        <div>
-          <ButtonEditQueue />
-        </div>
-        <div>
-          <ButtonEditJobInput />
-        </div>
-        <JobStatusDisplay job={job} />
-        <ButtonCancel job={job} />
+        <ButtonEditQueue />
+        {!queue || queue === "" ? null : (
+          <Fragment>
+            <div>
+              <ButtonEditJobInput />
+            </div>
+            <JobStatusDisplay job={job} />
+            <ButtonCancel job={job} />
+          </Fragment>
+        )}
       </HStack>
     </Box>
   );
@@ -49,6 +53,7 @@ const JobStatusDisplay: FunctionalComponent<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const state = job?.state;
+  const serverState = useServerState();
 
   if (!job) {
     return (
@@ -138,15 +143,27 @@ const JobStatusDisplay: FunctionalComponent<{
     case DockerJobState.ReQueued:
       return (
         <Alert status="warning">
-          <CircularProgress size="20px" isIndeterminate color="grey" />
-          <AlertTitle>&nbsp;&nbsp;&nbsp;{state}</AlertTitle>
+          {/* <CircularProgress size="20px" isIndeterminate color="grey" /> */}
+          <AlertTitle>
+            &nbsp;&nbsp;&nbsp;{state} (total workers:{" "}
+            {serverState?.state?.workers
+              ? serverState?.state?.workers.length
+              : 0}
+            )
+          </AlertTitle>
         </Alert>
       );
     case DockerJobState.Running:
       return (
         <Alert status="warning">
           <CircularProgress size="20px" isIndeterminate color="grey" />
-          <AlertTitle>&nbsp;&nbsp;&nbsp;{state}</AlertTitle>
+          <AlertTitle>
+            &nbsp;&nbsp;&nbsp;{state} (total workers:{" "}
+            {serverState?.state?.workers
+              ? serverState?.state?.workers.length
+              : 0}
+            )
+          </AlertTitle>
         </Alert>
       );
   }

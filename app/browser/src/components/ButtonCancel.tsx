@@ -2,8 +2,8 @@ import { FunctionalComponent } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { Button } from "@chakra-ui/react";
 import { CloseIcon, RepeatClockIcon } from "@chakra-ui/icons";
+import { useHashParam } from "@metapages/metaframe-hook";
 import { useServerState } from "../hooks/serverStateHook";
-import { useHashParam } from "../hooks/useHashParam";
 import {
   DockerJobDefinitionRow,
   DockerJobState,

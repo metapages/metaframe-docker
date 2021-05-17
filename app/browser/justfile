@@ -19,8 +19,10 @@ tsc                                := "./node_modules/typescript/bin/tsc"
 bold     := '\033[1m'
 normal   := '\033[0m'
 
-_help:
-    @just --list --unsorted
+@_help:
+    just --list --unsorted
+    echo -e ""
+    echo -e "    🔗: https://docker-metapage-io.glitch.me"
 
 # Build the client static files
 build +args="": (_tsc "--build --verbose")
@@ -43,8 +45,9 @@ dev remote="": (_tsc "--build --verbose")
     else
         APP_ORIGIN=https://${APP_FQDN}:${APP_PORT}
         if [ "{{remote}}" != "" ]; then
+
             export APP_ORIGIN=https://{{remote}};
-            echo "👉 login/logout does not work correctly pointing to a remote URL: ensure you are *already* logged in @ ${APP_ORIGIN}"
+            echo "APP_ORIGIN=https://{{remote}}" > .env.local
         fi
         echo "Browser development pointing to: ${APP_ORIGIN}"
         just ../ingress/https/mkcert ignorechecks

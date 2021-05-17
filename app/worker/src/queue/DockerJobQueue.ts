@@ -144,6 +144,12 @@ export class DockerJobQueue {
         }
 
         const dockerExecution: DockerJobExecution = await dockerJobExecute(executionArgs);
+        if (!this.queue[jobBlob.hash]) {
+            console.log(`job=${jobBlob.hash} after await jobBlob.hash no job in queue so killing`);
+            // what happened? the job was removed from the queue by someone else?
+            dockerExecution.kill();
+            return;
+        }
         this.queue[jobBlob.hash].execution = dockerExecution;
 
         dockerExecution.finish.then(async (result: DockerRunResult) => {

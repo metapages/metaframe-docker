@@ -34,7 +34,13 @@ export const copyLargeBlobsToCloud = async (inputs: InputsRefs | undefined): Pro
         // this is already cloud storage. weird. or really advanced? who knows, but trust it anyway,
         break;
       case DataRefType.json:
-        throw 'TODO: check input[].type === "json"'
+        if (inputs[name] && inputs[name].value) {
+          const jsonString = JSON.stringify(inputs[name].value);
+          if (jsonString.length > ENV_VAR_DATA_ITEM_LENGTH_MAX) {
+            uint8ArrayIfBig = Unibabel.utf8ToBuffer(jsonString);
+          }
+        }
+        break;
       case DataRefType.utf8:
         if (inputs[name] && inputs[name]?.value.length > ENV_VAR_DATA_ITEM_LENGTH_MAX) {
           uint8ArrayIfBig = Unibabel.utf8ToBuffer(inputs[name].value);

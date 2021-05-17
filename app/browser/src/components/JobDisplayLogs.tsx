@@ -1,10 +1,20 @@
 import { Fragment, FunctionalComponent } from "preact";
 import {
+  Box,
+  Code,
+  Stack,
+  Tab,
+  Tabs,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Text,
+} from "@chakra-ui/react";
+import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
 } from "../../../shared/dist/shared/types";
-import { Box, Heading, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 
 export const JobDisplayLogs: FunctionalComponent<{
   job: DockerJobDefinitionRow | undefined;
@@ -17,25 +27,35 @@ export const JobDisplayLogs: FunctionalComponent<{
       borderRadius="lg"
       overflow="hidden"
     >
-      <SimpleGrid columns={2} spacing={5}>
-        <Heading size="md">stdout</Heading>
-        <Heading size="md">stderr</Heading>
-        <DisplayLogs job={job} />
-      </SimpleGrid>
+      <Tabs>
+        <TabList>
+          <Tab>stdout</Tab>
+          <Tab>stderr</Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel background="#ECF2F7">
+            <DisplayLogs job={job} stdout={true} />
+          </TabPanel>
+          <TabPanel>
+            <DisplayLogs job={job} stdout={false} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Box>
   );
 };
 
 // show e.g. running, or exit code, or error
 const DisplayLogs: FunctionalComponent<{
+  stdout: boolean;
   job?: DockerJobDefinitionRow;
-}> = ({ job }) => {
+}> = ({ job, stdout }) => {
   const state = job?.state;
 
   if (!job || !state) {
     return (
       <Fragment>
-        <JustLogs logs={undefined} />
         <JustLogs logs={undefined} />
       </Fragment>
     );
@@ -46,8 +66,13 @@ const DisplayLogs: FunctionalComponent<{
       const resultFinished = job?.value as StateChangeValueWorkerFinished;
       return (
         <Fragment>
-          <JustLogs logs={resultFinished?.result?.stdout} />
-          <JustLogs logs={resultFinished?.result?.stderr} />
+          <JustLogs
+            logs={
+              stdout
+                ? resultFinished?.result?.stdout
+                : resultFinished?.result?.stderr
+            }
+          />
         </Fragment>
       );
     case DockerJobState.Queued:
@@ -56,7 +81,6 @@ const DisplayLogs: FunctionalComponent<{
       // TODO: handled streaming logs
       return (
         <Fragment>
-          <JustLogs logs={undefined} />
           <JustLogs logs={undefined} />
         </Fragment>
       );
@@ -74,12 +98,16 @@ const JustLogs: FunctionalComponent<{
     });
   }
   return (
-    <Stack spacing={3}>
-      {logsNewlineHandled.map(line => (
+    <Stack spacing={1}>
+      {logsNewlineHandled.map((line) => (
         <Fragment>
-          <Text lineHeight="60%" fontFamily="monospace">{line}</Text>
+          <Code fontSize={10}>
+            {line}
+          </Code>
         </Fragment>
       ))}
     </Stack>
   );
 };
+
+// lineHeight="100%" fontFamily="monospace"

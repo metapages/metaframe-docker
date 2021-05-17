@@ -13,9 +13,14 @@ normal                := '\033[0m'
 @_help:
     just --list --unsorted --list-heading $'Commands:\n'
     echo -e ""
-    echo -e "    Example command to start a worker:"
+    echo -e "    Example command to start a worker using a published docker image:"
     echo -e ""
     echo -e "        docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapage/asman-worker:$(cat package.json | jq -r '.version') --cpus=4 --queue=public1"
+    echo -e ""
+    echo -e "    Example command to start a worker using local development code"
+    echo -e ""
+    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=public1 --server=http://server:8080"
+    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=public1 --server=https://docker-metapage-io.glitch.me"
     echo -e ""
 
 # Build the production code
@@ -33,6 +38,11 @@ run +args="": build
     @# Not using ts-node because https://github.com/TypeStrong/ts-node/issues/1007
     @# --experimental-specifier-resolution=node: https://stackoverflow.com/questions/64453859/directory-import-is-not-supported-resolving-es-modules-with-node-js
     node --experimental-specifier-resolution=node ./dist/bin/index.js {{args}}
+
+# Actually run a worker docker image
+worker:
+    cd .. && docker-compose -f docker-compose.yml build worker
+    cd .. && docker-compose -f docker-compose.yml run --no-deps worker --cpus=1 --queue=public1 --server=https://docker-metapage-io.glitch.me/
 
 # test:
 #     NODE_ENV=test npx jest --verbose --runInBand

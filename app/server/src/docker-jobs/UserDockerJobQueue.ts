@@ -281,6 +281,12 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
         connection.socket.on('message', message => {
             try {
                 const messageString = message.toString().trim();
+                if (messageString === 'PING') {
+                    console.log(`PING FROM ${worker?.id}`)
+                    connection.socket.send('PONG');
+                    return;
+                }
+
                 if (!messageString.startsWith('{')) {
                     console.log('message not JSON', message)
                     return;
@@ -328,6 +334,11 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
         connection.socket.on('message', message => {
             try {
                 const messageString = message.toString();
+                if (messageString === 'PING') {
+                    console.log(`PING FROM browser`)
+                    connection.socket.send('PONG');
+                    return;
+                }
                 if (!messageString.startsWith('{')) {
                     console.log('message not JSON', message)
                     return;

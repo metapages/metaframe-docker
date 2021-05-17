@@ -2,12 +2,11 @@ import { FunctionalComponent } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { useQueryParam, StringParam } from "use-query-params";
 import { Box } from "@chakra-ui/react";
-import { Metaframe, MetaframeInputMap, isIframe } from "@metapages/metapage";
+import { MetaframeInputMap, isIframe } from "@metapages/metapage";
+import { MetaframeContext, useHashParam, useHashParamBoolean } from "@metapages/metaframe-hook";
 import { useDockerJobDefinition } from "../hooks/jobDefinitionHook";
 import { useServerState } from "../hooks/serverStateHook";
-import { useHashParam } from "../hooks/useHashParam";
 import { shaJobDefinition } from "../../../shared/dist/shared/util";
-import { DataRefType } from "../../../shared/dist/dataref";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
@@ -23,10 +22,6 @@ import { JobDisplayState } from "./JobDisplayState";
 import { JobDisplayLogs } from "./JobDisplayLogs";
 import { JobDisplayError } from "./JobDisplayError";
 import { JobDisplayId } from "./JobDisplayId";
-
-// import { MetaframeContext } from '../../../metaframe-react-hook/src/metaframe/preact/metaframeHook';
-// import { MetaframeContext } from '../../../metaframe-react-hook/src/metaframe/preact/metaframeHook';
-import { MetaframeContext } from "../hooks/metaframeHook";
 import {
   convertJobOutputDataRefsToExpectedFormat,
   DataMode,
@@ -42,13 +37,13 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
   const dockerJob = useDockerJobDefinition();
   const serverState = useServerState();
   const [jobHash, setJobHash] = useState<string | undefined>(undefined);
-  const [jobHashCurrentOutputs, setJobHashCurrentOutputs] = useState<
-    string | undefined
-  >(undefined);
+  const [jobHashCurrentOutputs, setJobHashCurrentOutputs] =
+    useState<string | undefined>(undefined);
   const [job, setJob] = useState<DockerJobDefinitionRow | undefined>(undefined);
   const metaframe = useContext(MetaframeContext);
   const [nocacheString] = useHashParam("nocache");
   const [inputsMode] = useQueryParam("inputsmode", StringParam);
+  const [debug] = useHashParamBoolean("debug");
   const outputsMode: DataMode = (inputsMode as DataMode) || DataModeDefault;
 
   // Update the local job hash (id) on change
@@ -100,16 +95,16 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
       job &&
       job.state === DockerJobState.Finished
     ) {
-      const stateFinished: StateChangeValueWorkerFinished = job.value as StateChangeValueWorkerFinished;
+      const stateFinished: StateChangeValueWorkerFinished =
+        job.value as StateChangeValueWorkerFinished;
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
         (async () => {
-          const metaframeOutputs:
-            | MetaframeInputMap
-            | undefined = await convertJobOutputDataRefsToExpectedFormat(
-            outputs,
-            outputsMode
-          );
+          const metaframeOutputs: MetaframeInputMap | undefined =
+            await convertJobOutputDataRefsToExpectedFormat(
+              outputs,
+              outputsMode
+            );
           if (metaframeOutputs) {
             try {
               metaframe.setOutputs!(metaframeOutputs);
@@ -144,8 +139,8 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
           // because the server eventually deletes our job, but we can know we have already computed it
           if (jobHashCurrentOutputs !== jobHashCurrent) {
             // inputs are already minified (fat blobs uploaded to the cloud)
-            const definition: DockerJobDefinitionInputRefs = dockerJob.definitionMeta!
-              .definition!;
+            const definition: DockerJobDefinitionInputRefs =
+              dockerJob.definitionMeta!.definition!;
             const value: StateChangeValueQueued = {
               definition,
               nocache: nocacheString === "1",
@@ -180,7 +175,8 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
 
   return (
     <Box>
-      <JobDisplayId job={job} />
+      { debug ? <JobDisplayId job={job} /> : null}
+
       <JobDisplayState job={job} />
       <JobDisplayError job={job} />
       <JobDisplayLogs job={job} />

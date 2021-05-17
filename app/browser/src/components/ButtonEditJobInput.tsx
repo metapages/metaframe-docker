@@ -1,7 +1,7 @@
 import { Fragment, FunctionalComponent } from "preact";
 import { useCallback, useState } from "preact/hooks";
 import { IconButton } from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
+import { SettingsIcon } from "@chakra-ui/icons";
 import { JobInputFromUrlParams } from "./JobInputFromUrlParams";
 
 export const ButtonEditJobInput: FunctionalComponent = () => {
@@ -17,7 +17,7 @@ export const ButtonEditJobInput: FunctionalComponent = () => {
         verticalAlign="top"
         aria-label="Docker configuration: image and command"
         // @ts-ignore
-        icon={<EditIcon />}
+        icon={<SettingsIcon />}
         size="lg"
         onClick={onClick}
       />

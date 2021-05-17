@@ -3,20 +3,15 @@
  */
 import { createContext } from "preact";
 import { useEffect, useState, useContext } from "preact/hooks";
-import { useParams } from "react-router-dom";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { useHashParam } from "./useHashParam";
-import {APP_ORIGIN  } from "../utils/origin";
+import { useHashParam } from "@metapages/metaframe-hook";
+import { APP_ORIGIN } from "../utils/origin";
 import {
   BroadcastState,
   WebsocketMessage,
   WebsocketMessageSender,
   WebsocketMessageType,
 } from "../../../shared/dist/shared/types";
-
-// interface RouteParams {
-//   address: string;
-// }
 
 type Props = {
   children: React.ReactNode;
@@ -28,46 +23,67 @@ interface ServerStateObject {
   connected: boolean;
 }
 
-const FAKESENDER = (_: WebsocketMessage)=> {}
+const FAKESENDER = (_: WebsocketMessage) => {};
 
 const serverStateMachine = (): [
   BroadcastState | undefined,
   WebsocketMessageSender,
   boolean
 ] => {
-  // const params = useParams<RouteParams>();
-  // const { address } = params;
-  // const [ address ] = useHashParam('queue');
   const [address] = useHashParam("queue");
   const [connected, setConnected] = useState<boolean>(false);
   const [state, setState] = useState<BroadcastState | undefined>(undefined);
-  const [sendMessage, setSendMessage] = useState<
-    {sender:WebsocketMessageSender}
-  >({sender:FAKESENDER});
+  const [sendMessage, setSendMessage] = useState<{
+    sender: WebsocketMessageSender;
+  }>({ sender: FAKESENDER });
 
   useEffect(() => {
-    if (!address || address === '') {
+    if (!address || address === "") {
       return;
     }
     const url = `${APP_ORIGIN.replace("http", "ws")}/browser/${address}`;
     setConnected(false);
     const rws = new ReconnectingWebSocket(url);
-
-    // setTimeout(() => {
-    //   console.log('💥 TEST setSendMessage', sender);
-    //   setSendMessage({sender:(m: WebsocketMessage)=> {}});
-    // }, 1000)
+    let timeLastPong = Date.now();
+    let timeLastPing = Date.now();
 
     const onMessage = (message: MessageEvent) => {
       try {
         const messageString = message.data.toString();
+        if (messageString === "PONG") {
+          timeLastPong = Date.now();
+
+          // wait a bit then send a ping
+          setTimeout(() => {
+            if (Date.now() - timeLastPing >= 5000) {
+              rws.send("PING");
+              timeLastPing = Date.now();
+            }
+            setTimeout(() => {
+              if (
+                Date.now() - timeLastPong >= 10000 &&
+                rws.readyState === rws.OPEN
+              ) {
+                console.log(
+                  `Reconnecting because no PONG since ${
+                    Date.now() - timeLastPong
+                  }ms `
+                );
+                rws.reconnect();
+              }
+            }, 10000);
+          }, 5000);
+
+          return;
+        }
         if (!messageString.startsWith("{")) {
           return;
         }
         const possibleMessage: WebsocketMessage = JSON.parse(messageString);
         switch (possibleMessage.type) {
           case WebsocketMessageType.State:
-            const state: BroadcastState = possibleMessage.payload as BroadcastState;
+            const state: BroadcastState =
+              possibleMessage.payload as BroadcastState;
             if (!state) {
               console.log({
                 error: "Missing payload in message",
@@ -95,12 +111,12 @@ const serverStateMachine = (): [
 
     const onOpen = () => {
       setConnected(true);
-      setSendMessage({sender});
+      setSendMessage({ sender });
     };
 
     const onClose = () => {
       setConnected(false);
-      setSendMessage({sender:FAKESENDER});
+      setSendMessage({ sender: FAKESENDER });
     };
 
     rws.addEventListener("message", onMessage);
@@ -115,7 +131,7 @@ const serverStateMachine = (): [
       rws.removeEventListener("close", onClose);
       rws.close();
       setConnected(false);
-      setSendMessage({sender:FAKESENDER});
+      setSendMessage({ sender: FAKESENDER });
     };
   }, [address, setState, setSendMessage, setConnected]);
 

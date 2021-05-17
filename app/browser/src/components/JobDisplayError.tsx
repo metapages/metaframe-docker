@@ -1,11 +1,11 @@
 import { FunctionalComponent } from "preact";
+import { Alert, AlertDescription, Box, Text } from "@chakra-ui/react";
 import {
   DockerJobDefinitionRow,
   DockerJobFinishedReason,
   DockerJobState,
   StateChangeValueWorkerFinished,
 } from "../../../shared/dist/shared/types";
-import { Alert, AlertDescription, Box, Text } from "@chakra-ui/react";
 
 /**
  * Show just the error message

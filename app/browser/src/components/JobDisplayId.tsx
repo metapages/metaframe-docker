@@ -1,10 +1,10 @@
 import { FunctionalComponent } from "preact";
 import {
-  DockerJobDefinitionRow,
-} from "../../../shared/dist/shared/types";
-import {
   Box,
 } from "@chakra-ui/react";
+import {
+  DockerJobDefinitionRow,
+} from "../../../shared/dist/shared/types";
 
 export const JobDisplayId: FunctionalComponent<{
   job: DockerJobDefinitionRow | undefined;

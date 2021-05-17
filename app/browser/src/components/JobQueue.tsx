@@ -1,11 +1,9 @@
 import { FunctionalComponent } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { isIframe } from "@metapages/metapage";
-import { useHashParam } from "../hooks/useHashParam";
+import { useHashParam } from "@metapages/metaframe-hook";
 import {
   Box,
-  Button,
-  ButtonGroup,
+  IconButton,
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -19,8 +17,6 @@ import {
 } from "@chakra-ui/react";
 // https://chakra-ui.com/docs/media-and-icons/icon
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
-
-const iframe = isIframe();
 
 export const JobQueue: FunctionalComponent<{
   isOpen: boolean;
@@ -74,7 +70,7 @@ export const JobQueue: FunctionalComponent<{
               overflow="hidden"
             >
               <Grid templateColumns="repeat(12, 1fr)" gap={6}>
-                <GridItem rowSpan={1} colSpan={2}>
+                <GridItem rowSpan={1} colSpan={3}>
                   <Box
                     w="100%"
                     h="100%"
@@ -87,7 +83,7 @@ export const JobQueue: FunctionalComponent<{
                     </Text>
                   </Box>
                 </GridItem>
-                <GridItem rowSpan={1} colSpan={10}>
+                <GridItem rowSpan={1} colSpan={9}>
                   {" "}
                   <Box w="100%" h="10">
                     <Input
@@ -99,29 +95,30 @@ export const JobQueue: FunctionalComponent<{
                   </Box>
                 </GridItem>
 
-                <GridItem rowSpan={1} colSpan={2}></GridItem>
+                {/* <GridItem rowSpan={1} colSpan={2}></GridItem> */}
 
-                <GridItem rowSpan={1} colSpan={2}>
-                  <Stack spacing={4}>
-                    <ButtonGroup variant="outline" spacing="6">
-                      <Button
-                        colorScheme="red"
-                        // @ts-ignore
-                        rightIcon={<CloseIcon />}
-                        onClick={onClose}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        colorScheme="green"
-                        // @ts-ignore
-                        rightIcon={<CheckIcon />}
-                        onClick={onCloseAndAccept}
-                      >
-                        Connect
-                      </Button>
-                    </ButtonGroup>
-                  </Stack>
+                <GridItem rowSpan={1} colSpan={10}></GridItem>
+
+                <GridItem rowSpan={1} colSpan={1}>
+                  {/*
+                      // @ts-ignore */}
+                  <IconButton
+                    size="lg"
+                    color="red"
+                    icon={(<CloseIcon />) as any}
+                    onClick={onClose}
+                  />
+                </GridItem>
+
+                <GridItem rowSpan={1} colSpan={1}>
+                  {/*
+                      // @ts-ignore */}
+                  <IconButton
+                    size="lg"
+                    color="green"
+                    icon={(<CheckIcon />) as any}
+                    onClick={onCloseAndAccept}
+                  />
                 </GridItem>
               </Grid>
             </Box>

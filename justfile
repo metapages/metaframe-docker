@@ -19,7 +19,7 @@ _help:
         echo ""
         echo "sub-commands:"
         echo "    app"
-        # echo "    ci"
+        echo "    worker"
         echo "    cloud"
         echo ""
         echo "DEBUGGING: e.g. 'DEBUG=1 just test'"
@@ -37,9 +37,10 @@ _help:
 # @test:
 #     just ci/test
 
-# Publish images to registries, libraries, etc
+# Publish server and UI to glitch, and worker image to docker-hub
 @deploy:
     just cloud/glitch/deploy
+    just app/worker/publish_docker
 
 # # Publish images to registries, libraries, etc
 # @publish:
@@ -58,9 +59,9 @@ alias cloud := _cloud
 @_cloud +args="":
     just cloud/{{args}}
 
-# alias ci := _ci
-# @_ci +args="":
-#     just ci/{{args}}
+alias worker := _worker
+@_worker +args="":
+    just app/worker/{{args}}
 
 alias app := _app
 @_app +args="":
