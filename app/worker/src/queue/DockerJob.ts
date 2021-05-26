@@ -110,7 +110,7 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
     volumes.forEach(volume => {
       // assert(volume.host, `Missing volume.host`);
       // assert(volume.container, `Missing volume.container`);
-      createOptions.HostConfig!.Binds!.push(`${volume.host}:${volume.container}`);
+      createOptions.HostConfig!.Binds!.push(`${volume.host}:${volume.container}:Z`);
     });
   }
 
