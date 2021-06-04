@@ -10,7 +10,7 @@ import { dataRefToFile, bufferToBase64Ref } from "./DataRefUtil"
 
 
 // const TMPDIR = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || '/tmp';
-const TMPDIR = '/tmp';
+const TMPDIR = '/tmp/asman';
 
 /**
  *
