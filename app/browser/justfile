@@ -28,6 +28,8 @@ normal   := '\033[0m'
 build +args="": (_tsc "--build --verbose")
     rm -rf dist/*
     {{parcel}} build {{args}} public/index.html --no-autoinstall
+    @# WTF is this file not copied with parcel-plugin-static-files-copy
+    cp public/metaframe.json dist/
 
 # Run the browser dev server (optionally pointing to any remote app)
 dev remote="": (_tsc "--build --verbose")

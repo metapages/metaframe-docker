@@ -71,14 +71,14 @@ export class DockerJobQueue {
         while (queuedJobKeys.length > 0 && Object.keys(this.queue).length < this.cpus) {
             const jobKey = queuedJobKeys.pop()!;
             const job = jobs[jobKey]
-            console.log(`about to claim ${JSON.stringify(job)}`);
+            console.log(`[${job.hash}] about to claim ${JSON.stringify(job)}`)
             this._startJob(job);
             return;
         }
     }
 
     async _startJob(jobBlob: DockerJobDefinitionRow): Promise<void> {
-        console.log(`${jobBlob.hash} starting job `)
+        console.log(`[${jobBlob.hash}] starting...`)
         const definition = jobBlob.definition;
 
         // add a placeholder on the queue for this job
@@ -145,7 +145,7 @@ export class DockerJobQueue {
 
         const dockerExecution: DockerJobExecution = await dockerJobExecute(executionArgs);
         if (!this.queue[jobBlob.hash]) {
-            console.log(`job=${jobBlob.hash} after await jobBlob.hash no job in queue so killing`);
+            console.log(`[${jobBlob.hash}] after await jobBlob.hash no job in queue so killing`);
             // what happened? the job was removed from the queue by someone else?
             dockerExecution.kill();
             return;
@@ -153,7 +153,7 @@ export class DockerJobQueue {
         this.queue[jobBlob.hash].execution = dockerExecution;
 
         dockerExecution.finish.then(async (result: DockerRunResult) => {
-            console.log('result', JSON.stringify(result, null, '  ').substr(0, 200));
+            console.log(`[${jobBlob.hash}] result ${JSON.stringify(result, null, '  ').substr(0, 200)}`);
 
             const resultWithOutputs: DockerRunResultWithOutputs = result as DockerRunResultWithOutputs;
             resultWithOutputs.outputs = {};
@@ -180,7 +180,7 @@ export class DockerJobQueue {
                         result: { ...result, outputs },
                     };
                 } catch (err) {
-                    console.log('failed to getOutputs', err)
+                    console.log(`[${jobBlob.hash}] 💥 failed to getOutputs ${err}`);
                     valueFinished = {
                         reason: DockerJobFinishedReason.Error,
                         worker: this.workerId,
@@ -205,7 +205,7 @@ export class DockerJobQueue {
                 }
             });
         }).catch(err => {
-            console.log(`${jobBlob.hash} errored`, err);
+            console.log(`[${jobBlob.hash}] 💥 errored ${err}`);
 
             // Delete from our local queue before sending
             // TODO: cache locally before attempting to send

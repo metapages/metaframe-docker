@@ -1,6 +1,7 @@
 import * as path from "path"
 import fse from "fs-extra"
 import klaw from "klaw";
+import chalk from "chalk";
 import { Volume } from './DockerJob'
 import { InputsRefs, DockerJobDefinitionRow } from '../../../shared/dist/shared/types.js';
 import { asyncForEach } from '../../../shared/dist/shared/util.js'
@@ -23,9 +24,17 @@ export const convertIOToVolumeMounts = async (job: DockerJobDefinitionRow): Prom
 
     // create the tmp directory for inputs+outputs
     await fse.ensureDir(inputsDir);
-    // TODO: delete existing files: security
     await fse.ensureDir(outputsDir);
 
+    // security/consistency: empty directories, in case restarting jobs
+    await fse.emptyDir(inputsDir);
+    await fse.ensureDir(outputsDir);
+
+    // make sure directories are writable
+    await fse.chmod(inputsDir, 0o777);
+    await fse.chmod(outputsDir, 0o777);
+
+    console.log(`[${job.hash}] creating\n\t ${inputsDir}\n\t ${outputsDir}`)
 
     // copy the inputs (if any)
     const inputs = job.definition.inputs;
@@ -72,6 +81,8 @@ export const getOutputs = async (job: DockerJobDefinitionRow): Promise<InputsRef
     const baseDir = path.join(TMPDIR, job.hash);
     const outputsDir = path.join(baseDir, 'outputs');
 
+    console.log(`[${job.hash}] getting outputs from  ${outputsDir}`);
+
     // copy the inputs (if any)
     const outputs: InputsRefs = {};
 
@@ -84,7 +95,7 @@ export const getOutputs = async (job: DockerJobDefinitionRow): Promise<InputsRef
         const ref: DataRef = await bufferToBase64Ref(fileBuffer);
         outputs[file.replace(`${outputsDir}/`, '')] = ref;
     });
-    console.log('outputs', JSON.stringify(outputs, null, '  ').substr(0, 100));
+    console.log(`[${job.hash}] outputs ${JSON.stringify(outputs, null, '  ').substr(0, 100)}`);
     return outputs;
 }
 

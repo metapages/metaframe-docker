@@ -29,9 +29,9 @@ build: clean (_tsc "--build --verbose")
     cp -r bin ./dist/
 
 # Run in development mode (automatic reloading)
-dev +args="--cpus=1 --queue=public1 --id=local-dev":
+dev queue="public1":
     @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
-    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run "{{args}}"
+    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run --cpus=1 --id=local-dev --queue="{{queue}}"
 
 # Build then run node script
 run +args="": build
@@ -40,7 +40,7 @@ run +args="": build
     node --experimental-specifier-resolution=node ./dist/bin/index.js {{args}}
 
 # Actually run a worker docker image
-worker:
+worker queue="public1":
     cd .. && docker-compose -f docker-compose.yml build worker
     cd .. && docker-compose -f docker-compose.yml run --no-deps worker --cpus=1 --queue=public1 --server=https://docker-metapage-io.glitch.me/
 
