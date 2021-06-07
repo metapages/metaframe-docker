@@ -19,8 +19,8 @@ normal                := '\033[0m'
     echo -e ""
     echo -e "    Example command to start a worker using local development code"
     echo -e ""
-    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=public1 --server=http://server:8080"
-    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=public1 --server=https://docker-metapage-io.glitch.me"
+    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=local1 --server=http://server:8080"
+    echo -e "        docker-compose run --no-deps --rm worker just dev --cpus=1 --queue=local1 --server=https://docker-metapage-io.glitch.me"
     echo -e ""
 
 # Build the production code
@@ -29,9 +29,9 @@ build: clean (_tsc "--build --verbose")
     cp -r bin ./dist/
 
 # Run in development mode (automatic reloading)
-dev queue="public1":
+dev +args="--cpus=1 --queue=local1":
     @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
-    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run --cpus=1 --id=local-dev --queue="{{queue}}"
+    watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run --id=local-dev "{{args}}"
 
 # Build then run node script
 run +args="": build
@@ -40,9 +40,9 @@ run +args="": build
     node --experimental-specifier-resolution=node ./dist/bin/index.js {{args}}
 
 # Actually run a worker docker image
-worker queue="public1":
+worker queue="local1":
     cd .. && docker-compose -f docker-compose.yml build worker
-    cd .. && docker-compose -f docker-compose.yml run --no-deps worker --cpus=1 --queue=public1 --server=https://docker-metapage-io.glitch.me/
+    cd .. && docker-compose -f docker-compose.yml run --no-deps worker --cpus=1 --queue={{queue}} --server=https://docker-metapage-io.glitch.me/
 
 # test:
 #     NODE_ENV=test npx jest --verbose --runInBand

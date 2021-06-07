@@ -3,7 +3,11 @@ import { useContext, useEffect, useState } from "preact/hooks";
 import { useQueryParam, StringParam } from "use-query-params";
 import { Box } from "@chakra-ui/react";
 import { MetaframeInputMap, isIframe } from "@metapages/metapage";
-import { MetaframeContext, useHashParam, useHashParamBoolean } from "@metapages/metaframe-hook";
+import {
+  MetaframeContext,
+  useHashParam,
+  useHashParamBoolean,
+} from "@metapages/metaframe-hook";
 import { useDockerJobDefinition } from "../hooks/jobDefinitionHook";
 import { useServerState } from "../hooks/serverStateHook";
 import { shaJobDefinition } from "../../../shared/dist/shared/util";
@@ -22,6 +26,7 @@ import { JobDisplayState } from "./JobDisplayState";
 import { JobDisplayLogs } from "./JobDisplayLogs";
 import { JobDisplayError } from "./JobDisplayError";
 import { JobDisplayId } from "./JobDisplayId";
+import { JobDisplayOutputs } from "./JobDisplayOutputs";
 import {
   convertJobOutputDataRefsToExpectedFormat,
   DataMode,
@@ -99,12 +104,15 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
         job.value as StateChangeValueWorkerFinished;
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
+        console.log('outputs', outputs);
         (async () => {
           const metaframeOutputs: MetaframeInputMap | undefined =
             await convertJobOutputDataRefsToExpectedFormat(
               outputs,
               outputsMode
             );
+
+            console.log('metaframeOutputs', metaframeOutputs);
           if (metaframeOutputs) {
             try {
               metaframe.setOutputs!(metaframeOutputs);
@@ -169,16 +177,13 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
 
   // TODO: streaming logs
 
-  // const job: DockerJobDefinitionRow | undefined = jobHash
-  //   ? serverState.state!.state!.jobs[jobHash]
-  //   : undefined;
-
   return (
     <Box>
-      { debug ? <JobDisplayId job={job} /> : null}
+      {debug ? <JobDisplayId job={job} /> : null}
 
       <JobDisplayState job={job} />
       <JobDisplayError job={job} />
+      <JobDisplayOutputs job={job} />
       <JobDisplayLogs job={job} />
     </Box>
   );

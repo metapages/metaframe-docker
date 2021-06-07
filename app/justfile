@@ -84,8 +84,7 @@ down +args="":
 
 # Open browser tab pointing to the stack (assumes stack is running)
 @open:
-    open https://${APP_FQDN}:${APP_PORT}/
-    # just _open_url https://${APP_FQDN}:${APP_PORT}/
+    open https://${APP_FQDN}:${APP_PORT}/#?queue=local1
 
 # Deletes generated files
 @clean:

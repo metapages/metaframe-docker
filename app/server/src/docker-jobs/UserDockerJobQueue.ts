@@ -64,7 +64,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
 
     stateChange(change: StateChange) {
 
-        console.log('🌘stateChange', JSON.stringify(change, null, '  '));
+        // console.log('🌘stateChange', JSON.stringify(change, null, '  ').substr(0, 300));
         // console.log('this.state.jobs', JSON.stringify(this.state.jobs, null, '  '));
 
         let sendBroadcast = false;
@@ -288,7 +288,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
                 }
 
                 if (!messageString.startsWith('{')) {
-                    console.log('message not JSON', message)
+                    console.log('message not JSON', messageString.substr(0, 100))
                     return;
                 }
                 const possibleMessage: WebsocketMessage = JSON.parse(messageString);
@@ -296,7 +296,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
                     case WebsocketMessageType.StateChange:
                         const change: StateChange = possibleMessage.payload as StateChange;
                         if (!change) {
-                            console.log({ error: 'Missing payload in message', message });
+                            console.log({ error: 'Missing payload in message', message: messageString.substr(0, 100) });
                             break;
                         }
                         this.stateChange(change);
@@ -304,7 +304,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
                     case WebsocketMessageType.WorkerRegistration:
                         worker = possibleMessage.payload as WorkerRegistration;
                         if (!worker) {
-                            console.log({ error: 'Missing payload in message', message });
+                            console.log({ error: 'Missing payload in message', message: messageString.substr(0, 100) });
                             break;
                         }
                         this.workers.push({ registration: worker, connection: connection.socket });
@@ -340,7 +340,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
                     return;
                 }
                 if (!messageString.startsWith('{')) {
-                    console.log('message not JSON', message)
+                    console.log('message not JSON', messageString.substr(0, 100))
                     return;
                 }
                 const possibleMessage: WebsocketMessage = JSON.parse(messageString);
@@ -348,7 +348,7 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
                     case WebsocketMessageType.StateChange:
                         const change: StateChange = possibleMessage.payload as StateChange;
                         if (!change) {
-                            console.log({ error: 'Missing payload in message', message });
+                            console.log({ error: 'Missing payload in message', message: messageString.substr(0, 100) });
                             break;
                         }
                         this.stateChange(change);

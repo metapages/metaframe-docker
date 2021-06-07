@@ -81,9 +81,11 @@ export const convertJobOutputDataRefsToExpectedFormat = async (outputs: InputsRe
     return;
   }
   let arrayBuffer :ArrayBuffer;
+  let newOutputs :MetaframeInputMap = {};
   switch (mode) {
     case DataMode.base64:
-      return Object.keys(outputs).reduce<MetaframeInputMap>(async (newOutputs: MetaframeInputMap, name: string) => {
+
+      await Promise.all(Object.keys(outputs).map(async (name: string) => {
         const type: DataRefType = outputs[name].type || DataRefTypeDefault;
         switch (type) {
           case DataRefType.base64:
@@ -105,8 +107,10 @@ export const convertJobOutputDataRefsToExpectedFormat = async (outputs: InputsRe
             newOutputs[name] = Unibabel.utf8ToBase64(outputs[name].value);
             break;
         }
-        return newOutputs;
-      }, {} as MetaframeInputMap);
+      }));
+
+      return newOutputs;
+
     case DataMode.dataref:
       console.log('❗❗❗ There is no actual size checking for mode=dataref')
       return outputs;
