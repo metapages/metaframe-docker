@@ -1,4 +1,5 @@
 set shell                := ["bash", "-c"]
+set dotenv-load          := true
 export ROOT              := `git rev-parse --show-toplevel`
 export GLITCH_BUILD_ROOT := ROOT + "/.tmp/glitch"
 GLITCH_GIT_URL           := env_var("GLITCH_GIT_URL")

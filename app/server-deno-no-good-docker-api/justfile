@@ -1,8 +1,0 @@
-set shell := ["bash", "-c"]
-
-@_help:
-    just --list --unsorted
-
-# Start the server
-@run:
-    deno run --unstable --allow-all src/index.ts

@@ -1,10 +1,10 @@
-
+set shell       := ["bash", "-c"]
+set dotenv-load := true
 # Always use locally installed tools (always pin versions)
-tsc                                := "node_modules/typescript/bin/tsc"
-
+tsc             := "node_modules/typescript/bin/tsc"
 # minimal formatting, bold is very useful
-bold     := '\033[1m'
-normal   := '\033[0m'
+bold            := '\033[1m'
+normal          := '\033[0m'
 
 _help:
     @just --unsorted --list

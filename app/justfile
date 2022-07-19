@@ -1,5 +1,6 @@
 # just docs: https://github.com/casey/just
-set shell := ["bash", "-c"]
+set shell                          := ["bash", "-c"]
+set dotenv-load                    := true
 # Eg "ghcr.io". By default, the ci environment will set this.
 # Required for pulling/pushing images, not required for locally building and running.
 export DOCKER_REGISTRY             := env_var_or_default("DOCKER_REGISTRY", "")

@@ -1,6 +1,6 @@
-
 # Always use locally installed tools (always pin versions)
-set shell := ["bash", "-c"]
+set shell             := ["bash", "-c"]
+set dotenv-load       := true
 # export SERVER_ORIGIN  := env_var_or_default("SERVER_ORIGIN", "http://server:8080")
 export CI             := env_var_or_default("CI", "")
 NPM_MODULE            := `cat package.json | jq -r .name`
