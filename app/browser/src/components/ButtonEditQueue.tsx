@@ -1,41 +1,102 @@
-import { Fragment, FunctionalComponent } from "preact";
-import { useCallback, useState } from "preact/hooks";
-import { Alert, AlertIcon, IconButton, Icon, Spinner } from "@chakra-ui/react";
+import { useCallback } from "react";
+import {
+  Alert,
+  AlertIcon,
+  IconButton,
+  useDisclosure,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalOverlay,
+  ModalHeader,
+  ModalContent,
+} from "@chakra-ui/react";
 import { RiSignalWifiErrorLine, RiSignalWifiFill } from "react-icons/ri";
-import { useHashParam } from "@metapages/metaframe-hook";
-import { JobQueue } from "./JobQueue";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import { useHashParam } from "@metapages/hash-query";
 import { useServerState } from "../hooks/serverStateHook";
 
-export const ButtonEditQueue: FunctionalComponent = () => {
-  const [open, setOpen] = useState<boolean>(false);
+const validationSchema = yup.object({
+  queue: yup.string(),
+});
+interface FormType extends yup.InferType<typeof validationSchema> {}
+
+export const ButtonEditQueue: React.FC = () => {
+  const { isOpen, onClose, onToggle } = useDisclosure();
   const serverState = useServerState();
-  const [queue] = useHashParam("queue");
+  const [queue, setQueue] = useHashParam("queue", "");
 
-  const onClick = useCallback(() => {
-    setOpen(!open);
-  }, [open]);
+  const onSubmit = useCallback(
+    (values: FormType) => {
+      console.log(`setQueue(${values.queue});`);
+      setQueue(values.queue);
+      onClose();
+    },
+    [onClose, setQueue]
+  );
 
-  const icon =
-    queue && !serverState.connected ? (
-      <Spinner />
-    ) : (
-      <Icon as={queue ? RiSignalWifiFill : RiSignalWifiErrorLine} />
-    );
+  const formik = useFormik({
+    initialValues: {
+      queue,
+    },
+    onSubmit,
+    validationSchema,
+  });
+
+  const closeAndClear = useCallback(() => {
+    formik.resetForm();
+    onClose();
+  }, [formik, onClose]);
 
   return (
-    <Fragment>
-      <div>
-        <IconButton
-          verticalAlign="top"
-          aria-label="Docker job queue"
-          // @ts-ignore
-          icon={icon}
-          size="lg"
-          onClick={onClick}
-        />
+    <>
+      <IconButton
+        size="lg"
+        onClick={onToggle}
+        colorScheme="blue"
+        aria-label="edit docker job queue"
+        icon={queue ? <RiSignalWifiFill /> : <RiSignalWifiErrorLine />}
+        // isLoading={
+        //   queue !== undefined && queue.length > 0 && !serverState.connected
+        // }
+      />
 
-        <JobQueue isOpen={open} setOpen={setOpen} />
-      </div>
+      <Modal isOpen={isOpen} onClose={closeAndClear}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Job queue key:</ModalHeader>
+          <form onSubmit={formik.handleSubmit}>
+            <ModalBody>
+              <FormControl>
+
+                <InputGroup>
+                  <Input
+                    id="queue"
+                    name="queue"
+                    type="text"
+                    variant="filled"
+                    onChange={formik.handleChange}
+                    value={formik.values.queue}
+                  />
+                </InputGroup>
+              </FormControl>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button type="submit" colorScheme="green" mr={3}>
+                Add
+              </Button>
+            </ModalFooter>
+            {/* {error ? <Message type="error" message={error} /> : null} */}
+          </form>
+        </ModalContent>
+      </Modal>
 
       {!queue || queue === "" ? (
         <Alert status="error">
@@ -43,6 +104,6 @@ export const ButtonEditQueue: FunctionalComponent = () => {
           ◀️ You must connect to a queue
         </Alert>
       ) : null}
-    </Fragment>
+    </>
   );
 };

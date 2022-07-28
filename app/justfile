@@ -43,7 +43,7 @@ normal   := '\033[0m'
 # 🌱 Build the application stack
 @build +args="": _init
     # service 'browser' is consumed by the build step of 'auth', so unfortunately must be built first. If this changes, remove this line
-    if [ "{{args}}" = "" ]; then just _build browser-builder; fi
+    if [ "{{args}}" = "" ]; then just _build browser; fi
     just _build {{args}}
 
 # 🌱 Test the application stack
@@ -114,7 +114,7 @@ dc +args="":
 # Internal docker-compose build command with env vars documented
 @_build +args="":
     echo -e "🚪 {{bold}}DOCKER_TAG=$DOCKER_TAG DOCKER_REGISTRY=$DOCKER_REGISTRY DOCKER_IMAGE_PREFIX=$DOCKER_IMAGE_PREFIX {{DOCKER_COMPOSE}} -f docker-compose.cache.yml build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}{{normal}} 🚪 " && \
-    DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} -f docker-compose.cache.yml build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}
+    DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}
 
 # Build browser on host but using docker-compose
 @_dev_build_browser:

@@ -1,13 +1,13 @@
-import { h, render } from "preact";
+import { createRoot } from "react-dom/client";
 import { ChakraProvider } from "@chakra-ui/react";
-import { WithMetaframe } from "@metapages/metaframe-hook";
+import { WithMetaframeAndInputs } from "@metapages/metaframe-hook";
 import { App } from "./App";
 
-render(
+const container = document.getElementById("root");
+createRoot(container!).render(
   <ChakraProvider>
-    <WithMetaframe>
+    <WithMetaframeAndInputs>
       <App />
-    </WithMetaframe>
-  </ChakraProvider>,
-  document.getElementById("root")!
+    </WithMetaframeAndInputs>
+  </ChakraProvider>
 );

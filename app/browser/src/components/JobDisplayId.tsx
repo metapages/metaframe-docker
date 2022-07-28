@@ -1,12 +1,12 @@
-import { FunctionalComponent } from "preact";
+
 import {
   Box,
 } from "@chakra-ui/react";
 import {
   DockerJobDefinitionRow,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
-export const JobDisplayId: FunctionalComponent<{
+export const JobDisplayId: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   return (

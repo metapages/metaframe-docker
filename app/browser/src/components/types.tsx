@@ -1,4 +1,4 @@
-import { DockerJobDefinitionInputRefs } from "../../../shared/dist/shared/types";
+import { DockerJobDefinitionInputRefs } from "@metapages/asman-shared";
 
 export type DockerJobDefinitionParamsInUrlHash = Omit<DockerJobDefinitionInputRefs, "inputs">;
 

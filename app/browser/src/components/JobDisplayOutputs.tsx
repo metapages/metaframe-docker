@@ -1,4 +1,4 @@
-import { FunctionalComponent } from "preact";
+
 import {
   Box,
   Table,
@@ -8,14 +8,14 @@ import {
   Td,
   Tbody,
 } from "@chakra-ui/react";
-import { useHashParam } from "@metapages/metaframe-hook";
+import { useHashParam } from "@metapages/hash-query";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
-export const JobDisplayOutputs: FunctionalComponent<{
+export const JobDisplayOutputs: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const [queue] = useHashParam("queue");

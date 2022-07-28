@@ -1,4 +1,3 @@
-import { FunctionalComponent } from "preact"
 import {
   Box,
   Table,
@@ -14,9 +13,9 @@ import {
   BroadcastState,
   DockerJobState,
   StateChangeValueRunning,
-} from "../../../shared/dist/shared/types"
+} from "@metapages/asman-shared"
 
-export const Workers: FunctionalComponent = () => {
+export const Workers: React.FC = () => {
   const serverState = useServerState();
   const state = serverState.state;
 
@@ -53,7 +52,7 @@ export const Workers: FunctionalComponent = () => {
   );
 };
 
-const WorkerComponent: FunctionalComponent<{
+const WorkerComponent: React.FC<{
   workerId: string;
   cpus: number;
   state: BroadcastState;

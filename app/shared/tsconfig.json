@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig-base.json",
   "compilerOptions": {
+    "moduleResolution": "node",
     "composite": true,
     "lib": ["es6", "es2018"],
     "module": "es6",

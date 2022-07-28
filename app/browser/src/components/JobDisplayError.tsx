@@ -1,16 +1,16 @@
-import { FunctionalComponent } from "preact";
+
 import { Alert, AlertDescription, Box, Text } from "@chakra-ui/react";
 import {
   DockerJobDefinitionRow,
   DockerJobFinishedReason,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
 /**
  * Show just the error message
  */
-export const JobDisplayError: FunctionalComponent<{
+export const JobDisplayError: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const state = job?.state;

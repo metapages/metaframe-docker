@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks";
+import { useEffect } from "react";
 
 export const useKeypress = (key: string, action: () => void) => {
   useEffect(() => {

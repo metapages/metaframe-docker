@@ -2,8 +2,7 @@
 import objectHash from "object-hash"
 import { Unibabel } from "unibabel";
 import { MetaframeInputMap } from "@metapages/metapage";
-import { DataRef, DataRefType, DataRefTypeDefault } from "../../../shared/src/dataref";
-import { InputsRefs } from "../../../shared/src/index";
+import { InputsRefs, DataRef, DataRefType, DataRefTypeDefault } from "@metapages/asman-shared";
 import { APP_ORIGIN } from "../utils/origin";
 
 const ENV_VAR_DATA_ITEM_LENGTH_MAX = 200;

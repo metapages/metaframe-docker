@@ -1,17 +1,16 @@
-import { FunctionalComponent } from "preact";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { useQueryParam, StringParam } from "use-query-params";
+
+import { useContext, useEffect, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import { MetaframeInputMap, isIframe } from "@metapages/metapage";
 import {
-  MetaframeContext,
-  useHashParam,
-  useHashParamBoolean,
+  MetaframeAndInputsContext,
+  MetaframeAndInputsObject,
 } from "@metapages/metaframe-hook";
+import { useHashParam, useHashParamBoolean } from "@metapages/hash-query";
 import { useDockerJobDefinition } from "../hooks/jobDefinitionHook";
 import { useServerState } from "../hooks/serverStateHook";
-import { shaJobDefinition } from "../../../shared/dist/shared/util";
 import {
+  shaJobDefinition,
   DockerJobDefinitionRow,
   DockerJobState,
   StateChange,
@@ -21,7 +20,7 @@ import {
   DockerJobDefinitionInputRefs,
   StateChangeValueWorkerFinished,
   InputsRefs,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 import { JobDisplayState } from "./JobDisplayState";
 import { JobDisplayLogs } from "./JobDisplayLogs";
 import { JobDisplayError } from "./JobDisplayError";
@@ -33,7 +32,7 @@ import {
   DataModeDefault,
 } from "../utils/dataref";
 
-export const JobProcessor: FunctionalComponent<{}> = () => {
+export const JobProcessor: React.FC<{}> = () => {
   // this is where two complex hooks are threaded together:
   // 1. get the job definition
   // 2. send the job definition if changed
@@ -42,12 +41,16 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
   const dockerJob = useDockerJobDefinition();
   const serverState = useServerState();
   const [jobHash, setJobHash] = useState<string | undefined>(undefined);
-  const [jobHashCurrentOutputs, setJobHashCurrentOutputs] =
-    useState<string | undefined>(undefined);
+  const [jobHashCurrentOutputs, setJobHashCurrentOutputs] = useState<
+    string | undefined
+  >(undefined);
   const [job, setJob] = useState<DockerJobDefinitionRow | undefined>(undefined);
-  const metaframe = useContext(MetaframeContext);
+  const metaframe = useContext<MetaframeAndInputsObject>(
+    MetaframeAndInputsContext
+  );
   const [nocacheString] = useHashParam("nocache");
-  const [inputsMode] = useQueryParam("inputsmode", StringParam);
+  const [inputsMode] = useHashParam("inputsmode");
+  // const [inputsMode] = useQueryParam("inputsmode", StringParam);
   const [debug] = useHashParamBoolean("debug");
   const outputsMode: DataMode = (inputsMode as DataMode) || DataModeDefault;
 
@@ -94,17 +97,13 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
 
   // only maybe update metaframe outputs if the job updates and is finished (with outputs)
   useEffect(() => {
-    if (
-      metaframe &&
-      metaframe.setOutputs &&
-      job &&
-      job.state === DockerJobState.Finished
-    ) {
+    const metaframeObj = metaframe?.metaframe;
+    if (metaframeObj?.setOutputs && job?.state === DockerJobState.Finished) {
       const stateFinished: StateChangeValueWorkerFinished =
         job.value as StateChangeValueWorkerFinished;
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
-        console.log('outputs', outputs);
+        console.log("outputs", outputs);
         (async () => {
           const metaframeOutputs: MetaframeInputMap | undefined =
             await convertJobOutputDataRefsToExpectedFormat(
@@ -112,10 +111,10 @@ export const JobProcessor: FunctionalComponent<{}> = () => {
               outputsMode
             );
 
-            console.log('metaframeOutputs', metaframeOutputs);
+          console.log("metaframeOutputs", metaframeOutputs);
           if (metaframeOutputs) {
             try {
-              metaframe.setOutputs!(metaframeOutputs);
+              metaframeObj.setOutputs!(metaframeOutputs);
             } catch (err) {
               console.error("Failed to send metaframe outputs", err);
             }

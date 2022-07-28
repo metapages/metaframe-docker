@@ -1,439 +1,211 @@
-import { FunctionalComponent } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
-import { useQueryParam, StringParam } from "use-query-params";
+import { useCallback } from "react";
 import {
   useHashParam,
   useHashParamJson,
   useHashParamBoolean,
-} from "@metapages/metaframe-hook";
+} from "@metapages/hash-query";
 import { parse } from "shell-quote";
 import {
-  Box,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  Grid,
-  GridItem,
   Input,
   Select,
   Switch,
-  Text,
+  Button,
+  FormControl,
+  FormLabel,
+  InputGroup,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  Heading,
+  Divider,
+  ModalCloseButton,
 } from "@chakra-ui/react";
-// https://chakra-ui.com/docs/media-and-icons/icon
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { useFormik } from "formik";
+import * as yup from "yup";
 import { DockerJobDefinitionParamsInUrlHash } from "./types";
 import { DataMode, DataModeDefault } from "../utils/dataref";
 
-export const JobInputFromUrlParams: FunctionalComponent<{
-  isOpen: boolean;
-  setOpen: (open: boolean) => void;
-}> = ({ isOpen, setOpen }) => {
-  // isOpen = true;
+const validationSchema = yup.object({
+  image: yup.string(),
+  command: yup.string(),
+  entrypoint: yup.string(),
+  workdir: yup.string(),
+  cache: yup.boolean(),
+  inputsmode: yup.string(),
+  debug: yup.boolean(),
+});
+interface FormType extends yup.InferType<typeof validationSchema> {}
 
+export const JobInputFromUrlParams: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+}> = ({ isOpen, onClose }) => {
   const [jobDefinitionBlob, setJobDefinitionBlob] =
     useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
-
-  const [nocacheString, setnocacheString] = useHashParam("nocache");
+  const [nocache, setnocache] = useHashParamBoolean("nocache");
   const [debug, setDebug] = useHashParamBoolean("debug");
-
-  // something like: ?x=123&foo=bar in the URL
-  // const [num, setNum] = useQueryParam('x', NumberParam);
   // Allow the user to define what format the inputs are. If they can
   // tell us, then we can make data move better/faster
-  const [inputsMode, setInputsMode] = useQueryParam("inputsmode", StringParam);
-  const [localInputsMode, setLocalInputsMode] = useState<DataMode | undefined>(
-    inputsMode as DataMode
-  );
+  const [inputsMode, setInputsMode] = useHashParam("inputsmode");
 
-  const [localImage, setLocalImage] = useState<string | undefined>(
-    jobDefinitionBlob?.image ? jobDefinitionBlob?.image : undefined
-  );
-  const [localCommandString, setLocalCommandString] = useState<
-    string | undefined
-  >(
-    jobDefinitionBlob?.command
-      ? jobDefinitionBlob?.command.join(" ")
-      : undefined
-  );
+  const onSubmit = useCallback(
+    (values: FormType) => {
+      const newJobDefinitionBlob = {} as DockerJobDefinitionParamsInUrlHash;
+      if (values.image) {
+        newJobDefinitionBlob.image = values.image;
+      }
 
-  const [localEntrypointString, setLocalEntrypointString] = useState<
-    string | undefined
-  >(
-    jobDefinitionBlob?.entrypoint
-      ? jobDefinitionBlob?.entrypoint.join(" ")
-      : undefined
-  );
+      if (values.workdir) {
+        newJobDefinitionBlob.workdir = values.workdir;
+      }
 
-  const [localWorkdir, setLocalWorkdir] = useState<string | undefined>(
-    jobDefinitionBlob?.workdir ? jobDefinitionBlob?.workdir : undefined
-  );
+      // CMD
+      let maybeCommandArray: string[] | undefined;
+      try {
+        maybeCommandArray =
+          values.command && values.command !== ""
+            ? (parse(values.command) as string[])
+            : undefined;
+      } catch (err) {
+        // ignore parsing errors
+      }
 
-  const [localnoCache, setLocalNoCache] = useState<boolean>(
-    nocacheString === "1"
-  );
+      maybeCommandArray = maybeCommandArray?.map((s) =>
+        typeof s === "object" ? (s as { op: string }).op : s
+      );
+      newJobDefinitionBlob.command = maybeCommandArray;
 
-  const [localDebug, setLocalDebug] = useState<boolean | undefined>(debug);
+      // ENTRYPOINT
+      let maybeEntrypointArray: string[] | undefined;
+      try {
+        maybeEntrypointArray =
+          values.entrypoint && values.entrypoint !== ""
+            ? (parse(values.entrypoint) as string[])
+            : undefined;
+      } catch (err) {
+        // ignore parsing errors
+      }
+      maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
+        typeof s === "object" ? (s as { op: string }).op : s
+      );
+      newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
 
-  const onClose = useCallback(() => {
-    setOpen(!isOpen);
-  }, [setOpen, isOpen]);
+      setJobDefinitionBlob(newJobDefinitionBlob);
+      setnocache(!values.cache);
+      if (
+        values.inputsmode !== undefined &&
+        values.inputsmode !== DataMode.base64
+      ) {
+        setInputsMode(values.inputsmode);
+      }
 
-  const onCloseAndAccept = useCallback(() => {
-    setOpen(!isOpen);
-
-    const newJobDefinitionBlob = {} as DockerJobDefinitionParamsInUrlHash;
-    if (localImage) {
-      newJobDefinitionBlob.image = localImage;
-    }
-
-    if (localWorkdir) {
-      newJobDefinitionBlob.workdir = localWorkdir;
-    }
-
-    // CMD
-    let maybeCommandArray: string[] | undefined;
-    try {
-      maybeCommandArray =
-        localCommandString && localCommandString !== ""
-          ? (parse(localCommandString) as string[])
-          : undefined;
-    } catch (err) {
-      // ignore parsing errors
-    }
-
-    maybeCommandArray = maybeCommandArray?.map((s) =>
-      typeof s === "object" ? (s as { op: string }).op : s
-    );
-    newJobDefinitionBlob.command = maybeCommandArray;
-
-    // ENTRYPOINT
-    let maybeEntrypointArray: string[] | undefined;
-    try {
-      maybeEntrypointArray =
-        localEntrypointString && localEntrypointString !== ""
-          ? (parse(localEntrypointString) as string[])
-          : undefined;
-    } catch (err) {
-      // ignore parsing errors
-    }
-    maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
-      typeof s === "object" ? (s as { op: string }).op : s
-    );
-    newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
-
-    setJobDefinitionBlob(newJobDefinitionBlob);
-    setnocacheString(localnoCache ? "1" : undefined);
-    if (localInputsMode !== undefined && inputsMode !== DataMode.base64) {
-      setInputsMode(localInputsMode);
-    }
-
-    setDebug(localDebug);
-  }, [
-    setOpen,
-    isOpen,
-    localImage,
-    localCommandString,
-    localEntrypointString,
-    localWorkdir,
-    localnoCache,
-    localInputsMode,
-    localDebug,
-    setJobDefinitionBlob,
-    setnocacheString,
-    setInputsMode,
-    setDebug,
-  ]);
-
-  const onChangeImage = useCallback(
-    // this typing/casting is awful but the only thing I found that works
-    (event: any) => {
-      setLocalImage((event.target as HTMLInputElement).value);
+      setDebug(values.debug!!);
+      onClose();
     },
-    [setLocalImage]
+    [onClose, setJobDefinitionBlob, setnocache, setInputsMode, setDebug]
   );
 
-  const onChangeWorkdir = useCallback(
-    // this typing/casting is awful but the only thing I found that works
-    (event: any) => {
-      setLocalWorkdir((event.target as HTMLInputElement).value);
+  const formik = useFormik({
+    initialValues: {
+      debug,
+      image: jobDefinitionBlob?.image,
+      command: jobDefinitionBlob?.command?.join(" "),
+      entrypoint: jobDefinitionBlob?.entrypoint?.join(" "),
+      workdir: jobDefinitionBlob?.workdir,
+      cache: !nocache,
+      inputsmode: inputsMode || DataModeDefault,
     },
-    [setLocalWorkdir]
-  );
-
-  const onChangeNoCache = useCallback(() => {
-    setLocalNoCache(!localnoCache);
-  }, [localnoCache, setLocalNoCache]);
-
-  const onChangeDebug = useCallback(() => {
-    setLocalDebug(!localDebug);
-  }, [localDebug, setLocalDebug]);
-
-  const onChangeCommand = useCallback(
-    // this typing/casting is awful but the only thing I found that works
-    (event: any) => {
-      const inputString: string | undefined = (event.target as HTMLInputElement)
-        .value;
-      setLocalCommandString(inputString);
-    },
-    [setLocalCommandString]
-  );
-
-  const onChangeEntrypoint = useCallback(
-    // this typing/casting is awful but the only thing I found that works
-    (event: any) => {
-      const inputString: string | undefined = (event.target as HTMLInputElement)
-        .value;
-      setLocalEntrypointString(inputString);
-    },
-    [setLocalEntrypointString]
-  );
-
-  // preact complains in dev mode if this is moved out of a functional component
-  useEffect(() => {
-    const onKeyup = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && isOpen) onCloseAndAccept();
-    };
-    window.addEventListener("keyup", onKeyup);
-    return () => {
-      window.removeEventListener("keyup", onKeyup);
-    };
-  }, [onCloseAndAccept, isOpen]);
-
-  useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLocalInputsMode(e.target.value as DataMode);
-    },
-    [setLocalInputsMode]
-  );
+    onSubmit,
+    validationSchema,
+  });
 
   return (
-    <Drawer placement="top" onClose={onCloseAndAccept} isOpen={isOpen}>
-      <DrawerOverlay>
-        <DrawerContent>
-          <DrawerHeader borderBottomWidth="0px">
-            Choose and configure docker image to run
-          </DrawerHeader>
-          <DrawerBody>
-            <Box
-              maxW="100%"
-              p={2}
-              borderWidth="4px"
-              borderRadius="lg"
-              overflow="hidden"
-            >
-              <Grid templateColumns="repeat(12, 1fr)" gap={6}>
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Docker image:
-                    </Text>
-                  </Box>
-                </GridItem>
-                <GridItem rowSpan={1} colSpan={9}>
-                  {" "}
-                  <Box w="100%" h="10">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Configure docker batch job</ModalHeader>
+        <ModalCloseButton />
+        <form onSubmit={formik.handleSubmit}>
+          <ModalBody>
+            <Heading size="xs" textAlign="center">
+              Docker container:
+            </Heading>
+            <br />
+
+            <Stack direction="column" spacing="4px">
+              {["image", "command", "entrypoint", "workdir"].map((key) => (
+                <FormControl key={key}>
+                  <FormLabel htmlFor={key}>{key}:</FormLabel>
+                  <InputGroup>
                     <Input
+                      id={key}
+                      name={key}
                       type="text"
-                      placeholder="hello-world"
-                      value={localImage}
-                      onInput={onChangeImage}
+                      variant="filled"
+                      onChange={formik.handleChange}
+                      value={(formik.values as any)[key] || ""}
                     />
-                  </Box>
-                </GridItem>
+                  </InputGroup>
+                </FormControl>
+              ))}
 
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Docker image command:
-                    </Text>
-                  </Box>
-                </GridItem>
-                <GridItem rowSpan={1} colSpan={9}>
-                  {" "}
-                  <Box w="100%" h="10">
-                    <Input
-                      type="text"
-                      placeholder=""
-                      value={localCommandString}
-                      onInput={onChangeCommand}
-                    />
-                  </Box>
-                </GridItem>
+              <br />
+              <Divider />
+              <Heading size="xs" textAlign="center">
+                Misc:
+              </Heading>
 
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Workdir:
-                    </Text>
-                  </Box>
-                </GridItem>
-                <GridItem rowSpan={1} colSpan={9}>
-                  {" "}
-                  <Box w="100%" h="10">
-                    <Input
-                      type="text"
-                      placeholder=""
-                      value={localWorkdir}
-                      onInput={onChangeWorkdir}
-                    />
-                  </Box>
-                </GridItem>
+              <FormControl>
+                <FormLabel htmlFor="nocache">Cache</FormLabel>
+                <Switch
+                  id="nocache"
+                  name="cache"
+                  onChange={formik.handleChange}
+                  isChecked={formik.values.cache}
+                />
+              </FormControl>
 
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Docker image entrypoint:
-                    </Text>
-                  </Box>
-                </GridItem>
-                <GridItem rowSpan={1} colSpan={9}>
-                  {" "}
-                  <Box w="100%" h="10">
-                    <Input
-                      type="text"
-                      placeholder=""
-                      value={localEntrypointString}
-                      onInput={onChangeEntrypoint}
-                    />
-                  </Box>
-                </GridItem>
+              <FormControl>
+                <FormLabel htmlFor="inputsmode">Inputs Mode</FormLabel>
+                <Select
+                  id="inputsmode"
+                  name="inputsmode"
+                  onChange={formik.handleChange}
+                  value={formik.values.inputsmode}
+                >
+                  {Object.keys(DataMode).map((datamode) => (
+                    <option value={datamode} key={datamode}>
+                      {datamode +
+                        (datamode === DataModeDefault ? " (default)" : "")}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
 
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Cache results:
-                    </Text>
-                  </Box>
-                </GridItem>
+              <FormControl>
+                <FormLabel htmlFor="debug">Debug</FormLabel>
+                <Switch
+                  id="debug"
+                  name="debug"
+                  onChange={formik.handleChange}
+                  isChecked={formik.values.debug}
+                />
+              </FormControl>
+            </Stack>
+          </ModalBody>
 
-                <GridItem rowSpan={1} colSpan={9}>
-                  <Switch
-                    // @ts-ignore
-                    rightIcon={<CheckIcon />}
-                    onChange={onChangeNoCache}
-                    isChecked={!localnoCache}
-                    value={localnoCache ? 1 : 0}
-                  />
-                </GridItem>
-
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Inputs format:
-                    </Text>
-                  </Box>
-                </GridItem>
-
-                <GridItem rowSpan={1} colSpan={9}>
-                  <Select
-                    value={localInputsMode}
-                    onChange={(e) =>
-                      setLocalInputsMode(e.target.value as DataMode)
-                    }
-                    placeholder="Select option"
-                  >
-                    {Object.keys(DataMode).map((datamode) => (
-                      <option value={datamode}>
-                        {datamode +
-                          (datamode === DataModeDefault ? " (default)" : "")}
-                      </option>
-                    ))}
-                  </Select>
-                </GridItem>
-
-                <GridItem rowSpan={1} colSpan={3}>
-                  <Box
-                    w="100%"
-                    h="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Text textAlign={"right"} verticalAlign="bottom">
-                      Show extra info:
-                    </Text>
-                  </Box>
-                </GridItem>
-                <GridItem rowSpan={1} colSpan={9}>
-                  <Switch
-                    // @ts-ignore
-                    rightIcon={<CheckIcon />}
-                    onChange={onChangeDebug}
-                    isChecked={localDebug}
-                    value={localDebug ? 0 : 1}
-                  />
-                </GridItem>
-
-                <GridItem rowSpan={1} colSpan={12}></GridItem>
-                <GridItem rowSpan={1} colSpan={12}></GridItem>
-                <GridItem rowSpan={1} colSpan={12}></GridItem>
-                <GridItem rowSpan={1} colSpan={10}></GridItem>
-
-                <GridItem rowSpan={1} colSpan={1}>
-                  {/*
-                      // @ts-ignore */}
-                  <IconButton
-                    size="lg"
-                    color="red"
-                    icon={(<CloseIcon />) as any}
-                    onClick={onClose}
-                  />
-                </GridItem>
-
-                <GridItem rowSpan={1} colSpan={1}>
-                  {/*
-                      // @ts-ignore */}
-                  <IconButton
-                    size="lg"
-                    color="green"
-                    icon={(<CheckIcon />) as any}
-                    onClick={onCloseAndAccept}
-                  />
-                </GridItem>
-              </Grid>
-            </Box>
-          </DrawerBody>
-        </DrawerContent>
-      </DrawerOverlay>
-    </Drawer>
+          <ModalFooter>
+            <Button type="submit" colorScheme="green" mr={3}>
+              ✅ OK
+            </Button>
+          </ModalFooter>
+          {/* {error ? <Message type="error" message={error} /> : null} */}
+        </form>
+      </ModalContent>
+    </Modal>
   );
 };

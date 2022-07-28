@@ -1,5 +1,5 @@
-import { FunctionalComponent } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -21,9 +21,9 @@ import {
   WebsocketMessageType,
   StateChange,
   DockerJobFinishedReason,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
-export const Jobs: FunctionalComponent = () => {
+export const Jobs: React.FC = () => {
   const serverState = useServerState();
   const state = serverState.state;
 
@@ -76,7 +76,7 @@ export const Jobs: FunctionalComponent = () => {
   );
 };
 
-const JobComponent: FunctionalComponent<{
+const JobComponent: React.FC<{
   jobId: string;
   state: BroadcastState;
 }> = ({ jobId, state }) => {
@@ -98,7 +98,7 @@ const JobComponent: FunctionalComponent<{
   );
 };
 
-const ButtonJobCancel: FunctionalComponent<{ job: DockerJobDefinitionRow }> = ({
+const ButtonJobCancel: React.FC<{ job: DockerJobDefinitionRow }> = ({
   job,
 }) => {
   const [clicked, setClicked] = useState<boolean>(false);

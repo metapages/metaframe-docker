@@ -1,27 +1,23 @@
-import { Fragment, FunctionalComponent } from "preact";
-import { useCallback, useState } from "preact/hooks";
-import { IconButton } from "@chakra-ui/react";
+import { IconButton, useDisclosure } from "@chakra-ui/react";
 import { SettingsIcon } from "@chakra-ui/icons";
 import { JobInputFromUrlParams } from "./JobInputFromUrlParams";
 
-export const ButtonEditJobInput: FunctionalComponent = () => {
-  const [open, setOpen] = useState<boolean>(false);
-
-  const onClick = useCallback(() => {
-    setOpen(!open);
-  }, [open]);
+export const ButtonEditJobInput: React.FC = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Fragment>
+    <>
       <IconButton
         verticalAlign="top"
         aria-label="Docker configuration: image and command"
-        // @ts-ignore
         icon={<SettingsIcon />}
         size="lg"
-        onClick={onClick}
+        onClick={onOpen}
       />
-      <JobInputFromUrlParams isOpen={open} setOpen={setOpen} />
-    </Fragment>
+      <JobInputFromUrlParams
+        isOpen={isOpen}
+        onClose={onClose}
+      />
+    </>
   );
 };

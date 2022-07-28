@@ -59,13 +59,13 @@ async function start() {
   console.log('readdirSync', fs.readdirSync(BROWSER_ASSETS_DIRECTORY))
   api.register(fastifyStatic, {
     root:BROWSER_ASSETS_DIRECTORY,
-    wildcard: false,
+    wildcard: true,
   });
 
   // Run the server!
   const port = process.env.PORT
     ? parseInt(process.env.PORT)
-    : 4000;
+    : 8080;
   try {
     console.log('1️⃣  listen')
     const address = await api.listen(port, "0.0.0.0");

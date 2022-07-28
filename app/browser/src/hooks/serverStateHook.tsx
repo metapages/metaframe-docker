@@ -1,20 +1,21 @@
 /**
  * Gets the server state and a method to send state changes over a websocket connection
  */
-import { createContext } from "preact";
-import { useEffect, useState, useContext } from "preact/hooks";
+import { createContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { useHashParam } from "@metapages/metaframe-hook";
-import { APP_ORIGIN } from "../utils/origin";
+import { useHashParam } from "@metapages/hash-query";
 import {
   BroadcastState,
   WebsocketMessage,
   WebsocketMessageSender,
   WebsocketMessageType,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
+import { websocketConnectionUrl } from "../config";
 
 type Props = {
-  children: React.ReactNode;
+  // children: React.ReactNode;
+  children: any;
 };
 
 interface ServerStateObject {
@@ -41,7 +42,7 @@ const serverStateMachine = (): [
     if (!address || address === "") {
       return;
     }
-    const url = `${APP_ORIGIN.replace("http", "ws")}/browser/${address}`;
+    const url = `${websocketConnectionUrl}${address}`;
     setConnected(false);
     const rws = new ReconnectingWebSocket(url);
     let timeLastPong = Date.now();

@@ -2,33 +2,33 @@
  * Via Context provide the current docker job definition which is combined from metaframe inputs
  * and URL query parameters, and the means to change (some of) them
  */
-import { createContext } from "preact";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { useQueryParam, StringParam } from "use-query-params";
+import { createContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MetaframeInputMap } from "@metapages/metapage";
 import {
-  MetaframeContext,
-  useHashParamJson,
-  useHashParam,
+  MetaframeAndInputsContext,
+  MetaframeAndInputsObject,
 } from "@metapages/metaframe-hook";
+import { useHashParamJson, useHashParam } from "@metapages/hash-query";
 import {
   copyLargeBlobsToCloud,
   DataMode,
   DataModeDefault,
 } from "../utils/dataref";
-import { DataRefType } from "../../../shared/src/dataref/index";
+import {
+  DataRefType,
+  DockerJobDefinitionInputRefs,
+  InputsBase64String,
+  InputsRefs,
+} from "@metapages/asman-shared";
 import {
   DockerJobDefinitionMetadata,
   DockerJobDefinitionParamsInUrlHash,
 } from "../components/types";
-import {
-  DockerJobDefinitionInputRefs,
-  InputsBase64String,
-  InputsRefs,
-} from "../../../shared/dist/shared/types";
 
 type Props = {
-  children: React.ReactNode;
+  // children: React.ReactNode;
+  children: any;
 };
 
 interface DockerJobDefinitionObject {
@@ -47,19 +47,19 @@ const DockerJobDefinitionContext = createContext<DockerJobDefinitionObject>(
 
 export const DockerJobDefinitionProvider = ({ children }: Props) => {
   // we listen to the job parameters embedded in the URL changing
-  const [definitionParamsInUrl] =
-    useHashParamJson<DockerJobDefinitionParamsInUrlHash | undefined>("job");
+  const [definitionParamsInUrl] = useHashParamJson<
+    DockerJobDefinitionParamsInUrlHash | undefined
+  >("job");
 
-  const metaframe = useContext(MetaframeContext);
-
+  const metaframe = useContext<MetaframeAndInputsObject>(
+    MetaframeAndInputsContext
+  );
   const [nocacheString] = useHashParam("nocache");
-
-  const [inputsModeFromQuery] = useQueryParam("inputsmode", StringParam);
-
   const nocache = nocacheString === "1" ? true : false;
-
-  const [definitionMeta, setDefinitionMeta] =
-    useState<DockerJobDefinitionMetadata | undefined>(undefined);
+  const [inputsModeFromQuery] = useHashParam("inputsmode");
+  const [definitionMeta, setDefinitionMeta] = useState<
+    DockerJobDefinitionMetadata | undefined
+  >(undefined);
 
   // if the URL inputs change, or the metaframe inputs change, maybe update the dockerJobDefinitionMeta
   useEffect(() => {

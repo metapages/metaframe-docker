@@ -1,4 +1,5 @@
 {
+  // "extends": "../tsconfig.workspace.json",
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

@@ -12,10 +12,13 @@ normal           := '\033[0m'
     just --list --unsorted
 
 # 🌱 Build the shared library
-@build: clean
+@build: _ensure_npm_modules clean
     {{tsc}} --build
 
 clean:
     mkdir -p dist
     rm -rf dist/*
     rm -rf tsconfig.tsbuildinfo
+
+@_ensure_npm_modules:
+    if [ ! -d "node_modules" ]; then npm i; fi

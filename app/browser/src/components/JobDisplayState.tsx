@@ -1,4 +1,3 @@
-import { Fragment, FunctionalComponent } from "preact";
 import {
   Alert,
   AlertIcon,
@@ -8,19 +7,20 @@ import {
   CircularProgress,
   HStack,
 } from "@chakra-ui/react";
-import { useHashParam } from "@metapages/metaframe-hook";
-import { ButtonCancel } from "../components/ButtonCancel";
-import { ButtonEditJobInput } from "../components/ButtonEditJobInput";
-import { ButtonEditQueue } from "../components/ButtonEditQueue";
-import { useServerState } from "../hooks/serverStateHook";
+import { useHashParam } from "@metapages/hash-query";
 import {
   DockerJobDefinitionRow,
   DockerJobFinishedReason,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
+import { ButtonCancel } from "../components/ButtonCancel";
+import { ButtonEditJobInput } from "../components/ButtonEditJobInput";
+import { ButtonEditQueue } from "../components/ButtonEditQueue";
+import { ButtonHelp } from "./ButtonHelp";
+import { useServerState } from "../hooks/serverStateHook";
 
-export const JobDisplayState: FunctionalComponent<{
+export const JobDisplayState: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const [queue] = useHashParam("queue");
@@ -35,21 +35,22 @@ export const JobDisplayState: FunctionalComponent<{
       <HStack spacing="24px">
         <ButtonEditQueue />
         {!queue || queue === "" ? null : (
-          <Fragment>
+          <>
             <div>
               <ButtonEditJobInput />
             </div>
             <JobStatusDisplay job={job} />
             <ButtonCancel job={job} />
-          </Fragment>
+          </>
         )}
+        <ButtonHelp />
       </HStack>
     </Box>
   );
 };
 
 // show e.g. running, or exit code, or error
-const JobStatusDisplay: FunctionalComponent<{
+const JobStatusDisplay: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const state = job?.state;

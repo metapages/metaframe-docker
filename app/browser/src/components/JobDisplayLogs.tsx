@@ -1,4 +1,3 @@
-import { Fragment, FunctionalComponent } from "preact";
 import {
   Box,
   Code,
@@ -14,9 +13,9 @@ import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
-export const JobDisplayLogs: FunctionalComponent<{
+export const JobDisplayLogs: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   return (
@@ -47,7 +46,7 @@ export const JobDisplayLogs: FunctionalComponent<{
 };
 
 // show e.g. running, or exit code, or error
-const DisplayLogs: FunctionalComponent<{
+const DisplayLogs: React.FC<{
   stdout: boolean;
   job?: DockerJobDefinitionRow;
 }> = ({ job, stdout }) => {
@@ -55,9 +54,9 @@ const DisplayLogs: FunctionalComponent<{
 
   if (!job || !state) {
     return (
-      <Fragment>
+      <>
         <JustLogs logs={undefined} />
-      </Fragment>
+      </>
     );
   }
 
@@ -65,7 +64,7 @@ const DisplayLogs: FunctionalComponent<{
     case DockerJobState.Finished:
       const resultFinished = job?.value as StateChangeValueWorkerFinished;
       return (
-        <Fragment>
+        <>
           <JustLogs
             logs={
               stdout
@@ -73,21 +72,21 @@ const DisplayLogs: FunctionalComponent<{
                 : resultFinished?.result?.stderr
             }
           />
-        </Fragment>
+        </>
       );
     case DockerJobState.Queued:
     case DockerJobState.ReQueued:
     case DockerJobState.Running:
       // TODO: handled streaming logs
       return (
-        <Fragment>
+        <>
           <JustLogs logs={undefined} />
-        </Fragment>
+        </>
       );
   }
 };
 
-const JustLogs: FunctionalComponent<{
+const JustLogs: React.FC<{
   logs?: string[];
 }> = ({ logs }) => {
   let logsNewlineHandled: string[] = [];
@@ -100,11 +99,11 @@ const JustLogs: FunctionalComponent<{
   return (
     <Stack spacing={1}>
       {logsNewlineHandled.map((line) => (
-        <Fragment>
+        <>
           <Code fontSize={10}>
             {line}
           </Code>
-        </Fragment>
+        </>
       ))}
     </Stack>
   );

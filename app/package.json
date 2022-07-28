@@ -1,0 +1,9 @@
+{
+    "name": "@metapages/packages",
+    "private": true,
+    "workspaces": [
+      "browser",
+      "shared",
+      "worker"
+    ]
+  }

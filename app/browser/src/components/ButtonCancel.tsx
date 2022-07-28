@@ -1,8 +1,8 @@
-import { FunctionalComponent } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@chakra-ui/react";
 import { CloseIcon, RepeatClockIcon } from "@chakra-ui/icons";
-import { useHashParam } from "@metapages/metaframe-hook";
+import { useHashParam } from "@metapages/hash-query";
 import { useServerState } from "../hooks/serverStateHook";
 import {
   DockerJobDefinitionRow,
@@ -12,13 +12,13 @@ import {
   WebsocketMessageType,
   StateChangeValueWorkerFinished,
   StateChangeValueQueued,
-} from "../../../shared/dist/shared/types";
+} from "@metapages/asman-shared";
 
 interface ButtonCancelProps {
   job?: DockerJobDefinitionRow;
 }
 
-export const ButtonCancel: FunctionalComponent<ButtonCancelProps> = ({
+export const ButtonCancel: React.FC<ButtonCancelProps> = ({
   job,
 }) => {
   const [clicked, setClicked] = useState<boolean>(false);
