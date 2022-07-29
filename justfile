@@ -21,23 +21,24 @@ _help:
     echo "DEBUGGING: e.g. 'DEBUG=1 just test'"
     echo ""
 
+# Develop: run the stack with docker-compose, open a browser window. 'just app/down' to stop.
+@dev:
+    just app/dev
+
+# Run all build/unit tests
+@test:
+    echo "No tests currently setup"
+
+# Publish 1) server to glitch, 2) browser client to gihub pages, 3) worker image to docker-hub
+@deploy:
+    just app/browser/publish
+    just deployments/glitch/deploy
+    just app/worker/publish_docker
+
 
 # builds (versioned) production docker images
 @build:
     just deployments/glitch/build
-
-# Run all build/unit tests
-# @test:
-#     just ci/test
-
-# Publish server and UI to glitch, and worker image to docker-hub
-@deploy:
-    just deployments/glitch/deploy
-    just app/worker/publish_docker
-
-# Develop: run the stack with docker-compose, open a browser window. 'just app/down' to stop.
-@dev:
-    just app/dev
 
 ###################################################
 # Internal utilies

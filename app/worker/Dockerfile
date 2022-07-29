@@ -33,7 +33,7 @@ RUN VERSION=1.14.1 ; \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
 
-RUN npm install -g npm@6.14.5
+RUN npm install -g npm@8.4.1
 
 #################################################################
 # code: shared: setup
@@ -48,8 +48,6 @@ RUN apk --no-cache add --virtual native-deps \
   npm install --quiet node-gyp -g &&\
   npm install && \
   apk del native-deps
-
-
 
 #################################################################
 # code: monorepo shared module setup
@@ -115,6 +113,8 @@ COPY worker/justfile ./justfile
 COPY worker/tsconfig.json ./tsconfig.json
 COPY worker/src ./src
 COPY worker/bin ./bin
+ARG DOCKER_TAG=local
+ENV DOCKER_TAG=$DOCKER_TAG
 RUN just build
 
 ENTRYPOINT ["node", "--experimental-specifier-resolution=node", "./dist/bin/index.js"]

@@ -18,7 +18,16 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
 
 ## Getting started
 
-TODO
+1. Create a queue
+   - Click the connect button in the top-left
+   - A "queue" is simply string or key
+   - The part of the URL that looks like `#?queue=my-queue`
+   - Best if the `queue` value is a long impossible to guess string e.g. a GUID
+   - Workers point to this queue, and run the configured docker jobs
+2. Configure the docker job
+   1.
+
+
 
 
 ## Example URL
