@@ -10,21 +10,22 @@ export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", 
 # For typical operations (outside of debugging), you won't need to set this yourself
 # This line is duplicated in ci/justfile
 export DOCKER_TAG                  := env_var_or_default("DOCKER_TAG", `(which git >/dev/null && git rev-parse --short HEAD) || echo local`)
+###############################################################################
+# Ports, domains, and API servers
+###############################################################################
 # Required for local https certificates, OAuth config, and the https URL
 # Changing APP_FQDN requires the corresponding file in app/vouch/oauth/$APP_FQDN:$APP_PORT.yaml
-# TODO: instructions how to set this.
-# This line is duplicated in ci/justfile
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "docker-run.dev")
-# Default to the local development stack, publishing typically is only DOCKER_COMPOSE="docker-compose -f docker-compose.yml"
-export DOCKER_COMPOSE              := env_var_or_default("DOCKER_COMPOSE", "docker-compose -f docker-compose.yml -f docker-compose.override.yml")
-# If this isn't custom to the project, then conflicts occur
-export COMPOSE_PROJECT_NAME        := `basename $(dirname $PWD)`
 # App level env vars for ports etc
 # Changing APP_PORT requires the corresponding file in app/vouch/oauth/$APP_FQDN:$APP_PORT.yaml
 # This line is duplicated in ci/justfile
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
 export PORT_BROWSER                := env_var_or_default("PORT_BROWSER", "3000")
-
+###############################################################################
+# Default to the local development stack, publishing typically is only DOCKER_COMPOSE="docker-compose -f docker-compose.yml"
+export DOCKER_COMPOSE              := env_var_or_default("DOCKER_COMPOSE", "docker-compose -f docker-compose.yml -f docker-compose.override.yml")
+# If this isn't custom to the project, then conflicts occur
+export COMPOSE_PROJECT_NAME        := `basename $(dirname $PWD)`
 # Enforce use of buildkit
 export DOCKER_BUILDKIT             := "1"
 export COMPOSE_DOCKER_CLI_BUILD    := "1"

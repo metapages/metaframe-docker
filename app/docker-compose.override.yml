@@ -70,11 +70,11 @@ services:
       dockerfile: browser/Dockerfile
       args:
         DOCKER_TAG: ${DOCKER_TAG:-local}
-    command: just _dev
+    command: just dev
     environment:
       - APP_FQDN=${APP_FQDN:-metaframe1.dev}
       - APP_PORT=${APP_PORT:-443}
-      - VITE_SERVER_ORIGIN=https://${APP_FQDN:-metaframe1.dev}:${PORT_SERVER:-8080}
+      - SERVER_ORIGIN=https://${APP_FQDN:-metaframe1.dev}:${PORT_SERVER:-8080}
     volumes:
       - ./package.json:/app/package.json
       - ./tsconfig.workspace.json:/app/tsconfig.workspace.json

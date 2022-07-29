@@ -35,9 +35,9 @@ _help:
     just deployments/glitch/deploy
     just app/worker/publish_docker
 
-
 # builds (versioned) production docker images
 @build:
+    just app/browser/build
     just deployments/glitch/build
 
 ###################################################

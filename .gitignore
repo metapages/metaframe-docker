@@ -7,3 +7,5 @@
 .data
 # Assets to deploy are built here:
 /.tmp
+# Ignored but also force committed by github pages publishing script
+docs

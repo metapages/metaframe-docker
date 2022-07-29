@@ -28,6 +28,13 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    1.
 
 
+## Repository
+[https://github.com/metapages/metaframe-docker](https://github.com/metapages/metaframe-docker)
+
+
+## Versions
+
+[https://metapages.github.io/metaframe-docker/v/](https://metapages.github.io/metaframe-docker/v/)
 
 
 ## Example URL

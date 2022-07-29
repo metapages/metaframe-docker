@@ -1,7 +1,10 @@
 {
-  "name": "@metapages/metaframe-asman-local",
-  "version": "0.1.0",
+  "name": "@metapages/metaframe-docker",
+  "version": "0.1.1",
   "private": true,
+  "repository": {
+    "url": "https://metapages.github.io/metaframe-docker/"
+  },
   "scripts": {
     "prebuild": "npm i && ./node_modules/typescript/bin/tsc --build --verbose",
     "build": "rm -rf dist/* && node_modules/parcel-bundler/bin/cli.js build public/index.html --no-autoinstall"

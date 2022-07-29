@@ -15,10 +15,11 @@ normal           := '\033[0m'
 @build: _ensure_npm_modules clean
     {{tsc}} --build
 
-clean:
+@clean:
     mkdir -p dist
     rm -rf dist/*
     rm -rf tsconfig.tsbuildinfo
 
 @_ensure_npm_modules:
     if [ ! -d "node_modules" ]; then npm i; fi
+    if [ ! -f "{{tsc}}" ]; then npm i; fi

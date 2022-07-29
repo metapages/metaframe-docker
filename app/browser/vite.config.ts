@@ -6,8 +6,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 enum DeployTarget {
-  GithubPages = "GithubPages",
-  Glitch = "Glitch",
+  GithubPages = "githubpages",
+  Glitch = "glitch",
 }
 
 const APP_FQDN: string = process.env.APP_FQDN || "metaframe1.dev";
@@ -15,10 +15,10 @@ const APP_PORT: string = process.env.APP_PORT || "443";
 const INSIDE_CONTAINER: boolean = fs.existsSync("/.dockerenv");
 
 // Adapt the build to the deploy/build target idiosyncrasies
-const DEPLOY_TARGET: DeployTarget =
-  process.env.API_SERVER_EXTERNAL === "https://api.glitch.com"
-    ? DeployTarget.Glitch
-    : DeployTarget.GithubPages;
+const DEPLOY_TARGET: DeployTarget = process.env.DEPLOY_TARGET as DeployTarget || DeployTarget.GithubPages;
+
+const OUTDIR: string =
+  DEPLOY_TARGET === DeployTarget.Glitch ? "dist" : process.env.OUTDIR || "dist";
 
 const GithubPages_BUILD_SUB_DIR: string = process.env.BUILD_SUB_DIR || "";
 const fileKey: string = `../ingress/https/.certs/${APP_FQDN}-key.pem`;
@@ -31,19 +31,18 @@ const packageName = JSON.parse(
 )["name"];
 const GithubPages_baseWebPath = packageName.split("/")[1];
 
-console.log('packageName', packageName);
-console.log('GithubPages_baseWebPath', GithubPages_baseWebPath);
-console.log('DEPLOY_TARGET', DEPLOY_TARGET);
+console.log("packageName", packageName);
+console.log("GithubPages_baseWebPath", GithubPages_baseWebPath);
+console.log("DEPLOY_TARGET", DEPLOY_TARGET);
 
 let base =
-    DEPLOY_TARGET === DeployTarget.Glitch
-      ? undefined
-      : GithubPages_BUILD_SUB_DIR !== ""
-      ? `/${GithubPages_baseWebPath}/${GithubPages_BUILD_SUB_DIR}/`
-      : `/${GithubPages_baseWebPath}/`;
+  DEPLOY_TARGET === DeployTarget.Glitch
+    ? undefined
+    : GithubPages_BUILD_SUB_DIR !== ""
+    ? `/${GithubPages_baseWebPath}/v/${GithubPages_BUILD_SUB_DIR}/`
+    : `/${GithubPages_baseWebPath}/`;
 
-console.log('base', base);
-
+console.log("base", base);
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
@@ -52,29 +51,25 @@ export default defineConfig(({ command, mode }) => ({
     DEPLOY_TARGET === DeployTarget.Glitch
       ? undefined
       : GithubPages_BUILD_SUB_DIR !== ""
-      ? `/${GithubPages_baseWebPath}/${GithubPages_BUILD_SUB_DIR}/`
+      ? `/${GithubPages_baseWebPath}/v/${GithubPages_BUILD_SUB_DIR}/`
       : `/${GithubPages_baseWebPath}/`,
   resolve: {
     alias: {
       "/@": resolve(__dirname, "./src"),
-      '@metapages/asman-shared': resolve(__dirname, '../shared/src'),
+      "@metapages/asman-shared": resolve(__dirname, "../shared/src"),
     },
-
   },
   // this is really stupid this should not be necessary
   plugins: [react()],
   build: {
-    outDir:
-      DEPLOY_TARGET === DeployTarget.Glitch
-        ? "dist"
-        : `docs/${GithubPages_BUILD_SUB_DIR}`,
+    outDir: OUTDIR,
     target: "esnext",
     sourcemap: true,
     minify: mode === "development" ? false : "esbuild",
     emptyOutDir: DEPLOY_TARGET === DeployTarget.Glitch,
   },
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    logOverride: { "this-is-undefined-in-esm": "silent" },
     // jsxInject: `import React from 'react'`,
   },
   server:
