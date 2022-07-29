@@ -39,10 +39,12 @@ build:
     # glitch needs a 'package.json' in the repository root, but our entry point is in <app/server/>
     set -e
     cd $ROOT
-    for component in browser server
-    do
-        just app/$component/build
-    done
+    export DEPLOY_TARGET=glitch
+    # for component in browser server
+    # do
+    #     just app/$component/build
+    # done
+    just app/server/build
     mkdir -p $GLITCH_BUILD_ROOT
     rm -rf $GLITCH_BUILD_ROOT/*
     for component in browser server shared
@@ -109,7 +111,7 @@ _commit_build_to_glitch:
     fi
 
 # sets up the glitch.com app master branch, locally we name it "glitch"
-@_glitch_branch_setup:
+_glitch_branch_setup:
     #!/usr/bin/env bash
     cd $ROOT
     CURRENT_BRANCH=$(git branch --show-current)
@@ -117,24 +119,14 @@ _commit_build_to_glitch:
     git checkout -b glitch --track glitchdotcom/master
     git pull glitchdotcom master:glitch
     touch .gitignore
-    if ! grep ".tmp" .gitignore; then
-        echo ".tmp" >> .gitignore
-    fi
-    if ! grep ".data" .gitignore; then
-        echo ".data" >> .gitignore
-    fi
-    if ! grep "/cloud" .gitignore; then
-        echo "/cloud" >> .gitignore
-    fi
-    if ! grep "node_modules" .gitignore; then
-        echo "node_modules" >> .gitignore
-    fi
-    if ! grep ".cache" .gitignore; then
-        echo ".cache" >> .gitignore
-    fi
-    if ! grep "/app" .gitignore; then
-        echo "/app" >> .gitignore
-    fi
+
+    for ignore in .tmp .data /cloud node_modules .cache /app /docs
+    do
+        if ! grep "$ignore" .gitignore; then
+            echo "$ignore" >> .gitignore
+        fi
+    done
+
     git add .gitignore
     if [ "$(git status --porcelain=v1 2>/dev/null)" != "" ]; then
         git commit -m ".gitignore"
