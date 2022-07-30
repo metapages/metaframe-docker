@@ -111,7 +111,9 @@ export const convertJobOutputDataRefsToExpectedFormat = async (outputs: InputsRe
       return newOutputs;
 
     case DataMode.dataref:
-      console.log('❗❗❗ There is no actual size checking for mode=dataref')
+      if (import.meta.env.DEV) {
+        console.log('❗❗❗ There is no actual size checking for mode=dataref')
+      }
       return outputs;
     case DataMode.json:
       return Object.keys(outputs).reduce<MetaframeInputMap>(async (newOutputs: MetaframeInputMap, name: string) => {

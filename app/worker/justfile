@@ -84,11 +84,11 @@ unpublish version:
 publish_docker: (_require "DOCKER_TOKEN")
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin ghcr.io
-    cd ..
-    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml build
-    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml push worker
-
+    # echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin ghcr.io
+    # cd ..
+    # DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml build
+    # DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml push worker
+    echo "✅ ${DOCKER_REGISTRY}${DOCKER_IMAGE_PREFIX}worker:$(cat ../worker/package.json | jq -r '.version')"
 
 # I don't just remove 'dist/' itself because it might be moutned into a docker-compose container
 @clean:

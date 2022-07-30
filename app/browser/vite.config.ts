@@ -42,8 +42,6 @@ let base =
     ? `/${GithubPages_baseWebPath}/v/${GithubPages_BUILD_SUB_DIR}/`
     : `/${GithubPages_baseWebPath}/`;
 
-console.log("base", base);
-
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
   // For serving NOT at the base path e.g. with github pages: https://<user_or_org>.github.io/<repo>/

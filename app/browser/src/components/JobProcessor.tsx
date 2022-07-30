@@ -103,7 +103,6 @@ export const JobProcessor: React.FC<{}> = () => {
         job.value as StateChangeValueWorkerFinished;
       if (isIframe() && stateFinished?.result?.outputs) {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
-        console.log("outputs", outputs);
         (async () => {
           const metaframeOutputs: MetaframeInputMap | undefined =
             await convertJobOutputDataRefsToExpectedFormat(
@@ -111,7 +110,6 @@ export const JobProcessor: React.FC<{}> = () => {
               outputsMode
             );
 
-          console.log("metaframeOutputs", metaframeOutputs);
           if (metaframeOutputs) {
             try {
               metaframeObj.setOutputs!(metaframeOutputs);

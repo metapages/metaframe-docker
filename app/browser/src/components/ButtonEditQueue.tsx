@@ -34,7 +34,6 @@ export const ButtonEditQueue: React.FC = () => {
 
   const onSubmit = useCallback(
     (values: FormType) => {
-      console.log(`setQueue(${values.queue});`);
       setQueue(values.queue);
       onClose();
     },

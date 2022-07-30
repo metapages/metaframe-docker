@@ -26,7 +26,10 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    - Workers point to this queue, and run the configured docker jobs
 2. Configure the docker job
    1.
-
+3. Run a worker (or a bunch):
+   ```
+   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.0.12 --cpus=2 --queue=public1
+   ```
 
 ## Repository
 [https://github.com/metapages/metaframe-docker](https://github.com/metapages/metaframe-docker)
