@@ -119,8 +119,6 @@ _mkcert:
 _githubpages_publish:
     VITE_SERVER_ORIGIN={{SERVER_ORIGIN}} \
     HOST={{APP_FQDN}} \
-    OUTDIR=../../docs \
-    BASE={{BASE}} \
         deno run --unstable --allow-all /Users/dion/dev/git/metapages/deno/deno/browser/gh-pages-publish-to-docs.ts --versioning=true
 
 @_require_NPM_TOKEN:
