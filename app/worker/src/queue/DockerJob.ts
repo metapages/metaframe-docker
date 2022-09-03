@@ -130,7 +130,7 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
     grabberErrStream.pipe(errStream!);
   }
 
-  console.log('createOptions', createOptions);
+  // console.log('createOptions', createOptions);
 
   const finish = async () => {
 

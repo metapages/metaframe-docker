@@ -64,8 +64,8 @@ export class UserDockerJobQueue extends (EventEmitter as { new(): UserDockerJobQ
 
     stateChange(change: StateChange) {
 
-        console.log('🌘stateChange', JSON.stringify(change, null, '  ').substring(0, 300));
-        console.log('this.state.jobs', JSON.stringify(this.state.jobs, null, '  '));
+        // console.log('🌘stateChange', JSON.stringify(change, null, '  ').substring(0, 300));
+        // console.log('this.state.jobs', JSON.stringify(this.state.jobs, null, '  '));
 
         let sendBroadcast = false;
         const jobId = change.job;

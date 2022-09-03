@@ -21,7 +21,6 @@ const convertStringToDockerCommand = (command?: string): string[] | undefined =>
     if (typeof command !== 'string') {
         return command;
     }
-    console.log(`command (${typeof command})`, command);
     const parsed = parse(command);
     const containsOperations = parsed.some((item :ParseEntry) => typeof item === "object");
     if (containsOperations) {
@@ -29,7 +28,6 @@ const convertStringToDockerCommand = (command?: string): string[] | undefined =>
     }
     return parsed as string[];
 }
-
 
 export class DockerJobQueue {
     workerId: string;
@@ -90,7 +88,7 @@ export class DockerJobQueue {
         while (queuedJobKeys.length > 0 && Object.keys(this.queue).length < this.cpus) {
             const jobKey = queuedJobKeys.pop()!;
             const job = jobs[jobKey]
-            console.log(`[${job.hash}] about to claim ${JSON.stringify(job)}`)
+            // console.log(`[${job.hash}] about to claim ${JSON.stringify(job)}`)
             this._startJob(job);
             return;
         }
