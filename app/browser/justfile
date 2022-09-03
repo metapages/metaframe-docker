@@ -24,7 +24,7 @@ export DOCKER_IMAGE_NAME           := `basename $(pwd)`
 # The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 # Source of deno scripts. When developing we need to switch this
-export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.3")
+DENO_SOURCE                        := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.9")
 # Common commands that require some preamble
 vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js"
 tsc                                := "./node_modules/typescript/bin/tsc"
@@ -77,7 +77,7 @@ build BASE="": _ensure_npm_modules (_tsc "--build")
     HOST={{APP_FQDN}} \
     OUTDIR=../../docs \
     BASE={{BASE}} \
-        deno run --allow-all --unstable /Users/dion/dev/git/metapages/deno/deno/browser/vite-build.ts --versioning=true
+        deno run --allow-all --unstable {{DENO_SOURCE}}/browser/vite-build.ts --versioning=true
 
 # Test: currently bare minimum: only building. Need proper test harness.
 @test: (_tsc "--build")
@@ -106,7 +106,7 @@ _tsc +args="--build": _ensure_npm_modules
 
 # DEV: generate TLS certs for HTTPS over localhost https://blog.filippo.io/mkcert-valid-https-certificates-for-localhost/
 _mkcert:
-    deno run --allow-all --unstable https://deno.land/x/metapages@v0.0.7/commands/ensure_mkcert.ts --certs-dir="../ingress/https/certs"
+    deno run --allow-all --unstable {{DENO_SOURCE}}/commands/ensure_mkcert.ts --certs-dir="../ingress/https/certs"
 
 @_ensure_npm_modules:
     if [ ! -f "{{tsc}}" ]; then npm i; fi
@@ -118,8 +118,7 @@ _mkcert:
 # update "gh-pages" branch with the (versioned and default) current build (./docs) (and keeping all previous versions)
 _githubpages_publish:
     VITE_SERVER_ORIGIN={{SERVER_ORIGIN}} \
-    HOST={{APP_FQDN}} \
-        deno run --unstable --allow-all /Users/dion/dev/git/metapages/deno/deno/browser/gh-pages-publish-to-docs.ts --versioning=true
+        deno run --unstable --allow-all {{DENO_SOURCE}}/browser/gh-pages-publish-to-docs.ts --versioning=true
 
 @_require_NPM_TOKEN:
 	if [ -z "{{NPM_TOKEN}}" ]; then echo "Missing NPM_TOKEN env var"; exit 1; fi
