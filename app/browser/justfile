@@ -73,7 +73,7 @@ dev: _mkcert _ensure_npm_modules (_tsc "--build")
 
 # Build the browser client static assets (in <root/docs>)
 build BASE="": _ensure_npm_modules (_tsc "--build")
-    VITE_SERVER_ORIGIN={{SERVER_ORIGIN}}
+    VITE_SERVER_ORIGIN={{SERVER_ORIGIN}} \
     HOST={{APP_FQDN}} \
     OUTDIR=../../docs \
     BASE={{BASE}} \
@@ -117,7 +117,11 @@ _mkcert:
 
 # update "gh-pages" branch with the (versioned and default) current build (./docs) (and keeping all previous versions)
 _githubpages_publish:
-    deno run --unstable --allow-all /Users/dion/dev/git/metapages/deno/deno/browser/gh-pages-publish-to-docs.ts --versioning=true
+    VITE_SERVER_ORIGIN={{SERVER_ORIGIN}} \
+    HOST={{APP_FQDN}} \
+    OUTDIR=../../docs \
+    BASE={{BASE}} \
+        deno run --unstable --allow-all /Users/dion/dev/git/metapages/deno/deno/browser/gh-pages-publish-to-docs.ts --versioning=true
 
 @_require_NPM_TOKEN:
 	if [ -z "{{NPM_TOKEN}}" ]; then echo "Missing NPM_TOKEN env var"; exit 1; fi

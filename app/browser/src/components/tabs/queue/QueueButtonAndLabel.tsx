@@ -64,8 +64,8 @@ export const QueueButtonAndLabel: React.FC = () => {
         onClick={onToggle}
         colorScheme="blue"
         aria-label="edit docker job queue"
-        icon={queue ? <RiSignalWifiFill /> : <RiSignalWifiErrorLine />}
-        isLoading={!!queue && !serverState.connected}
+        icon={queue && serverState.connected ? <RiSignalWifiFill /> : <RiSignalWifiErrorLine />}
+        // isLoading={!!queue && !serverState.connected}
       />
 
 <Box p={2}>
