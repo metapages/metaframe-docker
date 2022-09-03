@@ -6,12 +6,18 @@ import {
   DrawerBody,
   IconButton,
   DrawerCloseButton,
+  Center,
 } from "@chakra-ui/react";
 import { isIframe } from "@metapages/metaframe-hook";
 import { QuestionIcon } from "@chakra-ui/icons";
 
-export const ButtonHelp: React.FC<{ url?: string }> = ({ url }) => {
-  const [open, setOpen] = useState<boolean>(isIframe() || window.location.hash.length >= 3 ? false : true);
+export const ButtonHelp: React.FC<{ url?: string; color?: string }> = ({
+  url,
+  color,
+}) => {
+  const [open, setOpen] = useState<boolean>(
+    isIframe() || window.location.hash.length >= 3 ? false : true
+  );
 
   url = url
     ? url
@@ -23,15 +29,17 @@ export const ButtonHelp: React.FC<{ url?: string }> = ({ url }) => {
 
   return (
     <>
-      <IconButton
-        verticalAlign="top"
-        aria-label="Help"
-        // @ts-ignore
-        icon={<QuestionIcon />}
-        size="lg"
-        onClick={onClick}
-        mr="4"
-      />
+      <Center>
+        <IconButton
+          color={color}
+          verticalAlign="top"
+          aria-label="Help"
+          icon={<QuestionIcon />}
+          size="sm"
+          onClick={onClick}
+          mr="4"
+        />
+      </Center>
       <HelpPanel url={url} isOpen={open} setOpen={setOpen} />
     </>
   );

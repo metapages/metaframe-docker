@@ -123,7 +123,7 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
   }
 
   var grabberErrStream = StreamTools.createTransformStream((s: string) => {
-    result.stdout!.push(s.toString());
+    result.stderr!.push(s.toString());
     return s;
   });
   if (errStream) {

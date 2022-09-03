@@ -7,31 +7,25 @@ import {
   Tbody,
   Td,
   TableCaption,
-} from "@chakra-ui/react"
-import { useServerState } from "../hooks/serverStateHook"
+} from "@chakra-ui/react";
+import { useServerState } from "../hooks/serverStateHook";
 import {
   BroadcastState,
   DockerJobState,
   StateChangeValueRunning,
-} from "@metapages/asman-shared"
+} from "/@shared";
 
 export const Workers: React.FC = () => {
   const serverState = useServerState();
   const state = serverState.state;
 
   return (
-    <Box
-      maxW="100%"
-      p={2}
-      borderWidth="4px"
-      borderRadius="lg"
-      overflow="hidden"
-    >
-      <Table variant="simple">
-        <TableCaption>Workers (will run jobs)</TableCaption>
+    <Box width="100%" p={2}>
+      <Table width="100%" variant="simple">
+        <TableCaption>(will run jobs)</TableCaption>
         <Thead>
           <Tr>
-            <Th>Worker (total {state?.workers ? state.workers.length : 0})</Th>
+            <Th>ID</Th>
             <Th>CPUs</Th>
             <Th>GPUs</Th>
             <Th>Jobs</Th>

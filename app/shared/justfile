@@ -1,25 +1,24 @@
 # just docs: https://github.com/casey/just
-set shell        := ["bash", "-c"]
-set dotenv-load  := true
-tsc              := "node_modules/typescript/bin/tsc"
-ts_node_dev      := "node_modules/ts-node-dev/lib/bin.js"
+set shell       := ["bash", "-c"]
+set dotenv-load := true
+tsc             := "./node_modules/typescript/bin/tsc"
 # minimal formatting, bold is very useful
-bold             := '\033[1m'
-normal           := '\033[0m'
+bold            := '\033[1m'
+normal          := '\033[0m'
 
-# If not in docker, 🚪 get inside 🚪
 @_help:
     just --list --unsorted
 
-# 🌱 Build the shared library
-@build: _ensure_npm_modules clean
-    {{tsc}} --build
+# Build the client static files
+build: (_typescript "--build")
 
-@clean:
-    mkdir -p dist
-    rm -rf dist/*
-    rm -rf tsconfig.tsbuildinfo
+# compile typescript src, may or may not emit artifacts
+_typescript +args="--build": _ensure_npm_modules
+    {{tsc}} {{args}}
+
+# rebuild the client on changes, but do not serve
+watch:
+    watchexec -w src -w tsconfig.json -w package.json -- just build
 
 @_ensure_npm_modules:
-    if [ ! -d "node_modules" ]; then npm i; fi
     if [ ! -f "{{tsc}}" ]; then npm i; fi

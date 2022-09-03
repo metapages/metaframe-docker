@@ -1,13 +1,17 @@
 {
   "extends": "./tsconfig-base.json",
   "compilerOptions": {
-    "moduleResolution": "node",
     "composite": true,
+    "declaration": true,
     "lib": ["es6", "es2018"],
     "module": "es6",
     "outDir": "./dist",
     "rootDir": "./src",
     "target": "es2018",
+    "types": [],
+    "paths": {
+      "/@shared*": ["./*"],
+    },
   },
   "include": ["./src/**/*"],
   "exclude": [

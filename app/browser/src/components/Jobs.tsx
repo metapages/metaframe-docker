@@ -1,16 +1,5 @@
-
 import { useCallback, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  TableCaption,
-} from "@chakra-ui/react";
+import { Box, Button, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useServerState } from "../hooks/serverStateHook";
 import {
@@ -21,7 +10,7 @@ import {
   WebsocketMessageType,
   StateChange,
   DockerJobFinishedReason,
-} from "@metapages/asman-shared";
+} from "/@shared";
 
 export const Jobs: React.FC = () => {
   const serverState = useServerState();
@@ -48,21 +37,15 @@ export const Jobs: React.FC = () => {
   });
 
   return (
-    <Box
-      maxW="100%"
-      p={2}
-      borderWidth="4px"
-      borderRadius="lg"
-      overflow="hidden"
-    >
+    <Box width="100%" p={2}>
       <Table variant="simple">
-        <TableCaption>Jobs</TableCaption>
         <Thead>
           <Tr>
-            <Th>JobId (total {jobIds.length})</Th>
+            <Th>Id</Th>
             <Th>image</Th>
             <Th>command</Th>
             <Th>Time</Th>
+            <Th>State</Th>
             <Th>Cancel</Th>
           </Tr>
         </Thead>
@@ -91,6 +74,7 @@ const JobComponent: React.FC<{
       <Td>{definition.image}</Td>
       <Td>{definition.command}</Td>
       <Td>TBD</Td>
+      <Td>{jobBlob.state}</Td>
       <Td>
         <ButtonJobCancel job={jobBlob} />
       </Td>

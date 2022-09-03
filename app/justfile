@@ -20,7 +20,7 @@ export APP_FQDN                    := env_var_or_default("APP_FQDN", "docker-run
 # Changing APP_PORT requires the corresponding file in app/vouch/oauth/$APP_FQDN:$APP_PORT.yaml
 # This line is duplicated in ci/justfile
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
-export PORT_BROWSER                := env_var_or_default("PORT_BROWSER", "3000")
+export APP_PORT_BROWSER            := env_var_or_default("APP_PORT_BROWSER", "4440")
 ###############################################################################
 # Default to the local development stack, publishing typically is only DOCKER_COMPOSE="docker-compose -f docker-compose.yml"
 export DOCKER_COMPOSE              := env_var_or_default("DOCKER_COMPOSE", "docker-compose -f docker-compose.yml -f docker-compose.override.yml")
@@ -75,8 +75,11 @@ dev:
 
 # 'docker-compose up' to run the stack
 @up +args="": _init
-    # if [ "{{args}}" = "" ]; then just _dev_build_browser; fi
     {{DOCKER_COMPOSE}} up --remove-orphans {{args}}
+
+# 'docker-compose up' to run the stack
+@run +args="": _init
+    {{DOCKER_COMPOSE}} run {{args}}
 
 # 'docker-compose down'
 down +args="":
@@ -84,12 +87,14 @@ down +args="":
 
 # Open browser tab pointing to the stack (assumes stack is running)
 @open:
-    open https://${APP_FQDN}:${APP_PORT}/#?queue=local1
+    echo "APP_PORT_BROWSER=${APP_PORT_BROWSER}"
+    open https://${APP_FQDN}:${APP_PORT_BROWSER}/#?queue=local1
 
 # Deletes generated files
-@clean:
+@clean: && (dc "down -v")
     just ingress/clean
     just browser/clean
+
 
 # Tail logs for a given service (lazydocker is currently broken)
 @logs service="":
@@ -112,11 +117,6 @@ dc +args="":
 @_build +args="":
     echo -e "🚪 {{bold}}DOCKER_TAG=$DOCKER_TAG DOCKER_REGISTRY=$DOCKER_REGISTRY DOCKER_IMAGE_PREFIX=$DOCKER_IMAGE_PREFIX {{DOCKER_COMPOSE}} -f docker-compose.cache.yml build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}{{normal}} 🚪 " && \
     DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}
-
-# Build browser on host but using docker-compose
-@_dev_build_browser:
-    docker-compose -f browser/docker-compose.browser.yml build
-    docker-compose -f browser/docker-compose.browser.yml up
 
 # docker-compose push the images
 _push +images="":

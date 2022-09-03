@@ -10,7 +10,7 @@ import {
   WebsocketMessage,
   WebsocketMessageSender,
   WebsocketMessageType,
-} from "@metapages/asman-shared";
+} from "/@shared";
 import { websocketConnectionUrl } from "../config";
 
 type Props = {

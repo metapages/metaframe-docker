@@ -25,6 +25,9 @@ _help:
 @dev:
     just app/dev
 
+@open:
+    just app/open
+
 # Run all build/unit tests
 @test:
     echo "No tests currently setup"
@@ -39,6 +42,10 @@ _help:
 @build:
     just app/browser/build
     just deployments/glitch/build
+
+# Removes generated files, docker volumes, etc.
+@clean:
+    just app/clean
 
 ###################################################
 # Internal utilies

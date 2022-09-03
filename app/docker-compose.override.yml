@@ -23,8 +23,7 @@ services:
     networks:
       - default
     ports:
-      # - ${PORT_SERVER:-8081}:8080
-      - "${PORT_SERVER:-8080}:${APP_PORT:-443}"
+      - "${APP_PORT:-443}:${APP_PORT:-443}"
     logging:
       driver: ${LOGGING_HTTPS:-none}
 
@@ -72,10 +71,16 @@ services:
         DOCKER_TAG: ${DOCKER_TAG:-local}
     command: just dev
     environment:
+      - GITHUB_WORKSPACE=
+      - DENO_DIR=/root/.cache/deno
       - APP_FQDN=${APP_FQDN:-metaframe1.dev}
       - APP_PORT=${APP_PORT:-443}
-      - SERVER_ORIGIN=https://${APP_FQDN:-metaframe1.dev}:${PORT_SERVER:-8080}
+      - APP_PORT_BROWSER=${APP_PORT_BROWSER:-4440}
+      - SERVER_ORIGIN=https://${APP_FQDN:-metaframe1.dev}:${APP_PORT:-443}
     volumes:
+      - node_modules:/app/browser/node_modules
+      - deno:/root/.cache/deno
+      - /Users/dion/dev/git/metapages/deno:/Users/dion/dev/git/metapages/deno
       - ./package.json:/app/package.json
       - ./tsconfig.workspace.json:/app/tsconfig.workspace.json
       - ./shared:/app/shared
@@ -93,4 +98,10 @@ services:
     networks:
       - default
     ports:
-      - "${APP_PORT:-443}:${APP_PORT:-443}"
+      - "${APP_PORT_BROWSER:-4440}:${APP_PORT_BROWSER:-4440}"
+
+volumes:
+  deno:
+    driver: local
+  node_modules:
+    driver: local

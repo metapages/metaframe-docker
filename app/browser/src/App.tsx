@@ -1,8 +1,13 @@
-
-import { Address } from "./routes/address";
+import { DockerJobDefinitionProvider } from "./hooks/jobDefinitionHook";
+import { ServerStateProvider } from "./hooks/serverStateHook";
+import { TabMenu } from "./routes/TabMenu";
 
 export const App: React.FC = () => {
   return (
-    <Address/>
+    <ServerStateProvider>
+      <DockerJobDefinitionProvider>
+        <TabMenu />
+      </DockerJobDefinitionProvider>
+    </ServerStateProvider>
   );
 };

@@ -8,6 +8,7 @@ set dotenv-load                    := true
 # The root domain for this app, serving index.html
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "metaframe1.dev")
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
+export APP_PORT_BROWSER            := env_var_or_default("APP_PORT_BROWSER", "4440")
 SERVER_ORIGIN                      := env_var_or_default("SERVER_ORIGIN", "https://docker-metapage-io.glitch.me")
 export ROOT                        := env_var_or_default("GITHUB_WORKSPACE", `(which git >/dev/null && git rev-parse --show-toplevel) || (cd ../.. && pwd)`)
 #`if [ "${GITHUB_WORKSPACE}" != "" ]; then echo "${GITHUB_WORKSPACE}"; else echo "$(git rev-parse --show-toplevel)"; fi`
@@ -41,20 +42,15 @@ _help:
     #!/usr/bin/env bash
     # exit when any command fails
     set -euo pipefail
-    # if [ -f /.dockerenv ]; then
-        echo -e ""
-        just --list --unsorted --list-heading $'🌱 Commands:\n\n'
-        echo -e ""
-        echo -e "    Github Pages  URL 🔗 {{green}}$(cat package.json | jq -r '.repository.url'){{normal}}"
-        echo -e "    Develop URL 🔗 {{green}}https://{{APP_FQDN}}:{{APP_PORT}}/{{normal}}"
-        echo -e ""
-    # else
-    #     # Hoist into a docker container with all require CLI tools installed
-    #     deno run --unstable --allow-all {{DENO_SOURCE}}/commands/docker/docker_mount.ts --mount-ssh=true --mount-git-config=true  --user=root --image={{DOCKER_IMAGE_PREFIX}}{{DOCKER_IMAGE_NAME}}:{{DOCKER_TAG}} --context="." --dockerfile=Dockerfile --command=bash;
-    # fi
+    echo -e ""
+    just --list --unsorted --list-heading $'🌱 Commands:\n\n'
+    echo -e ""
+    echo -e "    Github Pages  URL 🔗 {{green}}$(cat package.json | jq -r '.repository.url'){{normal}}"
+    echo -e "    Develop URL 🔗 {{green}}https://{{APP_FQDN}}:{{APP_PORT}}/{{normal}}"
+    echo -e ""
 
 # Run the dev server. Opens the web app in browser.
-dev: _mkcert _ensure_npm_modules _build_shared (_tsc "--build")
+dev: _mkcert _ensure_npm_modules (_tsc "--build")
     #!/usr/bin/env bash
     set -eo pipefail
 
@@ -66,29 +62,22 @@ dev: _mkcert _ensure_npm_modules _build_shared (_tsc "--build")
     if [ ! -f /.dockerenv ]; then
         export MAYBE_OPEN_BROWSER="--open";
     fi
+    npm i
+    export HOST={{APP_FQDN}}
+    export PORT={{APP_PORT_BROWSER}}
+    export CERT_FILE=../ingress/https/.certs/{{APP_FQDN}}.pem
+    export CERT_KEY_FILE=../ingress/https/.certs/{{APP_FQDN}}-key.pem
+    export BASE=
+    echo "vite PORT=${PORT}"
     VITE_SERVER_ORIGIN=${VITE_SERVER_ORIGIN} {{vite}} --clearScreen false ${MAYBE_OPEN_BROWSER}
 
 # Build the browser client static assets (in <root/docs>)
-build BUILD_SUB_DIR="": _ensure_npm_modules _build_shared (_tsc "--build") && _generate_versions_index
-    #!/usr/bin/env bash
-    set -euo pipefail
-    OUTDIR={{DIST_ROOT}}
-    if [ "{{BUILD_SUB_DIR}}" != "" ]; then
-        OUTDIR=${OUTDIR}/v/{{BUILD_SUB_DIR}}
-    fi
-    mkdir -p ${OUTDIR}
-    rm -rf ${OUTDIR}/public \
-           ${OUTDIR}/assets
-    find ${OUTDIR} -maxdepth 1 -type f -exec rm "{}" \;
-
-    # rm -rf {{DIST_ROOT}}/{{BUILD_SUB_DIR}}/public \
-    #        {{DIST_ROOT}}/{{BUILD_SUB_DIR}}/assets
-    # I cannot remember why I need this more complex delete operation
-    # I *think* it had something to do with glitch.com deployment
-    # Disabling but leaving here in case I hit problems and go looking
-    # But remove once glitch deployment is good
-    # rm -rf $(echo "docs/{{BUILD_SUB_DIR}}/assets" | sed s#//*#/#g)
-    BUILD_SUB_DIR={{BUILD_SUB_DIR}} VITE_SERVER_ORIGIN={{SERVER_ORIGIN}} OUTDIR=${OUTDIR} {{vite}} build --mode=production
+build BASE="": _ensure_npm_modules (_tsc "--build")
+    VITE_SERVER_ORIGIN={{SERVER_ORIGIN}}
+    HOST={{APP_FQDN}} \
+    OUTDIR=../../docs \
+    BASE={{BASE}} \
+        deno run --allow-all --unstable /Users/dion/dev/git/metapages/deno/deno/browser/vite-build.ts --versioning=true
 
 # Test: currently bare minimum: only building. Need proper test harness.
 @test: (_tsc "--build")
@@ -107,21 +96,17 @@ watch BUILD_SUB_DIR="":
     watchexec -w src -w tsconfig.json -w package.json -w vite.config.ts -- just build
 
 # Watch and serve browser client. Can't use vite to serve: https://github.com/vitejs/vite/issues/2754
-serve: _mkcert
-    DEPLOY_TARGET=glitch just build
-    cd dist && \
-        {{ROOT}}/app/browser/node_modules/http-server/bin/http-server --cors '*' -a {{APP_FQDN}} -p {{APP_PORT}} --ssl --cert {{ROOT}}/app/ingress/https/.certs/{{APP_FQDN}}.pem --key {{ROOT}}/app/ingress/https/.certs/{{APP_FQDN}}-key.pem
-
-_build_shared:
-    just {{ROOT}}/app/shared/build
+serve: _mkcert build
+    cd ../../docs && \
+    npx http-server --cors '*' -a {{APP_FQDN}} -p {{APP_PORT}} --ssl --cert {{ROOT}}/app/ingress/https/.certs/{{APP_FQDN}}.pem --key {{ROOT}}/app/ingress/https/.certs/{{APP_FQDN}}-key.pem
 
 # compile typescript src, may or may not emit artifacts
-_tsc +args="": _ensure_npm_modules
+_tsc +args="--build": _ensure_npm_modules
     {{tsc}} {{args}}
 
 # DEV: generate TLS certs for HTTPS over localhost https://blog.filippo.io/mkcert-valid-https-certificates-for-localhost/
 _mkcert:
-    just {{ROOT}}/app/ingress/https/mkcert
+    deno run --allow-all --unstable https://deno.land/x/metapages@v0.0.7/commands/ensure_mkcert.ts --certs-dir="../ingress/https/certs"
 
 @_ensure_npm_modules:
     if [ ! -f "{{tsc}}" ]; then npm i; fi
@@ -131,61 +116,8 @@ _mkcert:
     {{vite}} {{args}}
 
 # update "gh-pages" branch with the (versioned and default) current build (./docs) (and keeping all previous versions)
-_githubpages_publish: _ensureGitPorcelain
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    # Mostly CURRENT_BRANCH should be main, but maybe you are testing on a different branch
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    if [ -z "$(git branch --list gh-pages)" ]; then
-        git checkout -b gh-pages;
-    fi
-
-    git checkout gh-pages
-
-    git rebase --strategy recursive --strategy-option theirs ${CURRENT_BRANCH}
-
-    # Then build
-    just build $(cat package.json | jq -r .version)
-    just build
-
-    # Now commit and push
-    git add --all --force {{ROOT}}/docs
-    git commit -m "site v$(cat package.json | jq -r .version)"
-    git push -uf origin gh-pages
-
-    # Return to the original branch
-    git checkout ${CURRENT_BRANCH}
-    echo -e "👉 Github configuration (once): 🔗 https://github.com/$(git remote get-url origin | sd 'git@github.com:' '' | sd '.git' '')/settings/pages"
-    echo -e "  - {{green}}Source{{normal}}"
-    echo -e "    - {{green}}Branch{{normal}}: gh-pages 📁 /docs"
-
-@_ensureGitPorcelain:
-    if [ ! -z "$(git status --untracked-files=no --porcelain)" ]; then \
-        echo -e " ❗ Uncommitted files:"; \
-        git status --untracked-files=no --porcelain; \
-        exit 1; \
-    fi
+_githubpages_publish:
+    deno run --unstable --allow-all /Users/dion/dev/git/metapages/deno/deno/browser/gh-pages-publish-to-docs.ts --versioning=true
 
 @_require_NPM_TOKEN:
 	if [ -z "{{NPM_TOKEN}}" ]; then echo "Missing NPM_TOKEN env var"; exit 1; fi
-
-_generate_versions_index:
-    #!/usr/bin/env deno run --allow-read={{DIST_ROOT}} --allow-write={{DIST_ROOT}} --unstable
-    import {
-        ensureDir,
-        ensureDirSync,
-    } from "https://deno.land/std@0.150.0/fs/mod.ts";
-    ensureDirSync("{{DIST_ROOT}}/v");
-    let indexHtml = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><title>versions</title></head><body><ul>';
-
-    for await (const dirEntry of Deno.readDir("{{DIST_ROOT}}/v")) {
-        if (dirEntry.isDirectory) {
-            indexHtml += `<li><a href="${dirEntry.name}/">${dirEntry.name}</a></li>`;
-        }
-        console.log(dirEntry);
-
-    }
-    indexHtml += `</ul></body></html>`;
-
-    Deno.writeTextFileSync("{{DIST_ROOT}}/v/index.html", indexHtml);

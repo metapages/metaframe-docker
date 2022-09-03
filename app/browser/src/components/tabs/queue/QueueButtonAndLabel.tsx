@@ -6,7 +6,6 @@ import {
   useDisclosure,
   Button,
   FormControl,
-  FormLabel,
   Input,
   InputGroup,
   Modal,
@@ -15,26 +14,30 @@ import {
   ModalOverlay,
   ModalHeader,
   ModalContent,
+  HStack,
+  Tag,
+  Box,
 } from "@chakra-ui/react";
 import { RiSignalWifiErrorLine, RiSignalWifiFill } from "react-icons/ri";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { useHashParam } from "@metapages/hash-query";
-import { useServerState } from "../hooks/serverStateHook";
+import { useServerState } from "/@/hooks/serverStateHook";
 
 const validationSchema = yup.object({
   queue: yup.string(),
 });
 interface FormType extends yup.InferType<typeof validationSchema> {}
 
-export const ButtonEditQueue: React.FC = () => {
+export const QueueButtonAndLabel: React.FC = () => {
   const { isOpen, onClose, onToggle } = useDisclosure();
-  const serverState = useServerState();
   const [queue, setQueue] = useHashParam("queue", "");
+  const serverState = useServerState();
 
   const onSubmit = useCallback(
     (values: FormType) => {
       setQueue(values.queue);
+      formik.resetForm();
       onClose();
     },
     [onClose, setQueue]
@@ -54,17 +57,20 @@ export const ButtonEditQueue: React.FC = () => {
   }, [formik, onClose]);
 
   return (
-    <>
+    <HStack width="100%">
+
       <IconButton
         size="lg"
         onClick={onToggle}
         colorScheme="blue"
         aria-label="edit docker job queue"
         icon={queue ? <RiSignalWifiFill /> : <RiSignalWifiErrorLine />}
-        // isLoading={
-        //   queue !== undefined && queue.length > 0 && !serverState.connected
-        // }
+        isLoading={!!queue && !serverState.connected}
       />
+
+<Box p={2}>
+        {`Queue key:`} {queue ? <Tag>{queue}</Tag> : null}{" "}
+      </Box>
 
       <Modal isOpen={isOpen} onClose={closeAndClear}>
         <ModalOverlay />
@@ -73,7 +79,6 @@ export const ButtonEditQueue: React.FC = () => {
           <form onSubmit={formik.handleSubmit}>
             <ModalBody>
               <FormControl>
-
                 <InputGroup>
                   <Input
                     id="queue"
@@ -103,6 +108,6 @@ export const ButtonEditQueue: React.FC = () => {
           ◀️ You must connect to a queue
         </Alert>
       ) : null}
-    </>
+    </HStack>
   );
 };

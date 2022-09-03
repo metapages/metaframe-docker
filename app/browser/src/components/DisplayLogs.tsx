@@ -1,52 +1,12 @@
-import {
-  Box,
-  Code,
-  Stack,
-  Tab,
-  Tabs,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Text,
-} from "@chakra-ui/react";
+import { Stack, Code } from "@chakra-ui/react";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "@metapages/asman-shared";
-
-export const JobDisplayLogs: React.FC<{
-  job: DockerJobDefinitionRow | undefined;
-}> = ({ job }) => {
-  return (
-    <Box
-      maxW="100%"
-      p={2}
-      borderWidth="4px"
-      borderRadius="lg"
-      overflow="hidden"
-    >
-      <Tabs>
-        <TabList>
-          <Tab>stdout</Tab>
-          <Tab>stderr</Tab>
-        </TabList>
-
-        <TabPanels>
-          <TabPanel background="#ECF2F7">
-            <DisplayLogs job={job} stdout={true} />
-          </TabPanel>
-          <TabPanel>
-            <DisplayLogs job={job} stdout={false} />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </Box>
-  );
-};
+} from "/@shared";
 
 // show e.g. running, or exit code, or error
-const DisplayLogs: React.FC<{
+export const DisplayLogs: React.FC<{
   stdout: boolean;
   job?: DockerJobDefinitionRow;
 }> = ({ job, stdout }) => {
@@ -98,15 +58,11 @@ const JustLogs: React.FC<{
   }
   return (
     <Stack spacing={1}>
-      {logsNewlineHandled.map((line) => (
-        <>
-          <Code fontSize={10}>
-            {line}
-          </Code>
-        </>
+      {logsNewlineHandled.map((line, i) => (
+        <Code key={i} fontSize={10}>
+          {line}
+        </Code>
       ))}
     </Stack>
   );
 };
-
-// lineHeight="100%" fontFamily="monospace"

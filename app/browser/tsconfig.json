@@ -1,40 +1,32 @@
 {
-  "extends": "../tsconfig.workspace.json",
+  "extends": "../shared/tsconfig-base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    // vite recommends this
+    "baseUrl": "./",
     "isolatedModules": true,
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmit": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
     "outDir": "./dist",
-    "paths": {
-      // avoid ../../../../foo type import paths
-      "/@/*": ["./*"]
-    },
-    // https://stackoverflow.com/questions/51634361/how-to-force-tsc-to-ignore-node-modules-folder
-    // true means it won't try to compile node_modules content (even tho already "excluded")
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
     "target": "ESNext",
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["node_modules/@types", "src/types", "src/graphql/generated"],
     "types": ["vite/client"],
-    "useDefineForClassFields": true,
+    "paths": {
+      "/@/*": ["./src/*"],
+      "/@shared": ["../shared/src/index.ts"],
+    }
   },
-  "exclude": ["node_modules", "dist"],
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": [
+    "node_modules",
+    // https://github.com/microsoft/TypeScript/issues/14538#issuecomment-654933955
+    "dist"
+  ],
+  "references": [
+    {
+      // https://stackoverflow.com/questions/47729344/how-to-share-code-between-typescript-projects
+      "path": "../shared"
+    }
+  ]
 }

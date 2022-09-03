@@ -2,29 +2,29 @@
  * Via Context provide the current docker job definition which is combined from metaframe inputs
  * and URL query parameters, and the means to change (some of) them
  */
-import { createContext } from "react";
-import { useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { MetaframeInputMap } from "@metapages/metapage";
 import {
   MetaframeAndInputsContext,
   MetaframeAndInputsObject,
 } from "@metapages/metaframe-hook";
 import { useHashParamJson, useHashParam } from "@metapages/hash-query";
+import { JobInputs } from '../components/PanelInputs';
 import {
   copyLargeBlobsToCloud,
   DataMode,
   DataModeDefault,
-} from "../utils/dataref";
+} from "/@/utils/dataref";
 import {
   DataRefType,
   DockerJobDefinitionInputRefs,
   InputsBase64String,
   InputsRefs,
-} from "@metapages/asman-shared";
+} from "/@shared";
 import {
   DockerJobDefinitionMetadata,
   DockerJobDefinitionParamsInUrlHash,
-} from "../components/types";
+} from "/@/components/types";
 
 type Props = {
   // children: React.ReactNode;
@@ -50,7 +50,9 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
   const [definitionParamsInUrl] = useHashParamJson<
     DockerJobDefinitionParamsInUrlHash | undefined
   >("job");
-
+  const [jobInputs] = useHashParamJson<JobInputs | undefined>(
+    "inputs"
+  );
   const metaframe = useContext<MetaframeAndInputsObject>(
     MetaframeAndInputsContext
   );
@@ -63,6 +65,7 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
 
   // if the URL inputs change, or the metaframe inputs change, maybe update the dockerJobDefinitionMeta
   useEffect(() => {
+    // console.log(`🍔 useEffect`)
     let cancelled = false;
     // we DO NOT process inputs, pass them along. The job consumer expects base64 encoded strings
     // but maybe we can be graceful and convert objects to JSON strings?
@@ -76,7 +79,18 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
     const definition: DockerJobDefinitionInputRefs = {
       ...definitionParamsInUrl,
     };
-    definition.inputs = {};
+    definition.inputs = !jobInputs ? {} : Object.fromEntries(Object.keys(jobInputs).map((key) => {
+      return [key, { type: DataRefType.utf8, value: jobInputs[key] as string }];
+    }));
+
+    // console.log("🍔 useEffect definition", definition);
+
+
+    if (!definition.image) {
+      setDefinitionMeta(undefined);
+      return;
+    }
+
     (async () => {
       switch (inputsMode) {
         case DataMode.dataref:
@@ -126,14 +140,16 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
           definition,
           nocache,
         };
+        // console.log(`🍔 setDefinitionMeta`, newJobDefinition)
         setDefinitionMeta(newJobDefinition);
       }
 
       return () => {
+        // console.log("🍔😞 useEffect cancelled");
         cancelled = true;
       };
     })();
-  }, [metaframe.inputs, definitionParamsInUrl, inputsModeFromQuery]);
+  }, [metaframe.inputs, definitionParamsInUrl, jobInputs, inputsModeFromQuery]);
 
   return (
     <DockerJobDefinitionContext.Provider value={{ definitionMeta }}>

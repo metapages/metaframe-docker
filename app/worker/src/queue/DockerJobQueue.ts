@@ -1,3 +1,5 @@
+
+import { parse, ParseEntry } from "shell-quote";
 import { DockerRunResult, dockerJobExecute, DockerJobArgs, DockerJobExecution, Volume } from './DockerJob'
 import { BroadcastState, WorkerRegistration, WebsocketMessageType, WebsocketMessageSender, DockerJobDefinitionRow, DockerJobState, StateChangeValueWorkerFinished, StateChangeValueRunning, DockerJobFinishedReason } from '../../../shared/dist/shared/types.js';
 import { convertIOToVolumeMounts, getOutputs } from "./IO"
@@ -11,6 +13,23 @@ type WorkerJobQueueItem = {
     execution: DockerJobExecution | null;
     // TODO: put local state
 }
+
+const convertStringToDockerCommand = (command?: string): string[] | undefined => {
+    if (!command) {
+        return
+    }
+    if (typeof command !== 'string') {
+        return command;
+    }
+    console.log(`command (${typeof command})`, command);
+    const parsed = parse(command);
+    const containsOperations = parsed.some((item :ParseEntry) => typeof item === "object");
+    if (containsOperations) {
+        return [command];
+    }
+    return parsed as string[];
+}
+
 
 export class DockerJobQueue {
     workerId: string;
@@ -132,10 +151,11 @@ export class DockerJobQueue {
 
         // TODO hook up the durationMax to a timeout
         // TODO add input mounts
+
         const executionArgs: DockerJobArgs = {
             image: definition.image!,
-            command: definition.command,
-            entrypoint: definition.entrypoint,
+            command: convertStringToDockerCommand(definition.command),
+            entrypoint: convertStringToDockerCommand(definition.entrypoint),
             workdir: definition.workdir,
             env: definition.env,
             volumes: [volumes!.inputs, volumes!.outputs],

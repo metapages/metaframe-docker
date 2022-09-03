@@ -6,6 +6,11 @@ import {
   Box,
   CircularProgress,
   HStack,
+  VStack,
+  Heading,
+  Spacer,
+  ListItem,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { useHashParam } from "@metapages/hash-query";
 import {
@@ -13,37 +18,44 @@ import {
   DockerJobFinishedReason,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "@metapages/asman-shared";
-import { ButtonCancel } from "../components/ButtonCancel";
-import { ButtonEditJobInput } from "../components/ButtonEditJobInput";
-import { ButtonEditQueue } from "../components/ButtonEditQueue";
-import { ButtonHelp } from "./ButtonHelp";
-import { useServerState } from "../hooks/serverStateHook";
+} from "/@shared";
+import { ButtonCancelOrRetry } from "../ButtonCancelOrRetry";
+import { useServerState } from "/@/hooks/serverStateHook";
+import { PanelJobInputFromUrlParams } from "./PanelJobInputFromUrlParams";
 
-export const JobDisplayState: React.FC<{
+export const PanelJob: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const [queue] = useHashParam("queue");
   return (
-    <Box
-      maxW="100%"
-      p={2}
-      borderWidth="4px"
-      borderRadius="lg"
-      overflow="hidden"
-    >
-      <HStack spacing="24px">
-        <ButtonEditQueue />
-        {!queue || queue === "" ? null : (
-          <>
-            <div>
-              <ButtonEditJobInput />
-            </div>
-            <JobStatusDisplay job={job} />
-            <ButtonCancel job={job} />
-          </>
-        )}
-        <ButtonHelp />
+    <Box maxW="100%" p={2}>
+      <HStack spacing="24px" alignItems="flex-start">
+        <PanelJobInputFromUrlParams />
+
+        <VStack width="100%" alignItems="flex-start">
+          <Heading size="sm">Job status and control</Heading>
+          <br />
+          <br />
+          <VStack
+            borderWidth="1px"
+            p={4}
+            borderRadius="lg"
+            width="100%"
+            alignItems="flex-start"
+          >
+            <HStack width="100%">
+              <ButtonCancelOrRetry job={job} />
+              <Spacer />
+
+              <Box>{job?.hash ? `id: ${job?.hash}` : null}</Box>
+            </HStack>
+            {!queue || queue === "" ? null : (
+              <>
+                <JobStatusDisplay job={job} />
+              </>
+            )}
+          </VStack>
+        </VStack>
       </HStack>
     </Box>
   );
@@ -100,16 +112,30 @@ const JobStatusDisplay: React.FC<{
             </Alert>
           );
         case DockerJobFinishedReason.Error:
+          const errorBlob:
+            | { statusCode: number; json: { message: string } }
+            | undefined = resultFinished?.result?.error;
           return (
-            <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Failed</AlertTitle>
-              <AlertDescription>
-                {resultFinished?.result?.StatusCode
-                  ? `Exit code: ${resultFinished.result.StatusCode}`
-                  : null}
-              </AlertDescription>
-            </Alert>
+            <>
+              <Alert status="error">
+                <AlertIcon />
+                <AlertTitle>Failed</AlertTitle>
+              </Alert>
+
+              <Alert status="error">
+                <AlertDescription>
+                  <UnorderedList>
+                    {errorBlob?.statusCode ? (
+                      <ListItem>{`Exit code: ${errorBlob?.statusCode}`}</ListItem>
+                    ) : null}
+
+                    {errorBlob?.json?.message ? (
+                      <ListItem>{errorBlob?.json?.message}</ListItem>
+                    ) : null}
+                  </UnorderedList>
+                </AlertDescription>
+              </Alert>
+            </>
           );
         case DockerJobFinishedReason.Success:
           return (
@@ -136,7 +162,7 @@ const JobStatusDisplay: React.FC<{
             <Alert status="warning">
               <AlertIcon />
               Lost connection with the worker running your job, waiting to
-              re-queue...
+              re-queue/@.
             </Alert>
           );
       }
@@ -144,7 +170,6 @@ const JobStatusDisplay: React.FC<{
     case DockerJobState.ReQueued:
       return (
         <Alert status="warning">
-          {/* <CircularProgress size="20px" isIndeterminate color="grey" /> */}
           <AlertTitle>
             &nbsp;&nbsp;&nbsp;{state} (total workers:{" "}
             {serverState?.state?.workers

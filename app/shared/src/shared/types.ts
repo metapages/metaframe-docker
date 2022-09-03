@@ -1,7 +1,7 @@
 import { DataRef } from "../dataref";
 
 export type Image = string;
-export type Command = string[];
+export type Command = string;
 export type Env = { [name in string]: string } | undefined;
 export type InputsRefs = { [name in string]: DataRef };
 // values are base64 encoded buffers
@@ -12,7 +12,8 @@ export type DockerJobDefinitionInputsBase64 = {
     image?: Image;
     command?: Command;
     env?: Env;
-    entrypoint?: string[];
+    // entrypoint?: string[];
+    entrypoint?: string;
     workdir?:string;
     inputs?: InputsBase64String;
     durationMax?: number;

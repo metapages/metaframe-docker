@@ -1,6 +1,6 @@
 {
   "name": "@metapages/metaframe-docker",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": true,
   "repository": {
     "url": "https://metapages.github.io/metaframe-docker/"
@@ -10,16 +10,16 @@
     "build": "rm -rf dist/* && node_modules/parcel-bundler/bin/cli.js build public/index.html --no-autoinstall"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.0.4",
-    "@chakra-ui/react": "^2.0.2",
-    "@emotion/react": "^11.9.3",
-    "@emotion/styled": "^11.9.3",
-    "@metapages/hash-query": "^0.3.10",
+    "@chakra-ui/icons": "^2.0.9",
+    "@chakra-ui/react": "^2.3.1",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@metapages/hash-query": "^0.4.1",
     "@metapages/metaframe-hook": "^1.0.9",
-    "@metapages/metaframe-ui-widgets": "^0.1.1",
-    "@metapages/metapage": "^0.9.0",
-    "@popperjs/core": "^2.11.5",
-    "@vitejs/plugin-react": "^2.0.0",
+    "@metapages/metapage": "^0.12.0",
+    "@metapages/metapage-embed-react": "^0.0.16",
+    "@popperjs/core": "^2.11.6",
+    "@react-typed-hooks/use-key-press": "^1.0.5",
     "formik": "^2.2.9",
     "formik-chakra-ui": "^1.6.0",
     "framer-motion": "^6.5.1",
@@ -30,8 +30,6 @@
     "react-icons": "^4.4.0",
     "react-router-dom": "^6.3.0",
     "reconnecting-websocket": "^4.4.0",
-    "shell-quote": "^1.7.2",
-    "typescript": "4.1.5",
     "unibabel": "^2.1.8",
     "yup": "^0.32.11"
   },
@@ -55,14 +53,12 @@
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "@types/react-router-dom": "^5.3.3",
-    "@types/shell-quote": "^1.7.0",
     "@types/uuid": "^8.3.0",
+    "@vitejs/plugin-react": "^2.0.0",
     "http-server": "^14.1.1",
-    "vite": "^3.0.2"
-  },
-  "alias": {
-    "react": "preact/compat",
-    "react-dom": "preact/compat"
+    "typescript": "^4.8.2",
+    "vite": "^3.0.9",
+    "vite-tsconfig-paths": "^3.5.0"
   },
   "staticFiles": {
     "staticPath": [

@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@chakra-ui/react";
 import { CloseIcon, RepeatClockIcon } from "@chakra-ui/icons";
@@ -12,13 +11,13 @@ import {
   WebsocketMessageType,
   StateChangeValueWorkerFinished,
   StateChangeValueQueued,
-} from "@metapages/asman-shared";
+} from "/@shared";
 
-interface ButtonCancelProps {
+interface ButtonCancelOrRetryProps {
   job?: DockerJobDefinitionRow;
 }
 
-export const ButtonCancel: React.FC<ButtonCancelProps> = ({
+export const ButtonCancelOrRetry: React.FC<ButtonCancelOrRetryProps> = ({
   job,
 }) => {
   const [clicked, setClicked] = useState<boolean>(false);
@@ -56,7 +55,7 @@ export const ButtonCancel: React.FC<ButtonCancelProps> = ({
       const value: StateChangeValueQueued = {
         definition: (job.history[0].value as StateChangeValueQueued).definition,
         time: new Date(),
-        nocache: nocacheString === "1",
+        nocache: nocacheString === "1" || nocacheString === "true",
       };
 
       serverState.stateChange({
@@ -77,17 +76,17 @@ export const ButtonCancel: React.FC<ButtonCancelProps> = ({
       return (
         <Button
           aria-label="Cancel"
-          // @ts-ignore
           leftIcon={<CloseIcon />}
           onClick={onClickCancel}
           isActive={!clicked}
           size="lg"
-        ></Button>
+        >
+          Cancel
+        </Button>
       );
     case DockerJobState.Finished:
-      const value:
-        | StateChangeValueWorkerFinished
-        | undefined = job?.value as StateChangeValueWorkerFinished;
+      const value: StateChangeValueWorkerFinished | undefined =
+        job?.value as StateChangeValueWorkerFinished;
 
       if (value) {
         switch (value.reason) {
@@ -98,28 +97,29 @@ export const ButtonCancel: React.FC<ButtonCancelProps> = ({
             return (
               <Button
                 aria-label="Re-queue"
-                // @ts-ignore
                 leftIcon={<RepeatClockIcon />}
                 size="lg"
                 onClick={onClickRetry}
-              />
+              >
+                Re-queue
+              </Button>
             );
           case DockerJobFinishedReason.WorkerLost:
             return (
               <Button
                 aria-label="Disabled"
-                // @ts-ignore
                 leftIcon={<CloseIcon />}
                 isDisabled={true}
                 size="lg"
-              />
+              >
+                Cancel job
+              </Button>
             );
         }
       }
       return (
         <Button
           aria-label="Disabled"
-          // @ts-ignore
           leftIcon={<CloseIcon />}
           isDisabled={true}
           size="lg"
@@ -129,7 +129,6 @@ export const ButtonCancel: React.FC<ButtonCancelProps> = ({
       return (
         <Button
           aria-label="Disabled"
-          // @ts-ignore
           leftIcon={<CloseIcon />}
           isDisabled={true}
           size="lg"

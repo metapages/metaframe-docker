@@ -1,14 +1,23 @@
-
 import { useContext, useEffect, useState } from "react";
-import { Box } from "@chakra-ui/react";
+import {
+  useHashParam,
+  useHashParamInt,
+} from "@metapages/hash-query";
+import {
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from "@chakra-ui/react";
+import { useServerState } from "/@/hooks/serverStateHook";
+import { useDockerJobDefinition } from "/@/hooks/jobDefinitionHook";
 import { MetaframeInputMap, isIframe } from "@metapages/metapage";
+import { DisplayLogs } from "/@/components/DisplayLogs";
 import {
   MetaframeAndInputsContext,
   MetaframeAndInputsObject,
 } from "@metapages/metaframe-hook";
-import { useHashParam, useHashParamBoolean } from "@metapages/hash-query";
-import { useDockerJobDefinition } from "../hooks/jobDefinitionHook";
-import { useServerState } from "../hooks/serverStateHook";
 import {
   shaJobDefinition,
   DockerJobDefinitionRow,
@@ -20,19 +29,23 @@ import {
   DockerJobDefinitionInputRefs,
   StateChangeValueWorkerFinished,
   InputsRefs,
-} from "@metapages/asman-shared";
-import { JobDisplayState } from "./JobDisplayState";
-import { JobDisplayLogs } from "./JobDisplayLogs";
-import { JobDisplayError } from "./JobDisplayError";
-import { JobDisplayId } from "./JobDisplayId";
-import { JobDisplayOutputs } from "./JobDisplayOutputs";
+} from "/@shared";
 import {
   convertJobOutputDataRefsToExpectedFormat,
   DataMode,
   DataModeDefault,
-} from "../utils/dataref";
+} from "/@/utils/dataref";
+import { JobDisplayOutputs } from "/@/components/tabs/PanelOutputs";
+import { TabLabelQueue } from "/@/components/tabs/queue/TabLabelQueue";
+import { PanelQueue } from "/@/components/tabs/PanelQueue";
+import { PanelOutputsLabel } from "/@/components/tabs/PanelOutputsLabel";
+import { PanelJob } from "/@/components/tabs/PanelJob";
+import { ButtonHelp } from "/@/components/ButtonHelp";
+import { PanelJobLabel } from "/@/components/tabs/PanelJobLabel";
+import { PanelInputs } from '../components/PanelInputs';
 
-export const JobProcessor: React.FC<{}> = () => {
+export const TabMenu: React.FC = () => {
+  const [tabIndex, setTabIndex] = useHashParamInt("tab", 0);
   // this is where two complex hooks are threaded together:
   // 1. get the job definition
   // 2. send the job definition if changed
@@ -50,8 +63,6 @@ export const JobProcessor: React.FC<{}> = () => {
   );
   const [nocacheString] = useHashParam("nocache");
   const [inputsMode] = useHashParam("inputsmode");
-  // const [inputsMode] = useQueryParam("inputsmode", StringParam);
-  const [debug] = useHashParamBoolean("debug");
   const outputsMode: DataMode = (inputsMode as DataMode) || DataModeDefault;
 
   // Update the local job hash (id) on change
@@ -126,6 +137,10 @@ export const JobProcessor: React.FC<{}> = () => {
   // track the job state that matches our job definition (created by URL query params and inputs)
   // when we get the correct job state, it's straightforward to just show it
   useEffect(() => {
+    // console.log(
+    //   `⁉️ maybe send job dockerJob.definitionMeta`,
+    //   dockerJob.definitionMeta
+    // );
     if (dockerJob.definitionMeta && serverState && serverState.state) {
       const jobHashCurrent = shaJobDefinition(
         dockerJob.definitionMeta.definition
@@ -172,16 +187,46 @@ export const JobProcessor: React.FC<{}> = () => {
     }
   }, [dockerJob, serverState, jobHashCurrentOutputs]);
 
-  // TODO: streaming logs
-
   return (
-    <Box>
-      {debug ? <JobDisplayId job={job} /> : null}
+    <Tabs index={tabIndex} onChange={setTabIndex}>
+      <TabList>
+        <Tab>
+          <PanelJobLabel job={job} />
+        </Tab>
+        <Tab>Inputs</Tab>
+        <Tab>Stdout</Tab>
+        <Tab>Stderr</Tab>
+        <Tab>
+          <PanelOutputsLabel job={job} />
+        </Tab>
+        <Tab>
+          <TabLabelQueue />
+        </Tab>
+        <ButtonHelp />
+      </TabList>
 
-      <JobDisplayState job={job} />
-      <JobDisplayError job={job} />
-      <JobDisplayOutputs job={job} />
-      <JobDisplayLogs job={job} />
-    </Box>
+      <TabPanels>
+        <TabPanel>
+          <PanelJob job={job} />
+        </TabPanel>
+
+        <TabPanel>
+          <PanelInputs />
+        </TabPanel>
+        <TabPanel background="#ECF2F7">
+          <DisplayLogs job={job} stdout={true} />
+        </TabPanel>
+
+        <TabPanel>
+          <DisplayLogs job={job} stdout={false} />
+        </TabPanel>
+        <TabPanel>
+          <JobDisplayOutputs job={job} />
+        </TabPanel>
+        <TabPanel>
+          <PanelQueue />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   );
 };

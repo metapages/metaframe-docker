@@ -4,7 +4,6 @@ import {
   useHashParamJson,
   useHashParamBoolean,
 } from "@metapages/hash-query";
-import { parse } from "shell-quote";
 import {
   Input,
   Select,
@@ -54,6 +53,7 @@ export const JobInputFromUrlParams: React.FC<{
 
   const onSubmit = useCallback(
     (values: FormType) => {
+      console.log('values', values);
       const newJobDefinitionBlob = {} as DockerJobDefinitionParamsInUrlHash;
       if (values.image) {
         newJobDefinitionBlob.image = values.image;
@@ -64,35 +64,41 @@ export const JobInputFromUrlParams: React.FC<{
       }
 
       // CMD
-      let maybeCommandArray: string[] | undefined;
-      try {
-        maybeCommandArray =
-          values.command && values.command !== ""
-            ? (parse(values.command) as string[])
-            : undefined;
-      } catch (err) {
-        // ignore parsing errors
-      }
+      // let maybeCommandArray: string[] | undefined;
+      // console.log('values.command', values.command);
+      // try {
+      //   maybeCommandArray =
+      //     values.command && values.command !== ""
+      //       ? (parse(values.command) as string[])
+      //       : undefined;
 
-      maybeCommandArray = maybeCommandArray?.map((s) =>
-        typeof s === "object" ? (s as { op: string }).op : s
-      );
-      newJobDefinitionBlob.command = maybeCommandArray;
+      // console.log('maybeCommandArray', maybeCommandArray);
+      // } catch (err) {
+      //   // ignore parsing errors
+      // }
+
+      // maybeCommandArray = maybeCommandArray?.map((s) =>
+      //   typeof s === "object" ? (s as { op: string }).op : s
+      // );
+      // newJobDefinitionBlob.command = maybeCommandArray;
+
+      newJobDefinitionBlob.command = values.command
 
       // ENTRYPOINT
-      let maybeEntrypointArray: string[] | undefined;
-      try {
-        maybeEntrypointArray =
-          values.entrypoint && values.entrypoint !== ""
-            ? (parse(values.entrypoint) as string[])
-            : undefined;
-      } catch (err) {
-        // ignore parsing errors
-      }
-      maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
-        typeof s === "object" ? (s as { op: string }).op : s
-      );
-      newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
+      // let maybeEntrypointArray: string[] | undefined;
+      // try {
+      //   maybeEntrypointArray =
+      //     values.entrypoint && values.entrypoint !== ""
+      //       ? (parse(values.entrypoint) as string[])
+      //       : undefined;
+      // } catch (err) {
+      //   // ignore parsing errors
+      // }
+      // maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
+      //   typeof s === "object" ? (s as { op: string }).op : s
+      // );
+      // newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
+      newJobDefinitionBlob.entrypoint = values.entrypoint;
 
       setJobDefinitionBlob(newJobDefinitionBlob);
       setnocache(!values.cache);
@@ -113,8 +119,8 @@ export const JobInputFromUrlParams: React.FC<{
     initialValues: {
       debug,
       image: jobDefinitionBlob?.image,
-      command: jobDefinitionBlob?.command?.join(" "),
-      entrypoint: jobDefinitionBlob?.entrypoint?.join(" "),
+      command: jobDefinitionBlob?.command, //?.join(" "),
+      entrypoint: jobDefinitionBlob?.entrypoint, //?.join(" "),
       workdir: jobDefinitionBlob?.workdir,
       cache: !nocache,
       inputsmode: inputsMode || DataModeDefault,

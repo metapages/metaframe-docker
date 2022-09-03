@@ -1,32 +1,17 @@
-
-import {
-  Box,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Td,
-  Tbody,
-} from "@chakra-ui/react";
+import { Box, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
 import { useHashParam } from "@metapages/hash-query";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "@metapages/asman-shared";
+} from "/@shared";
 
 export const JobDisplayOutputs: React.FC<{
   job: DockerJobDefinitionRow | undefined;
 }> = ({ job }) => {
   const [queue] = useHashParam("queue");
   return (
-    <Box
-      maxW="100%"
-      p={2}
-      borderWidth="4px"
-      borderRadius="lg"
-      overflow="hidden"
-    >
+    <Box maxW="100%" p={2}>
       <Table variant="simple">
         <Thead>
           <Tr>
@@ -45,7 +30,7 @@ export const JobDisplayOutputs: React.FC<{
   );
 };
 
-const getOutputNames = (job?: DockerJobDefinitionRow) => {
+export const getOutputNames = (job?: DockerJobDefinitionRow) => {
   if (!job?.state || job.state !== DockerJobState.Finished) {
     return [];
   }
