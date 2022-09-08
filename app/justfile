@@ -5,7 +5,7 @@ set dotenv-load                    := true
 # Required for pulling/pushing images, not required for locally building and running.
 export DOCKER_REGISTRY             := env_var_or_default("DOCKER_REGISTRY", "ghcr.io")
 # Eg "yourname/yourrepo". By default, we'll try to get it whereever it might be available, no value means local development
-export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && GITHUB_ACTIONS=true deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.12/commands/docker_image_prefix.ts`)
+export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && GITHUB_ACTIONS=true deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.13/commands/docker_image_prefix.ts`)
 # By default, set by these scripts. Eg <git sha>, v1.2.3, or some other meaningful tag (cache|local)
 # For typical operations (outside of debugging), you won't need to set this yourself
 # This line is duplicated in ci/justfile
