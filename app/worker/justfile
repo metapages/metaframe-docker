@@ -6,7 +6,7 @@ export CI                          := env_var_or_default("CI", "")
 ###############################################################################
 # Docker image names
 export DOCKER_REGISTRY             := join(trim_end_matches(env_var_or_default("DOCKER_REGISTRY", "ghcr.io"), "/"), "")
-export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && GITHUB_ACTIONS=true deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.3/commands/docker_image_prefix.ts || echo ""`)
+export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && GITHUB_ACTIONS=true deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.12/commands/docker_image_prefix.ts || echo ""`)
 export DOCKER_TAG                  := env_var_or_default("DOCKER_TAG", `(which git >/dev/null && git rev-parse --short HEAD) || echo local`)
 ###############################################################################
 NPM_MODULE            := `cat package.json | jq -r .name`
