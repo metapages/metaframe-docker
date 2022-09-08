@@ -51,7 +51,7 @@ export const ButtonModalEditor: React.FC<EditorJsonProps> = ({
           <ModalCloseButton />
           <div>
             <MetaframeStandaloneComponent
-              url="https://metapages.github.io/metaframe-editor/v0.2.7/#?options=eyJoaWRlbWVudWlmaWZyYW1lIjp0cnVlLCJtb2RlIjoic2giLCJzYXZlbG9hZGluaGFzaCI6ZmFsc2UsInRoZW1lIjoidnMtZGFyayJ9"
+              url="https://editor.mtfm.io/#?options=eyJoaWRlbWVudWlmaWZyYW1lIjp0cnVlLCJtb2RlIjoic2giLCJzYXZlbG9hZGluaGFzaCI6ZmFsc2UsInRoZW1lIjoidnMtZGFyayJ9"
               inputs={{ value: content }}
               onOutputs={onOutputs as any}
             />
