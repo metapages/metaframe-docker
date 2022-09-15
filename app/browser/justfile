@@ -27,7 +27,7 @@ export DOCKER_IMAGE_NAME           := `basename $(pwd)`
 # The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 # Source of deno scripts. When developing we need to switch this
-DENO_SOURCE                        := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.13")
+DENO_SOURCE                        := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.17")
 # Common commands that require some preamble
 vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js"
 tsc                                := "./node_modules/typescript/bin/tsc"
@@ -53,7 +53,7 @@ _help:
     echo -e ""
 
 # Browser develop. Points to prodction by default, target=local points to the local docker stack
-dev target="": _mkcert _ensure_npm_modules (_tsc "--build")
+dev target="": _mkcert _ensure_npm_modules
     #!/usr/bin/env bash
     set -eo pipefail
 

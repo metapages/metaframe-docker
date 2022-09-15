@@ -1,15 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import {
-  useHashParam,
-  useHashParamInt,
-} from "@metapages/hash-query";
-import {
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-} from "@chakra-ui/react";
+import { useHashParam, useHashParamInt } from "@metapages/hash-query";
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { useServerState } from "/@/hooks/serverStateHook";
 import { useDockerJobDefinition } from "/@/hooks/jobDefinitionHook";
 import { MetaframeInputMap, isIframe } from "@metapages/metapage";
@@ -42,7 +33,8 @@ import { PanelOutputsLabel } from "/@/components/tabs/PanelOutputsLabel";
 import { PanelJob } from "/@/components/tabs/PanelJob";
 import { ButtonHelp } from "/@/components/ButtonHelp";
 import { PanelJobLabel } from "/@/components/tabs/PanelJobLabel";
-import { PanelInputs } from '../components/PanelInputs';
+import { PanelInputs } from "/@/components/PanelInputs";
+import { PanelStdLabel } from "/@/components/tabs/PanelStdLabel";
 
 export const TabMenu: React.FC = () => {
   const [tabIndex, setTabIndex] = useHashParamInt("tab", 0);
@@ -194,8 +186,12 @@ export const TabMenu: React.FC = () => {
           <PanelJobLabel job={job} />
         </Tab>
         <Tab>Inputs</Tab>
-        <Tab>Stdout</Tab>
-        <Tab>Stderr</Tab>
+        <Tab>
+          <PanelStdLabel stdout={true} job={job} />
+        </Tab>
+        <Tab>
+          <PanelStdLabel stdout={false} job={job} />
+        </Tab>
         <Tab>
           <PanelOutputsLabel job={job} />
         </Tab>
