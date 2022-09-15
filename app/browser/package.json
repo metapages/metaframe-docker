@@ -20,6 +20,7 @@
     "@metapages/metapage-embed-react": "^0.0.16",
     "@popperjs/core": "^2.11.6",
     "@react-typed-hooks/use-key-press": "^1.0.5",
+    "fetch-retry": "^5.0.3",
     "formik": "^2.2.9",
     "formik-chakra-ui": "^1.6.0",
     "framer-motion": "^6.5.1",

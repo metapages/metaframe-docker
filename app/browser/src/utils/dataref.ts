@@ -4,7 +4,9 @@ import { Unibabel } from "unibabel";
 import { MetaframeInputMap } from "@metapages/metapage";
 import { InputsRefs, DataRef, DataRefType, DataRefTypeDefault } from "/@shared";
 import { UPLOAD_DOWNLOAD_BASE_URL } from "../config";
+import fetchRetry from "fetch-retry";
 
+const fetch = fetchRetry(window.fetch);
 const ENV_VAR_DATA_ITEM_LENGTH_MAX = 200;
 
 export enum DataMode {
