@@ -2,7 +2,6 @@ import fs from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 const HOST: string = process.env.HOST || "server1.localhost";
 const PORT: string = process.env.PORT || "4440";
@@ -26,7 +25,6 @@ export default defineConfig(({ command, mode }) => ({
   // this is really stupid this should not be necessary
   plugins: [
     react(),
-    tsconfigPaths({root: ".."}),
   ],
 
   esbuild: {

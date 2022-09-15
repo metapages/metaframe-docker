@@ -49,11 +49,15 @@ export const PanelJob: React.FC<{
 
               <Box>{job?.hash ? `id: ${job?.hash}` : null}</Box>
             </HStack>
+            <HStack width="100%" height="100%">
             {!queue || queue === "" ? null : (
-              <>
-                <JobStatusDisplay job={job} />
-              </>
-            )}
+
+              <JobStatusDisplay job={job} />
+
+          )}
+            </HStack>
+
+
           </VStack>
         </VStack>
       </HStack>
@@ -115,6 +119,8 @@ const JobStatusDisplay: React.FC<{
           const errorBlob:
             | { statusCode: number; json: { message: string } }
             | undefined = resultFinished?.result?.error;
+
+          console.error(errorBlob)
           return (
             <>
               <Alert status="error">

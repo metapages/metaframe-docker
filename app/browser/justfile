@@ -9,6 +9,9 @@ set dotenv-load                    := true
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "metaframe1.dev")
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
 export APP_PORT_BROWSER            := env_var_or_default("APP_PORT_BROWSER", "4440")
+# Either this is set the docker-compose stack, or it defaults to production
+# So if you want local development outside docker-compose, but pointing locally,
+# you have to manually set this to 'local'
 SERVER_ORIGIN                      := env_var_or_default("SERVER_ORIGIN", "https://docker-metapage-io.glitch.me")
 export ROOT                        := env_var_or_default("GITHUB_WORKSPACE", `(which git >/dev/null && git rev-parse --show-toplevel) || (cd ../.. && pwd)`)
 #`if [ "${GITHUB_WORKSPACE}" != "" ]; then echo "${GITHUB_WORKSPACE}"; else echo "$(git rev-parse --show-toplevel)"; fi`
@@ -49,13 +52,16 @@ _help:
     echo -e "    Develop URL 🔗 {{green}}https://{{APP_FQDN}}:{{APP_PORT}}/{{normal}}"
     echo -e ""
 
-# Run the dev server. Opens the web app in browser.
-dev: _mkcert _ensure_npm_modules (_tsc "--build")
+# Browser develop. Points to prodction by default, target=local points to the local docker stack
+dev target="": _mkcert _ensure_npm_modules (_tsc "--build")
     #!/usr/bin/env bash
     set -eo pipefail
 
     if [ "${VITE_SERVER_ORIGIN}" = "" ]; then
-        export VITE_SERVER_ORIGIN="https://${APP_FQDN}:${APP_PORT}"
+        export VITE_SERVER_ORIGIN="{{SERVER_ORIGIN}}"
+    fi
+    if [ "{{target}}" = "local" ]; then
+        export VITE_SERVER_ORIGIN="https://{{APP_FQDN}}:{{APP_PORT}}"
     fi
     echo "Browser development pointing to: ${VITE_SERVER_ORIGIN}"
     MAYBE_OPEN_BROWSER=""

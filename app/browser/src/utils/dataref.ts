@@ -3,7 +3,7 @@ import objectHash from "object-hash"
 import { Unibabel } from "unibabel";
 import { MetaframeInputMap } from "@metapages/metapage";
 import { InputsRefs, DataRef, DataRefType, DataRefTypeDefault } from "/@shared";
-import { APP_ORIGIN } from "../utils/origin";
+import { UPLOAD_DOWNLOAD_BASE_URL } from "../config";
 
 const ENV_VAR_DATA_ITEM_LENGTH_MAX = 200;
 
@@ -57,7 +57,7 @@ export const copyLargeBlobsToCloud = async (inputs: InputsRefs | undefined): Pro
     if (uint8ArrayIfBig) {
       // upload and replace the dataref
       const hash = objectHash.sha1(uint8ArrayIfBig);
-      const urlGetUpload = `${APP_ORIGIN}/upload/${hash}`;
+      const urlGetUpload = `${UPLOAD_DOWNLOAD_BASE_URL}/upload/${hash}`;
       const resp = await fetch(urlGetUpload);
       if (!resp.ok) {
         throw new Error(`Failed to get upload URL from ${urlGetUpload} status=${resp.status}`);
@@ -173,7 +173,7 @@ const fetchBlobFromUrl = async (url: string): Promise<ArrayBuffer> => {
 }
 
 const fetchBlobFromHash = async (hash: string): Promise<ArrayBuffer> => {
-  const resp = await fetch(`${APP_ORIGIN}/download/${hash}`);
+  const resp = await fetch(`${UPLOAD_DOWNLOAD_BASE_URL}/download/${hash}`);
   const json: { url: string, ref: DataRef } = await resp.json();
   const arrayBuffer =  fetchBlobFromUrl(json.url);
   return arrayBuffer;
