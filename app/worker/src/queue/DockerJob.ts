@@ -148,10 +148,7 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
 
     const startData: Buffer = await container!.start();
 
-    // console.log('startData', startData.toString('utf8'));
-
     const dataWait = await container!.wait();
-    // console.log('dataWait', dataWait);
 
     result.StatusCode = dataWait != null
       ? dataWait.StatusCode

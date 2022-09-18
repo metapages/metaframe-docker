@@ -3,31 +3,18 @@
  * and URL query parameters, and the means to change (some of) them
  */
 import { createContext, useContext, useEffect, useState } from "react";
-import { MetaframeInputMap } from "@metapages/metapage";
-import {
-  MetaframeAndInputsContext,
-  MetaframeAndInputsObject,
-} from "@metapages/metaframe-hook";
+import { DataRefSerialized, Metaframe } from "@metapages/metapage";
+import { useMetaframeAndInput } from "@metapages/metaframe-hook";
 import { useHashParamJson, useHashParam } from "@metapages/hash-query";
-import { JobInputs } from '../components/PanelInputs';
-import {
-  copyLargeBlobsToCloud,
-  DataMode,
-  DataModeDefault,
-} from "/@/utils/dataref";
-import {
-  DataRefType,
-  DockerJobDefinitionInputRefs,
-  InputsBase64String,
-  InputsRefs,
-} from "/@shared";
+import { JobInputs } from "../components/PanelInputs";
+import { copyLargeBlobsToCloud } from "/@/utils/dataref";
+import { DataRefType, DockerJobDefinitionInputRefs } from "/@shared";
 import {
   DockerJobDefinitionMetadata,
   DockerJobDefinitionParamsInUrlHash,
 } from "/@/components/types";
 
 type Props = {
-  // children: React.ReactNode;
   children: any;
 };
 
@@ -50,15 +37,22 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
   const [definitionParamsInUrl] = useHashParamJson<
     DockerJobDefinitionParamsInUrlHash | undefined
   >("job");
-  const [jobInputs] = useHashParamJson<JobInputs | undefined>(
-    "inputs"
-  );
-  const metaframe = useContext<MetaframeAndInputsObject>(
-    MetaframeAndInputsContext
-  );
+  const [jobInputs] = useHashParamJson<JobInputs | undefined>("inputs");
+
+  const metaframeBlob = useMetaframeAndInput();
+  // important: do NOT auto serialize input blobs, since the worker is
+  // the only consumer, it wastes resources
+  // Output blobs tho?
+  useEffect(() => {
+    // This is here but currently does not seem to work:
+    // https://github.com/metapages/metapage/issues/117
+    if (metaframeBlob?.metaframe) {
+      metaframeBlob.metaframe.isInputOutputBlobSerialization = false;
+    }
+  }, [metaframeBlob?.metaframe]);
+
   const [nocacheString] = useHashParam("nocache");
   const nocache = nocacheString === "1" ? true : false;
-  const [inputsModeFromQuery] = useHashParam("inputsmode");
   const [definitionMeta, setDefinitionMeta] = useState<
     DockerJobDefinitionMetadata | undefined
   >(undefined);
@@ -67,24 +61,24 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
   useEffect(() => {
     // console.log(`🍔 useEffect`)
     let cancelled = false;
-    // we DO NOT process inputs, pass them along. The job consumer expects base64 encoded strings
-    // but maybe we can be graceful and convert objects to JSON strings?
-    // TODO: validate inputs as strings
-    // const mode
-    // The user claims inputsMode is the format of the inputs
-    const inputsMode: DataMode = inputsModeFromQuery
-      ? (inputsModeFromQuery as DataMode)
-      : DataModeDefault;
     // So convert all possible input data types into datarefs for smallest internal representation (no big blobs)
     const definition: DockerJobDefinitionInputRefs = {
       ...definitionParamsInUrl,
     };
-    definition.inputs = !jobInputs ? {} : Object.fromEntries(Object.keys(jobInputs).map((key) => {
-      return [key, { type: DataRefType.utf8, value: jobInputs[key] as string }];
-    }));
+    // These are inputs set in the metaframe and stored in the url hash params. They
+    // are always type: DataRefType.utf8 because they come from the text editor
+    definition.inputs = !jobInputs
+      ? {}
+      : Object.fromEntries(
+          Object.keys(jobInputs).map((key) => {
+            return [
+              key,
+              { type: DataRefType.utf8, value: jobInputs[key] as string },
+            ];
+          })
+        );
 
     // console.log("🍔 useEffect definition", definition);
-
 
     if (!definition.image) {
       setDefinitionMeta(undefined);
@@ -92,43 +86,42 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
     }
 
     (async () => {
-      switch (inputsMode) {
-        case DataMode.dataref:
-          const refsInputs = metaframe.inputs as InputsRefs;
-          Object.keys(refsInputs).forEach((name) => {
-            definition.inputs![name] = refsInputs[name];
-          });
-          break;
-        case DataMode.json:
-          const metaframeInputs = metaframe.inputs as MetaframeInputMap;
-          Object.keys(metaframeInputs).forEach((name) => {
+      // convert inputs into internal data refs so workers can consume
+      let inputs = metaframeBlob.inputs;
+      // TODO: this shouldn't be needed, but there is a bug:
+      // https://github.com/metapages/metapage/issues/117
+      inputs = await Metaframe.serializeInputs(inputs);
+      Object.keys(inputs).forEach((name) => {
+        let value = inputs[name];
+        if (typeof value === "object" && value._s === true) {
+          const blob = value as DataRefSerialized;
+          // serialized blob/typedarray/arraybuffer
+          definition.inputs![name] = {
+            value: blob.value,
+            type: DataRefType.base64,
+          };
+        } else {
+          if (typeof value === "object") {
             definition.inputs![name] = {
-              value: metaframeInputs[name],
+              value,
               type: DataRefType.json,
             };
-          });
-          break;
-        case DataMode.utf8:
-          const stringInputs = metaframe.inputs as MetaframeInputMap;
-          Object.keys(stringInputs).forEach((name) => {
+          } else if (typeof value === "string") {
             definition.inputs![name] = {
-              value: stringInputs[name],
+              value,
               type: DataRefType.utf8,
             };
-          });
-          break;
-        // base64 is the default if unrecognized
-        case DataMode.base64:
-        default:
-          const base64Inputs = metaframe.inputs as InputsBase64String;
-          Object.keys(base64Inputs).forEach((name) => {
-            definition.inputs![name] = {
-              value: base64Inputs[name],
-              type: DataRefType.base64,
-            };
-          });
-          break;
-      }
+          } else {
+            console.error(`I don't know how to handle input ${name}:`, value);
+          }
+          // Now all (non-blob) values are DataMode.utf8
+        }
+      });
+
+      const refsInputs = metaframeBlob.inputs;
+      Object.keys(refsInputs).forEach((name) => {
+        definition.inputs![name] = refsInputs[name];
+      });
 
       // at this point, these inputs could be very large blobs.
       // any big things are uploaded to cloud storage, then the input is replaced with a reference to the cloud lump
@@ -149,7 +142,7 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
         cancelled = true;
       };
     })();
-  }, [metaframe.inputs, definitionParamsInUrl, jobInputs, inputsModeFromQuery]);
+  }, [metaframeBlob.inputs, definitionParamsInUrl, jobInputs]);
 
   return (
     <DockerJobDefinitionContext.Provider value={{ definitionMeta }}>

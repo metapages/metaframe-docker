@@ -1,12 +1,7 @@
 import { useCallback } from "react";
-import {
-  useHashParam,
-  useHashParamJson,
-  useHashParamBoolean,
-} from "@metapages/hash-query";
+import { useHashParamJson, useHashParamBoolean } from "@metapages/hash-query";
 import {
   Input,
-  Select,
   Switch,
   Button,
   FormControl,
@@ -26,7 +21,6 @@ import {
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { DockerJobDefinitionParamsInUrlHash } from "./types";
-import { DataMode, DataModeDefault } from "../utils/dataref";
 
 const validationSchema = yup.object({
   image: yup.string(),
@@ -34,7 +28,6 @@ const validationSchema = yup.object({
   entrypoint: yup.string(),
   workdir: yup.string(),
   cache: yup.boolean(),
-  inputsmode: yup.string(),
   debug: yup.boolean(),
 });
 interface FormType extends yup.InferType<typeof validationSchema> {}
@@ -47,13 +40,9 @@ export const JobInputFromUrlParams: React.FC<{
     useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
   const [nocache, setnocache] = useHashParamBoolean("nocache");
   const [debug, setDebug] = useHashParamBoolean("debug");
-  // Allow the user to define what format the inputs are. If they can
-  // tell us, then we can make data move better/faster
-  const [inputsMode, setInputsMode] = useHashParam("inputsmode");
 
   const onSubmit = useCallback(
     (values: FormType) => {
-      console.log('values', values);
       const newJobDefinitionBlob = {} as DockerJobDefinitionParamsInUrlHash;
       if (values.image) {
         newJobDefinitionBlob.image = values.image;
@@ -63,56 +52,15 @@ export const JobInputFromUrlParams: React.FC<{
         newJobDefinitionBlob.workdir = values.workdir;
       }
 
-      // CMD
-      // let maybeCommandArray: string[] | undefined;
-      // console.log('values.command', values.command);
-      // try {
-      //   maybeCommandArray =
-      //     values.command && values.command !== ""
-      //       ? (parse(values.command) as string[])
-      //       : undefined;
-
-      // console.log('maybeCommandArray', maybeCommandArray);
-      // } catch (err) {
-      //   // ignore parsing errors
-      // }
-
-      // maybeCommandArray = maybeCommandArray?.map((s) =>
-      //   typeof s === "object" ? (s as { op: string }).op : s
-      // );
-      // newJobDefinitionBlob.command = maybeCommandArray;
-
-      newJobDefinitionBlob.command = values.command
-
-      // ENTRYPOINT
-      // let maybeEntrypointArray: string[] | undefined;
-      // try {
-      //   maybeEntrypointArray =
-      //     values.entrypoint && values.entrypoint !== ""
-      //       ? (parse(values.entrypoint) as string[])
-      //       : undefined;
-      // } catch (err) {
-      //   // ignore parsing errors
-      // }
-      // maybeEntrypointArray = maybeEntrypointArray?.map((s) =>
-      //   typeof s === "object" ? (s as { op: string }).op : s
-      // );
-      // newJobDefinitionBlob.entrypoint = maybeEntrypointArray;
+      newJobDefinitionBlob.command = values.command;
       newJobDefinitionBlob.entrypoint = values.entrypoint;
 
       setJobDefinitionBlob(newJobDefinitionBlob);
       setnocache(!values.cache);
-      if (
-        values.inputsmode !== undefined &&
-        values.inputsmode !== DataMode.base64
-      ) {
-        setInputsMode(values.inputsmode);
-      }
-
       setDebug(values.debug!!);
       onClose();
     },
-    [onClose, setJobDefinitionBlob, setnocache, setInputsMode, setDebug]
+    [onClose, setJobDefinitionBlob, setnocache, setDebug]
   );
 
   const formik = useFormik({
@@ -123,7 +71,6 @@ export const JobInputFromUrlParams: React.FC<{
       entrypoint: jobDefinitionBlob?.entrypoint, //?.join(" "),
       workdir: jobDefinitionBlob?.workdir,
       cache: !nocache,
-      inputsmode: inputsMode || DataModeDefault,
     },
     onSubmit,
     validationSchema,
@@ -173,23 +120,6 @@ export const JobInputFromUrlParams: React.FC<{
                   onChange={formik.handleChange}
                   isChecked={formik.values.cache}
                 />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel htmlFor="inputsmode">Inputs Mode</FormLabel>
-                <Select
-                  id="inputsmode"
-                  name="inputsmode"
-                  onChange={formik.handleChange}
-                  value={formik.values.inputsmode}
-                >
-                  {Object.keys(DataMode).map((datamode) => (
-                    <option value={datamode} key={datamode}>
-                      {datamode +
-                        (datamode === DataModeDefault ? " (default)" : "")}
-                    </option>
-                  ))}
-                </Select>
               </FormControl>
 
               <FormControl>

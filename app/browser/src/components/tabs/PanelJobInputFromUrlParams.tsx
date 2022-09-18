@@ -17,7 +17,6 @@ import {
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { DataMode, DataModeDefault } from "/@/utils/dataref";
 import { DockerJobDefinitionParamsInUrlHash } from "/@/components/types";
 
 const validationSchema = yup.object({
@@ -26,7 +25,6 @@ const validationSchema = yup.object({
   entrypoint: yup.string(),
   workdir: yup.string(),
   cache: yup.boolean(),
-  inputsmode: yup.string(),
   debug: yup.boolean(),
 });
 interface FormType extends yup.InferType<typeof validationSchema> {}
@@ -38,9 +36,6 @@ export const PanelJobInputFromUrlParams: React.FC<{
     useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
   const [nocache, setnocache] = useHashParamBoolean("nocache");
   const [debug, setDebug] = useHashParamBoolean("debug");
-  // Allow the user to define what format the inputs are. If they can
-  // tell us, then we can make data move better/faster
-  const [inputsMode, setInputsMode] = useHashParam("inputsmode");
 
   const onSubmit = useCallback(
     (values: FormType) => {
@@ -58,19 +53,13 @@ export const PanelJobInputFromUrlParams: React.FC<{
 
       setJobDefinitionBlob(newJobDefinitionBlob);
       setnocache(!values.cache);
-      if (
-        values.inputsmode !== undefined &&
-        values.inputsmode !== DataMode.base64
-      ) {
-        setInputsMode(values.inputsmode);
-      }
 
       setDebug(values.debug!!);
       if (onSave) {
         onSave();
       }
     },
-    [onSave, setJobDefinitionBlob, setnocache, setInputsMode, setDebug]
+    [onSave, setJobDefinitionBlob, setnocache, setDebug]
   );
 
   const formik = useFormik({
@@ -81,7 +70,6 @@ export const PanelJobInputFromUrlParams: React.FC<{
       entrypoint: jobDefinitionBlob?.entrypoint,
       workdir: jobDefinitionBlob?.workdir,
       cache: !nocache,
-      inputsmode: inputsMode || DataModeDefault,
     },
     onSubmit,
     validationSchema,
@@ -149,23 +137,6 @@ export const PanelJobInputFromUrlParams: React.FC<{
                 onChange={formik.handleChange}
                 isChecked={formik.values.cache}
               />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel htmlFor="inputsmode">Inputs Mode</FormLabel>
-              <Select
-                id="inputsmode"
-                name="inputsmode"
-                onChange={formik.handleChange}
-                value={formik.values.inputsmode}
-              >
-                {Object.keys(DataMode).map((datamode) => (
-                  <option value={datamode} key={datamode}>
-                    {datamode +
-                      (datamode === DataModeDefault ? " (default)" : "")}
-                  </option>
-                ))}
-              </Select>
             </FormControl>
 
             <FormControl>

@@ -190,7 +190,6 @@ export class DockerJobQueue {
                 // get outputs
                 try {
                     const outputs = await getOutputs(jobBlob);
-                    // console.log('outputs', outputs);
                     valueFinished = {
                         reason: DockerJobFinishedReason.Success,
                         worker: this.workerId,

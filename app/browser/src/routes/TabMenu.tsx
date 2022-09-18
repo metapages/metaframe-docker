@@ -8,6 +8,7 @@ import { DisplayLogs } from "/@/components/DisplayLogs";
 import {
   MetaframeAndInputsContext,
   MetaframeAndInputsObject,
+  useMetaframeAndInput,
 } from "@metapages/metaframe-hook";
 import {
   shaJobDefinition,
@@ -21,11 +22,7 @@ import {
   StateChangeValueWorkerFinished,
   InputsRefs,
 } from "/@shared";
-import {
-  convertJobOutputDataRefsToExpectedFormat,
-  DataMode,
-  DataModeDefault,
-} from "/@/utils/dataref";
+import { convertJobOutputDataRefsToExpectedFormat } from "/@/utils/dataref";
 import { JobDisplayOutputs } from "/@/components/tabs/PanelOutputs";
 import { TabLabelQueue } from "/@/components/tabs/queue/TabLabelQueue";
 import { PanelQueue } from "/@/components/tabs/PanelQueue";
@@ -50,12 +47,19 @@ export const TabMenu: React.FC = () => {
     string | undefined
   >(undefined);
   const [job, setJob] = useState<DockerJobDefinitionRow | undefined>(undefined);
-  const metaframe = useContext<MetaframeAndInputsObject>(
-    MetaframeAndInputsContext
-  );
+
+  const metaframeBlob = useMetaframeAndInput();
+  useEffect(() => {
+    // This is here but currently does not seem to work:
+    // https://github.com/metapages/metapage/issues/117
+    if (metaframeBlob?.metaframe) {
+      metaframeBlob.metaframe.isInputOutputBlobSerialization = false;
+    }
+  }, [metaframeBlob?.metaframe]);
+  // const metaframe = useContext<MetaframeAndInputsObject>(
+  //   MetaframeAndInputsContext
+  // );
   const [nocacheString] = useHashParam("nocache");
-  const [inputsMode] = useHashParam("inputsmode");
-  const outputsMode: DataMode = (inputsMode as DataMode) || DataModeDefault;
 
   // Update the local job hash (id) on change
   useEffect(() => {
@@ -100,7 +104,7 @@ export const TabMenu: React.FC = () => {
 
   // only maybe update metaframe outputs if the job updates and is finished (with outputs)
   useEffect(() => {
-    const metaframeObj = metaframe?.metaframe;
+    const metaframeObj = metaframeBlob?.metaframe;
     if (metaframeObj?.setOutputs && job?.state === DockerJobState.Finished) {
       const stateFinished: StateChangeValueWorkerFinished =
         job.value as StateChangeValueWorkerFinished;
@@ -108,31 +112,25 @@ export const TabMenu: React.FC = () => {
         const outputs: InputsRefs = stateFinished!.result!.outputs;
         (async () => {
           const metaframeOutputs: MetaframeInputMap | undefined =
-            await convertJobOutputDataRefsToExpectedFormat(
-              outputs,
-              outputsMode
-            );
-
+            await convertJobOutputDataRefsToExpectedFormat(outputs);
           if (metaframeOutputs) {
             try {
               metaframeObj.setOutputs!(metaframeOutputs);
             } catch (err) {
               console.error("Failed to send metaframe outputs", err);
             }
+          } else {
+            console.log(`❗no metaframeOutputs`);
           }
           setJobHashCurrentOutputs(job.hash);
         })();
       }
     }
-  }, [job, metaframe, setJobHashCurrentOutputs]);
+  }, [job, metaframeBlob?.metaframe, setJobHashCurrentOutputs]);
 
   // track the job state that matches our job definition (created by URL query params and inputs)
   // when we get the correct job state, it's straightforward to just show it
   useEffect(() => {
-    // console.log(
-    //   `⁉️ maybe send job dockerJob.definitionMeta`,
-    //   dockerJob.definitionMeta
-    // );
     if (dockerJob.definitionMeta && serverState && serverState.state) {
       const jobHashCurrent = shaJobDefinition(
         dockerJob.definitionMeta.definition
@@ -141,8 +139,6 @@ export const TabMenu: React.FC = () => {
         setJobHash(jobHashCurrent);
       }
       if (serverState.state.state.jobs[jobHashCurrent]) {
-        // const existingJobState =
-        //   serverState.state.state.jobs[jobHashCurrent].state;
         // Do we need to do anything here?
       } else {
         if (serverState && serverState.stateChange) {

@@ -3,7 +3,7 @@ import fse from "fs-extra";
 import machineId from 'node-machine-id';
 
 export const VERSION: string = JSON.parse(fse.readFileSync("./package.json", 'utf8')).version;
-const MACHINE_ID: string = machineId.machineIdSync().substr(0, 12);
+const MACHINE_ID: string = machineId.machineIdSync().substring(0, 12);
 
 export interface Arguments {
     cpus: number;

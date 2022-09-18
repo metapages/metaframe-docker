@@ -1,5 +1,20 @@
-import objectHash from "object-hash"
-import fetch from "isomorphic-fetch"
+import objectHash from "object-hash";
+import fetch from "isomorphic-fetch";
+import fetchRetry from "fetch-retry";
+
+export const fetchRobust = fetchRetry(fetch, {
+  retries: 8,
+  retryDelay: (attempt:number, error:any, response:any) => {
+    return Math.pow(2, attempt) * 500; // 500, 1000, 2000, 4000, 5000
+  },
+  retryOn: (attempt:number, error:any, response:any) => {
+    // retry on any network error, or 4xx or 5xx status codes
+    if (error !== null || response.status >= 400) {
+      console.log(`retrying, attempt number ${attempt + 1}`);
+      return true;
+    }
+  },
+});
 
 // represents a way of getting a blob of data (inputs/outputs)
 export enum DataRefType {
@@ -11,7 +26,6 @@ export enum DataRefType {
     hash = "hash", // the internal system can get this data blob given the hash address (stored in the value)
 }
 
-
 export const DataRefTypeDefault = DataRefType.base64;
 
 export type DataRef<T=string> = {
@@ -20,6 +34,7 @@ export type DataRef<T=string> = {
     type?: DataRefType;
 }
 
+// NOT USED
 // convert a lump of binary encoded as a base64 string into a DataRef
 export const base64ToDataRef = async (value: string, options: {ignoreHash?: boolean, putUrl:string}): Promise<DataRef> => {
     const { ignoreHash, putUrl } = options;
@@ -38,9 +53,9 @@ export const base64ToDataRef = async (value: string, options: {ignoreHash?: bool
         }
     }
 
-    const resp = await fetch(putUrl);
+    const resp = await fetchRobust(putUrl);
     const json : { url:string, ref: DataRef} = await resp.json();
-    const responseUpload = fetch(json.url, {method: 'PUT', body:null})
+    const responseUpload = await fetchRobust(json.url, {method: 'PUT', body:null})
     await responseUpload.blob();
 
     return {

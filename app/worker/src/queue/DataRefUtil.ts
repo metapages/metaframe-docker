@@ -1,9 +1,8 @@
 import * as path from "path"
 import fse from "fs-extra"
-import fetch from "node-fetch"
 import {pipeline} from "stream";
 import {promisify} from "util";
-import { DataRef, DataRefType } from '../../../shared/dist/dataref/index.js';
+import { DataRef, DataRefType, fetchRobust as fetch} from '../../../shared/dist/dataref/index.js';
 import { args } from "../args";
 const streamPipeline = promisify(pipeline);
 
@@ -24,7 +23,6 @@ export const dataRefToBuffer = async (ref: DataRef): Promise<Buffer> => {
 export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void> => {
     const dir = path.dirname(filename);
     await fse.ensureDir(dir);
-    // console.log('ref', ref);
     let errString:string;
     switch(ref.type) {
         case DataRefType.base64:
@@ -54,6 +52,7 @@ export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void
                 console.error(errString);
                 throw new Error(errString);
             }
+            // @ts-ignore
             await streamPipeline(responseUrl.body, fileStreamUrl);
             return;
         case DataRefType.hash:
@@ -84,6 +83,7 @@ export const dataRefToFile = async (ref: DataRef, filename:string): Promise<void
             if (!responseHashUrl.body) {
                 throw new Error(`Failed to download="${json.url}" status=${responseHashUrl.status} no body in response`);
             }
+            // @ts-ignore
             await streamPipeline(responseHashUrl.body, fileStreamHash);
             break;
         default: // undefined assume DataRefType.Base64
