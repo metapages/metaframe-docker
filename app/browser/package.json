@@ -1,6 +1,6 @@
 {
   "name": "@metapages/metaframe-docker",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "repository": {
     "url": "https://metapages.github.io/metaframe-docker/"
