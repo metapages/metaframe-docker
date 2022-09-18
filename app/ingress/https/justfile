@@ -2,7 +2,7 @@ set shell       := ["bash", "-c"]
 set dotenv-load := true
 export APP_FQDN := env_var_or_default("APP_FQDN", "metaframe1.dev")
 # Source of deno scripts. When developing we need to switch this
-export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.13")
+export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.17")
 bold            := '\033[1m'
 normal          := '\033[0m'
 
