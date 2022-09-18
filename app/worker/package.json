@@ -1,7 +1,7 @@
 {
   "name": "@metapages/asman-worker",
   "public": true,
-  "version": "0.0.13",
+  "version": "0.1.0",
   "description": "Execute docker compute jobs within the asman metaframe",
   "repository": "",
   "type": "module",
