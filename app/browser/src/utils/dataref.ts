@@ -26,14 +26,14 @@ export const copyLargeBlobsToCloud = async (
 
   await Promise.all(
     Object.keys(inputs).map(async (name) => {
-      const type: DataRefType = inputs[name].type || DataRefTypeDefault;
+      const type: DataRefType = inputs[name]?.type || DataRefTypeDefault;
       let uint8ArrayIfBig: Uint8Array | undefined;
       switch (type) {
         case DataRefType.hash:
           // this is already cloud storage. weird. or really advanced? who knows, but trust it anyway,
           break;
         case DataRefType.json:
-          if (inputs[name] && inputs[name].value) {
+          if (inputs?.[name]?.value) {
             const jsonString = JSON.stringify(inputs[name].value);
             if (jsonString.length > ENV_VAR_DATA_ITEM_LENGTH_MAX) {
               uint8ArrayIfBig = Unibabel.utf8ToBuffer(jsonString);
@@ -42,8 +42,7 @@ export const copyLargeBlobsToCloud = async (
           break;
         case DataRefType.utf8:
           if (
-            inputs[name] &&
-            inputs[name]?.value.length > ENV_VAR_DATA_ITEM_LENGTH_MAX
+            inputs?.[name]?.value?.length > ENV_VAR_DATA_ITEM_LENGTH_MAX
           ) {
             uint8ArrayIfBig = Unibabel.utf8ToBuffer(inputs[name].value);
           }
@@ -52,8 +51,7 @@ export const copyLargeBlobsToCloud = async (
         case DataRefType.base64:
         default:
           if (
-            inputs[name] &&
-            inputs[name]?.value.length > ENV_VAR_DATA_ITEM_LENGTH_MAX
+            inputs?.[name]?.value.length > ENV_VAR_DATA_ITEM_LENGTH_MAX
           ) {
             uint8ArrayIfBig = Unibabel.base64ToBuffer(inputs[name].value);
           }
