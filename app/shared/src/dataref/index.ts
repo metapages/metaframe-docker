@@ -26,7 +26,7 @@ export enum DataRefType {
     hash = "hash", // the internal system can get this data blob given the hash address (stored in the value)
 }
 
-export const DataRefTypeDefault = DataRefType.base64;
+export const DataRefTypeDefault = DataRefType.utf8;
 
 export type DataRef<T=string> = {
     value: T;

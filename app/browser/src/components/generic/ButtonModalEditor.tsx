@@ -27,8 +27,8 @@ export const ButtonModalEditor: React.FC<EditorJsonProps> = ({
       if (outputs["value"] === undefined || outputs["value"] === null) {
         return;
       }
-      const newValues = outputs["value"];
-      onUpdate(newValues);
+      const newValue = outputs["value"];
+      onUpdate(newValue);
       onClose();
     },
     [onUpdate, onClose]

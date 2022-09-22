@@ -1,15 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useHashParam, useHashParamInt } from "@metapages/hash-query";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { useServerState } from "/@/hooks/serverStateHook";
 import { useDockerJobDefinition } from "/@/hooks/jobDefinitionHook";
 import { MetaframeInputMap, isIframe } from "@metapages/metapage";
 import { DisplayLogs } from "/@/components/DisplayLogs";
-import {
-  MetaframeAndInputsContext,
-  MetaframeAndInputsObject,
-  useMetaframeAndInput,
-} from "@metapages/metaframe-hook";
+import { useMetaframeAndInput } from "@metapages/metaframe-hook";
 import {
   shaJobDefinition,
   DockerJobDefinitionRow,
@@ -28,10 +24,10 @@ import { TabLabelQueue } from "/@/components/tabs/queue/TabLabelQueue";
 import { PanelQueue } from "/@/components/tabs/PanelQueue";
 import { PanelOutputsLabel } from "/@/components/tabs/PanelOutputsLabel";
 import { PanelJob } from "/@/components/tabs/PanelJob";
-import { ButtonHelp } from "/@/components/ButtonHelp";
 import { PanelJobLabel } from "/@/components/tabs/PanelJobLabel";
 import { PanelInputs } from "/@/components/PanelInputs";
 import { PanelStdLabel } from "/@/components/tabs/PanelStdLabel";
+import { QuestionIcon } from "@chakra-ui/icons";
 
 export const TabMenu: React.FC = () => {
   const [tabIndex, setTabIndex] = useHashParamInt("tab", 0);
@@ -194,7 +190,10 @@ export const TabMenu: React.FC = () => {
         <Tab>
           <TabLabelQueue />
         </Tab>
-        <ButtonHelp />
+        <Tab>
+          <QuestionIcon />
+          &nbsp; Help{" "}
+        </Tab>
       </TabList>
 
       <TabPanels>
@@ -217,6 +216,13 @@ export const TabMenu: React.FC = () => {
         </TabPanel>
         <TabPanel>
           <PanelQueue />
+        </TabPanel>
+
+        <TabPanel>
+          <iframe
+            style={{ width: "100%", height: "90vh" }}
+            src={`https://markdown.mtfm.io/#?url=${window.location.origin}${window.location.pathname}/README.md`}
+          />
         </TabPanel>
       </TabPanels>
     </Tabs>

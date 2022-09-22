@@ -100,16 +100,18 @@ export const InputRow: React.FC<{
   onDelete: (name: string) => void;
   onUpdate: (name: string, content: string) => void;
 }> = ({ name, content, onDelete, onUpdate }) => {
+  const onUpdateMemoized = useCallback(
+    (contentUpdate: string) => onUpdate(name, contentUpdate),
+    [name, onUpdate]
+  );
+
   return (
     <Tr>
       <Td>
         <Tag>{name}</Tag>
       </Td>
       <Td textAlign="right">
-        <ButtonModalEditor
-          content={content}
-          onUpdate={(content: string) => onUpdate(name, content)}
-        />
+        <ButtonModalEditor content={content} onUpdate={onUpdateMemoized} />
       </Td>
       <Td textAlign="right">
         <ButtonDeleteWithConfirm callback={() => onDelete(name)} />

@@ -86,11 +86,17 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
     }
 
     (async () => {
+      if (cancelled) {
+        return;
+      }
       // convert inputs into internal data refs so workers can consume
       let inputs = metaframeBlob.inputs;
       // TODO: this shouldn't be needed, but there is a bug:
       // https://github.com/metapages/metapage/issues/117
       inputs = await Metaframe.serializeInputs(inputs);
+      if (cancelled) {
+        return;
+      }
       Object.keys(inputs).forEach((name) => {
         let value = inputs[name];
         if (typeof value === "object" && value._s === true) {
@@ -118,27 +124,23 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
         }
       });
 
-      const refsInputs = metaframeBlob.inputs;
-      Object.keys(refsInputs).forEach((name) => {
-        definition.inputs![name] = refsInputs[name];
-      });
-
       // at this point, these inputs could be very large blobs.
       // any big things are uploaded to cloud storage, then the input is replaced with a reference to the cloud lump
       definition.inputs = await copyLargeBlobsToCloud(definition.inputs);
-
-      // if uploading a large blob means new inputs have arrived and replaced this set, break out
-      if (!cancelled) {
-        const newJobDefinition: DockerJobDefinitionMetadata = {
-          definition,
-          nocache,
-        };
-        // console.log(`🍔 setDefinitionMeta`, newJobDefinition)
-        setDefinitionMeta(newJobDefinition);
+      if (cancelled) {
+        return;
       }
 
+      // if uploading a large blob means new inputs have arrived and replaced this set, break out
+      const newJobDefinition: DockerJobDefinitionMetadata = {
+        definition,
+        nocache,
+      };
+      // console.log(`🍔 setDefinitionMeta`, newJobDefinition)
+      setDefinitionMeta(newJobDefinition);
+
       return () => {
-        // console.log("🍔😞 useEffect cancelled");
+        console.log("🍔😞 useEffect cancelled");
         cancelled = true;
       };
     })();
