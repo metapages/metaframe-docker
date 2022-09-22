@@ -36,6 +36,11 @@ export const JobInputFromUrlParams: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
+
+  // console.log(`JobInputFromUrlParams ${isOpen} `);
+
+
+
   const [jobDefinitionBlob, setJobDefinitionBlob] =
     useHashParamJson<DockerJobDefinitionParamsInUrlHash>("job");
   const [nocache, setnocache] = useHashParamBoolean("nocache");
