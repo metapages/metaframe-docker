@@ -6,7 +6,7 @@ if (!SERVER_ORIGIN) {
 }
 
 serverOrigin = SERVER_ORIGIN;
-if (import.meta.env.DEV || true) {
+if (import.meta.env.DEV) {
     console.log(`SERVER_ORIGIN=${serverOrigin}`);
 }
 

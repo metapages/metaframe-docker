@@ -37,7 +37,7 @@ export const QueueButtonAndLabel: React.FC = () => {
   const onSubmit = useCallback(
     (values: FormType) => {
       setQueue(values.queue);
-      formik.resetForm();
+      formik.setFieldValue("queue", values.queue);
       onClose();
     },
     [onClose, setQueue]
@@ -58,17 +58,22 @@ export const QueueButtonAndLabel: React.FC = () => {
 
   return (
     <HStack width="100%">
-
       <IconButton
         size="lg"
         onClick={onToggle}
         colorScheme="blue"
         aria-label="edit docker job queue"
-        icon={queue && serverState.connected ? <RiSignalWifiFill /> : <RiSignalWifiErrorLine />}
+        icon={
+          queue && serverState.connected ? (
+            <RiSignalWifiFill />
+          ) : (
+            <RiSignalWifiErrorLine />
+          )
+        }
         // isLoading={!!queue && !serverState.connected}
       />
 
-<Box p={2}>
+      <Box p={2}>
         {`Queue key:`} {queue ? <Tag>{queue}</Tag> : null}{" "}
       </Box>
 

@@ -12,14 +12,14 @@ import { Jobs } from "../Jobs";
 import { Workers } from "../Workers";
 import { useActiveJobsCount } from "/@/hooks/useActiveJobsCount";
 import { useWorkersCount } from "/@/hooks/useWorkersCount";
-import { ButtonHelp } from "/@/components/ButtonHelp";
+import { QuestionIcon } from "@chakra-ui/icons";
 
 export const PanelQueue: React.FC = () => {
   const activeJobsCount = useActiveJobsCount();
   const workerCount = useWorkersCount();
 
   const maybeHelpForNoWorkers =
-    workerCount > 0 ? null : <ButtonHelp color="red" />;
+    workerCount > 0 ? null : <QuestionIcon color="red" />;
 
   return (
     <VStack width="100%" justifyContent="flex-start" alignItems="flex-start">
@@ -29,8 +29,8 @@ export const PanelQueue: React.FC = () => {
         <Tabs width="100%">
           <TabList>
             <Tab>Jobs (active total: {activeJobsCount})</Tab>
-            <Tab>Workers (total {workerCount}) </Tab>
-            {maybeHelpForNoWorkers}
+            <Tab>Workers (total {workerCount}) &nbsp; {maybeHelpForNoWorkers}</Tab>
+            {/* {maybeHelpForNoWorkers} */}
           </TabList>
 
           <TabPanels>
