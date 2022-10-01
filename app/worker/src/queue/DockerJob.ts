@@ -48,6 +48,7 @@ export interface DockerJobArgs {
   volumes?: Array<Volume>;
   outStream?: Writable;
   errStream?: Writable;
+  gpu?: boolean;
 }
 
 // this comes out
@@ -72,7 +73,7 @@ export interface DockerRunResult {
 
 export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobExecution> => {
 
-  const { image, command, env, workdir, entrypoint, volumes, outStream, errStream } = args;
+  const { image, command, env, workdir, entrypoint, volumes, outStream, errStream, gpu } = args;
 
   const result: DockerRunResult = {
     stdout: [],
@@ -98,12 +99,20 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
       : undefined,
     Tty: false, // needed for splitting stdout/err
     AttachStdout: true,
-    AttachStderr: true
+    AttachStderr: true,
   };
 
-  // if (somehow decide if GPU needed) {
-  //   createOptions.HostConfig["Runtime"] = "nvidia";
-  // }
+  if (gpu) {
+    // https://github.com/apocas/dockerode/issues/628
+    createOptions.HostConfig!.DeviceRequests = [
+      {
+        Count: -1,
+        Driver: "nvidia",
+        Capabilities: [["gpu"]],
+      },
+    ];
+
+  }
 
   if (volumes != null) {
     createOptions.HostConfig!.Binds = [];

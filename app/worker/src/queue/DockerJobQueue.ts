@@ -157,6 +157,7 @@ export class DockerJobQueue {
             workdir: definition.workdir,
             env: definition.env,
             volumes: [volumes!.inputs, volumes!.outputs],
+            gpu: definition.gpu,
             // outStream?: Writable;
             // errStream?: Writable;
         }

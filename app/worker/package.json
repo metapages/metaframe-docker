@@ -1,7 +1,7 @@
 {
   "name": "@metapages/asman-worker",
   "public": true,
-  "version": "0.1.0",
+  "version": "0.1.1-gpu-test.1",
   "description": "Execute docker compute jobs within the asman metaframe",
   "repository": "",
   "type": "module",
@@ -14,7 +14,7 @@
     "bufferutil": "^4.0.3",
     "chalk": "^4.1.1",
     "dev-null": "^0.1.1",
-    "dockerode": "^3.2.1",
+    "dockerode": "^3.3.4",
     "execa": "^5.0.0",
     "fs-extra": "^9.1.0",
     "klaw": "^3.0.0",

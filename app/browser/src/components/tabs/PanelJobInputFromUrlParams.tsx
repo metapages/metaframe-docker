@@ -1,12 +1,7 @@
 import { useCallback } from "react";
-import {
-  useHashParam,
-  useHashParamJson,
-  useHashParamBoolean,
-} from "@metapages/hash-query";
+import { useHashParamJson, useHashParamBoolean } from "@metapages/hash-query";
 import {
   Input,
-  Select,
   Switch,
   Button,
   FormControl,
@@ -26,6 +21,7 @@ const validationSchema = yup.object({
   workdir: yup.string(),
   cache: yup.boolean(),
   debug: yup.boolean(),
+  gpu: yup.boolean(),
 });
 interface FormType extends yup.InferType<typeof validationSchema> {}
 
@@ -48,8 +44,9 @@ export const PanelJobInputFromUrlParams: React.FC<{
         newJobDefinitionBlob.workdir = values.workdir;
       }
 
-      newJobDefinitionBlob.command = values.command
-      newJobDefinitionBlob.entrypoint = values.entrypoint
+      newJobDefinitionBlob.command = values.command;
+      newJobDefinitionBlob.entrypoint = values.entrypoint;
+      newJobDefinitionBlob.gpu = values.gpu;
 
       setJobDefinitionBlob(newJobDefinitionBlob);
       setnocache(!values.cache);
@@ -70,6 +67,7 @@ export const PanelJobInputFromUrlParams: React.FC<{
       entrypoint: jobDefinitionBlob?.entrypoint,
       workdir: jobDefinitionBlob?.workdir,
       cache: !nocache,
+      gpu: jobDefinitionBlob?.gpu,
     },
     onSubmit,
     validationSchema,
@@ -111,6 +109,19 @@ export const PanelJobInputFromUrlParams: React.FC<{
                 </InputGroup>
               </FormControl>
             ))}
+
+            <FormControl>
+              <FormLabel htmlFor="gpu">
+                GPU (if worker supported, equavalent to "--gpus all")
+              </FormLabel>
+
+              <Switch
+                id="gpu"
+                name="gpu"
+                onChange={formik.handleChange}
+                isChecked={formik.values.gpu}
+              />
+            </FormControl>
           </VStack>
 
           <br />

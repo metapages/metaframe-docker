@@ -17,6 +17,7 @@ export type DockerJobDefinitionInputsBase64 = {
     workdir?:string;
     inputs?: InputsBase64String;
     durationMax?: number;
+    gpu?: boolean;
 }
 
 // as soon as the DockerJobDefinition hits the server, it is converted
