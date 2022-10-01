@@ -1,9 +1,10 @@
-import { Writable } from "stream"
-import fse from "fs-extra"
-import * as Docker from 'dockerode'
+import { Writable } from "stream";
+import fse from "fs-extra";
+import * as Docker from "dockerode";
 // import { DockerRunResultWithOutputs } from '../../../shared/dist/shared/types.js';
-import * as StreamTools from "../docker/streamtools"
-import * as execa from "execa"
+import * as StreamTools from "../docker/streamtools";
+import * as execa from "execa";
+import { args as CliArgs } from "../args";
 
 // Minimal interface for interacting with docker jobs:
 //  inputs:
@@ -58,7 +59,9 @@ export interface DockerJobExecution {
 }
 
 if (!fse.existsSync("/var/run/docker.sock")) {
-  console.error('You must give access to the local docker daemon via: " -v /var/run/docker.sock:/var/run/docker.sock"');
+  console.error(
+    'You must give access to the local docker daemon via: " -v /var/run/docker.sock:/var/run/docker.sock"'
+  );
   process.exit(1);
 }
 
@@ -71,14 +74,25 @@ export interface DockerRunResult {
   error?: any;
 }
 
-export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobExecution> => {
-
-  const { image, command, env, workdir, entrypoint, volumes, outStream, errStream, gpu } = args;
+export const dockerJobExecute = async (
+  args: DockerJobArgs
+): Promise<DockerJobExecution> => {
+  const {
+    image,
+    command,
+    env,
+    workdir,
+    entrypoint,
+    volumes,
+    outStream,
+    errStream,
+    gpu,
+  } = args;
 
   const result: DockerRunResult = {
     stdout: [],
     stderr: [],
-  }
+  };
 
   let container: Docker.Container | undefined;
 
@@ -86,7 +100,7 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
     if (container) {
       await killAndRemove(container);
     }
-  }
+  };
 
   const createOptions: Docker.ContainerCreateOptions = {
     Image: image,
@@ -94,15 +108,16 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
     WorkingDir: workdir,
     Entrypoint: entrypoint,
     HostConfig: {},
-    Env: env != null
-      ? Object.keys(env).map(key => `${key}=${env[key]}`)
-      : undefined,
+    Env:
+      env != null
+        ? Object.keys(env).map((key) => `${key}=${env[key]}`)
+        : undefined,
     Tty: false, // needed for splitting stdout/err
     AttachStdout: true,
     AttachStderr: true,
   };
 
-  if (gpu) {
+  if (gpu && CliArgs.gpus) {
     // https://github.com/apocas/dockerode/issues/628
     createOptions.HostConfig!.DeviceRequests = [
       {
@@ -111,15 +126,16 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
         Capabilities: [["gpu"]],
       },
     ];
-
   }
 
   if (volumes != null) {
     createOptions.HostConfig!.Binds = [];
-    volumes.forEach(volume => {
+    volumes.forEach((volume) => {
       // assert(volume.host, `Missing volume.host`);
       // assert(volume.container, `Missing volume.container`);
-      createOptions.HostConfig!.Binds!.push(`${volume.host}:${volume.container}:Z`);
+      createOptions.HostConfig!.Binds!.push(
+        `${volume.host}:${volume.container}:Z`
+      );
     });
   }
 
@@ -142,65 +158,66 @@ export const dockerJobExecute = async (args: DockerJobArgs): Promise<DockerJobEx
   // console.log('createOptions', createOptions);
 
   const finish = async () => {
-
     try {
       await ensureDockerImage(image);
     } catch (err) {
-      console.error(err)
+      console.error(err);
       result.error = `Failure to pull or build the docker image:\n${err}`;
       return result;
     }
 
     container = await docker.createContainer(createOptions);
-    const stream = await container!.attach({ stream: true, stdout: true, stderr: true });
+    const stream = await container!.attach({
+      stream: true,
+      stdout: true,
+      stderr: true,
+    });
     container!.modem.demuxStream(stream, grabberOutStream, grabberErrStream);
 
     const startData: Buffer = await container!.start();
 
     const dataWait = await container!.wait();
 
-    result.StatusCode = dataWait != null
-      ? dataWait.StatusCode
-      : null;
+    result.StatusCode = dataWait != null ? dataWait.StatusCode : null;
 
     // remove the container out-of-band (return quickly)
     killAndRemove(container);
 
     return result;
-  }
+  };
 
   return {
     kill,
     finish: finish(),
-  }
-}
+  };
+};
 
 const killAndRemove = async (container?: Docker.Container): Promise<any> => {
   if (container) {
     let killResult: any;
     try {
       killResult = await container.kill();
-    } catch (err) {
-
-    }
+    } catch (err) {}
     (async () => {
       try {
         await container.remove();
       } catch (err) {
         console.log(`Failed to remove but ignoring error: ${err}`);
       }
-    })()
+    })();
     return killResult;
   }
-}
-
+};
 
 // assume that no images are deleted while we are running
 const CACHED_DOCKER_IMAGES: { [key: string]: boolean } = {};
 
-const ensureDockerImage = async (image: string, pullOptions?: any): Promise<void> => {
+const ensureDockerImage = async (
+  image: string,
+  pullOptions?: any
+): Promise<void> => {
   if (!image) {
-    throw new Error('ensureDockerImage missing image');
+    throw new Error("ensureDockerImage missing image");
   }
   if (CACHED_DOCKER_IMAGES[image]) {
     // console.log('FOUND IMAGE IN MY FAKE CACHE')
@@ -219,26 +236,32 @@ const ensureDockerImage = async (image: string, pullOptions?: any): Promise<void
   subprocess!.stderr!.pipe(process.stderr);
 
   await subprocess;
-}
+};
 
 const hasImage = async (imageUrl: string): Promise<boolean> => {
   const images = await docker.listImages();
   return images.some((e: any) => {
-    return e.RepoTags != null && e.RepoTags.some((tag: string) => {
-      return tag != null && dockerUrlMatches(parseDockerUrl(imageUrl), parseDockerUrl(tag));
-    });
+    return (
+      e.RepoTags != null &&
+      e.RepoTags.some((tag: string) => {
+        return (
+          tag != null &&
+          dockerUrlMatches(parseDockerUrl(imageUrl), parseDockerUrl(tag))
+        );
+      })
+    );
   });
-}
+};
 
 const dockerUrlMatches = (a: DockerUrlBlob, b: DockerUrlBlob) => {
   if (a.repository == b.repository) {
     const tagA = a.tag;
     const tagB = b.tag;
-    return !tagA || !tagB ? true : (tagA === tagB);
+    return !tagA || !tagB ? true : tagA === tagB;
   } else {
     return false;
   }
-}
+};
 
 interface DockerUrlBlob {
   repository: string;
@@ -259,18 +282,23 @@ const parseDockerUrl = (s: string): DockerUrlBlob => {
   if (tag) {
     tag = tag.substr(1);
   }
-  registryAndNamespace = registryAndNamespace ? registryAndNamespace.substr(0, registryAndNamespace.length - 1) : undefined;
+  registryAndNamespace = registryAndNamespace
+    ? registryAndNamespace.substr(0, registryAndNamespace.length - 1)
+    : undefined;
   let namespace: string | undefined;
   let registry: string | undefined;
   if (registryAndNamespace) {
-    var tokens = registryAndNamespace.split('/');
+    var tokens = registryAndNamespace.split("/");
     if (tokens.length > 1) {
       namespace = tokens.pop();
-      registry = tokens.length > 0 ? tokens.join('/') : undefined;
+      registry = tokens.length > 0 ? tokens.join("/") : undefined;
     } else {
       //If the registry and namespace does not contain /
       //and there's no '.'/':' then there's no registry
-      if (registryAndNamespace.indexOf('.') > -1 || registryAndNamespace.indexOf(':') > -1) {
+      if (
+        registryAndNamespace.indexOf(".") > -1 ||
+        registryAndNamespace.indexOf(":") > -1
+      ) {
         registry = registryAndNamespace;
       } else {
         namespace = registryAndNamespace;
@@ -280,7 +308,7 @@ const parseDockerUrl = (s: string): DockerUrlBlob => {
 
   var url: DockerUrlBlob = {
     repository: namespace == null ? repository : `${namespace}/${repository}`,
-  }
+  };
   if (tag != null) {
     url.tag = tag;
   }
@@ -288,4 +316,4 @@ const parseDockerUrl = (s: string): DockerUrlBlob => {
     url.registry = registry;
   }
   return url;
-}
+};

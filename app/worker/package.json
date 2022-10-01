@@ -1,7 +1,7 @@
 {
   "name": "@metapages/asman-worker",
   "public": true,
-  "version": "0.1.1-gpu-test.1",
+  "version": "0.1.1",
   "description": "Execute docker compute jobs within the asman metaframe",
   "repository": "",
   "type": "module",
