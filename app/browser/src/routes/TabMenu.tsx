@@ -105,19 +105,20 @@ export const TabMenu: React.FC = () => {
       const stateFinished: StateChangeValueWorkerFinished =
         job.value as StateChangeValueWorkerFinished;
       if (isIframe() && stateFinished?.result?.outputs) {
-        const outputs: InputsRefs = stateFinished!.result!.outputs;
+        // const outputs: InputsRefs = stateFinished!.result!.outputs;
+        const {outputs, ...theRest} = stateFinished!.result!;
         (async () => {
           const metaframeOutputs: MetaframeInputMap | undefined =
             await convertJobOutputDataRefsToExpectedFormat(outputs);
-          if (metaframeOutputs) {
+          // if (metaframeOutputs) {
             try {
-              metaframeObj.setOutputs!(metaframeOutputs);
+              metaframeObj.setOutputs!({...metaframeOutputs, ...theRest});
             } catch (err) {
               console.error("Failed to send metaframe outputs", err);
             }
-          } else {
-            console.log(`❗no metaframeOutputs`);
-          }
+          // } else {
+          //   console.log(`❗no metaframeOutputs`);
+          // }
           setJobHashCurrentOutputs(job.hash);
         })();
       }

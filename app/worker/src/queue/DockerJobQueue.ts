@@ -312,7 +312,6 @@ export class DockerJobQueue {
                 this._killJobAndIgnore(locallyRunningJobId);
             }
         });
-        const jobKeys = Object.keys(jobs);
     }
 
     _killJobAndIgnore(locallyRunningJobId: string) {
