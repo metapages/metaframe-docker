@@ -28,7 +28,7 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    1.
 3. Run a worker (or a bunch):
    ```
-   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.1.1 --cpus=2 --queue=public1 --gpus=true
+   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1 --gpus=true
    ```
 
 ## Repository
