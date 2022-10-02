@@ -40,6 +40,7 @@ export interface Volume {
 
 // this goes in
 export interface DockerJobArgs {
+  id: string;
   image: string;
   command?: string[] | undefined;
   env?: any;
@@ -115,6 +116,9 @@ export const dockerJobExecute = async (
     Tty: false, // needed for splitting stdout/err
     AttachStdout: true,
     AttachStderr: true,
+    Labels: {
+      "docker.mtfm.io/id": args.id,
+    }
   };
 
   if (gpu && CliArgs.gpus) {
@@ -166,7 +170,20 @@ export const dockerJobExecute = async (
       return result;
     }
 
-    container = await docker.createContainer(createOptions);
+    // Check for existing job container
+    const runningContainers = await docker.listContainers({Labels: {
+      "docker.mtfm.io/id": args.id,
+    }});
+    const existingJobContainer = runningContainers.find(container => container?.Labels["docker.mtfm.io/id"] === args.id);
+
+    if (existingJobContainer) {
+      container = docker.getContainer(existingJobContainer.Id);
+    }
+
+    if (!container) {
+      container = await docker.createContainer(createOptions);
+    }
+
     const stream = await container!.attach({
       stream: true,
       stdout: true,
@@ -174,7 +191,9 @@ export const dockerJobExecute = async (
     });
     container!.modem.demuxStream(stream, grabberOutStream, grabberErrStream);
 
-    const startData: Buffer = await container!.start();
+    if (!existingJobContainer) {
+      const startData: Buffer = await container!.start();
+    }
 
     const dataWait = await container!.wait();
 

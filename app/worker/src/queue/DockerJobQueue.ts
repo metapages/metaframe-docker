@@ -151,6 +151,7 @@ export class DockerJobQueue {
         // TODO add input mounts
 
         const executionArgs: DockerJobArgs = {
+            id: jobBlob.hash,
             image: definition.image!,
             command: convertStringToDockerCommand(definition.command),
             entrypoint: convertStringToDockerCommand(definition.entrypoint),
@@ -266,6 +267,7 @@ export class DockerJobQueue {
             const localJob = this.queue[locallyRunningJobId];
 
             // do we have local jobs the server doesn't even know about? This should never happen
+            // Maybe it could be in the case where the browser disconnected and you want the jobs to keep going
             if (!jobs[locallyRunningJobId]) {
                 console.log(`Cannot find local job ${locallyRunningJobId} in server state, killing and removing`);
                 this._killJobAndIgnore(locallyRunningJobId);
