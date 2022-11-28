@@ -1,10 +1,14 @@
 # Run docker containers via metapage in the browser
 
+Any time the inputs change (and on start) the configured docker contaner is run:
+ - `/inputs` is the location where inputs are copied as files
+ - `/outputs`: any files here when the container exits are passed on as metaframe outputs
+
 
 [![](https://mermaid.ink/svg/pako:eNqNkk9v2zAMxb8KoV5WwGnWdScVKFA0OezUQ3qLe1BsKlZtSZ5ENQ2SfPdRttM_u2yAAdPye-SPDzqIytcopNgG1TfwtCgdQNWpGBeowfYPvvMBtOk6eaG1LiIF36K8uLm-Xy5_Tp-znampkT_6t9vS5QYxbcZ-Fkn1aov5EGAT_C5iWJeiIeqjnM_P_-PV1lCTNlfGz2tftRhK8SylnABGexbroCz-cuv3GnZsBOP6RPGTA2azOzhO50Aexq7w4jfHM8cXqMngEw0OHbz94nkf-Jjo0_TKu5iscduz8y9qdPUQCIZXXnx8jcjcFX4nTPh8mxU7H9ohmrGAb6RajFkVISTnhhEO9j4F3oqHc_SpohRwXnnLkzFccma8xgyOE7ixHG0xZlAwHz_xOLHkmR-r_79nwstp8e6kjBuoP6JiiKzrjGtXtO8QvhfX8O9rIwphMVhlar6Mh9yhFNSgxVJILmvUKnVUitKdWJr6WhEua0M-CKlVF7EQimlXe1cJydHgWbQwiu-inVSnPyX5DNs)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNqNkk9v2zAMxb8KoV5WwGnWdScVKFA0OezUQ3qLe1BsKlZtSZ5ENQ2SfPdRttM_u2yAAdPye-SPDzqIytcopNgG1TfwtCgdQNWpGBeowfYPvvMBtOk6eaG1LiIF36K8uLm-Xy5_Tp-znampkT_6t9vS5QYxbcZ-Fkn1aov5EGAT_C5iWJeiIeqjnM_P_-PV1lCTNlfGz2tftRhK8SylnABGexbroCz-cuv3GnZsBOP6RPGTA2azOzhO50Aexq7w4jfHM8cXqMngEw0OHbz94nkf-Jjo0_TKu5iscduz8y9qdPUQCIZXXnx8jcjcFX4nTPh8mxU7H9ohmrGAb6RajFkVISTnhhEO9j4F3oqHc_SpohRwXnnLkzFccma8xgyOE7ixHG0xZlAwHz_xOLHkmR-r_79nwstp8e6kjBuoP6JiiKzrjGtXtO8QvhfX8O9rIwphMVhlar6Mh9yhFNSgxVJILmvUKnVUitKdWJr6WhEua0M-CKlVF7EQimlXe1cJydHgWbQwiu-inVSnPyX5DNs)
 
 
-Run arbitrary docker containers at scale in your metapages.
+Run arbitrary docker containers in your metapages.
 
 
 Use cases:
@@ -28,7 +32,7 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    1.
 3. Run a worker (or a bunch):
    ```
-   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.1.1 --cpus=2 --queue=public1 --gpus=true
+   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1 --gpus=true
    ```
 
 ## Repository
