@@ -49,7 +49,7 @@ worker queue="local1":
     cd .. && docker-compose -f docker-compose.yml run --no-deps worker --cpus=1 --queue={{queue}} --server=https://docker-metapage-io.glitch.me/
 
 # Publish npm module
-publish: (_require "NPM_TOKEN")
+publish: _npm_i (_require "NPM_TOKEN")
     #!/usr/bin/env bash
     set -euo pipefail
     if [ "$CI" != "true" ]; then
@@ -79,7 +79,7 @@ unpublish version:
     npm unpublish {{NPM_MODULE}}@{{version}}
 
 # Push docker image to metapage/asman-worker. This is just for prototyping
-publish_docker: (_require "DOCKER_TOKEN")
+publish_docker: _npm_i (_require "DOCKER_TOKEN")
     #!/usr/bin/env bash
     set -euo pipefail
     echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin
