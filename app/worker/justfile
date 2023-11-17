@@ -84,23 +84,9 @@ publish_docker: (_require "DOCKER_TOKEN")
     set -euo pipefail
     echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin
     cd ../
-    export VERSION=$(cat worker/package.json | jq -r '.version')
-    # DOCKER_TAG=$VERSION docker-compose -f docker-compose.yml build
-    # DOCKER_TAG=$VERSION docker-compose -f docker-compose.yml push worker
-    docker buildx build --push \
-        --file worker/Dockerfile \
-        --target worker \
-        --build-arg DOCKER_TAG=${DOCKER_TAG:-cache} \
-        --platform linux/amd64,linux/arm64 \
-        --tag metapage/metaframe-docker-worker:$VERSION .
-
-
-    # context: .
-    #   dockerfile: worker/Dockerfile
-    #   target: worker
-    #   args:
-    #     DOCKER_TAG: ${DOCKER_TAG:-cache}
-    echo "✅ metapage/metaframe-docker-worker:$VERSION"
+    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml build
+    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml push worker
+    echo "✅ ${DOCKER_IMAGE_PREFIX}worker:$(cat worker/package.json | jq -r '.version')"
 
 # I don't just remove 'dist/' itself because it might be moutned into a docker-compose container
 @clean:

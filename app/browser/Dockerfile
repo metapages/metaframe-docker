@@ -13,8 +13,8 @@ RUN apk --no-cache --update add \
 # https://gist.github.com/squarebracket/e719069522436873bc6f13efb359cac9
 RUN cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem
 
-# Needs community repo
-RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/community \
+# Needs edge repo
+RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
     sd
 
 ###############################################################################
