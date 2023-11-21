@@ -1,7 +1,7 @@
 #################################################################
 # Base image
 #################################################################
-FROM node:15.11.0-alpine3.10 as worker
+FROM node:21-alpine3.17 as worker
 
 RUN apk --no-cache add \
     bash \
@@ -44,7 +44,7 @@ COPY shared/package-lock.json ./package-lock.json
 
 # https://github.com/nodejs/docker-node/issues/384#issuecomment-305208112
 RUN apk --no-cache add --virtual native-deps \
-  g++ gcc libgcc libstdc++ linux-headers make python libffi-dev openssl-dev && \
+  g++ gcc libgcc libstdc++ linux-headers make python3 libffi-dev openssl-dev && \
   npm install --quiet node-gyp -g &&\
   npm install && \
   apk del native-deps
@@ -66,7 +66,7 @@ COPY worker/package.json ./package.json
 # WORKDIR /app
 # https://github.com/nodejs/docker-node/issues/384#issuecomment-305208112
 RUN apk --no-cache add --virtual native-deps \
-  g++ gcc libgcc libstdc++ linux-headers make python libffi-dev openssl-dev && \
+  g++ gcc libgcc libstdc++ linux-headers make python3 libffi-dev openssl-dev && \
   npm install --quiet node-gyp -g &&\
   npm install && \
   apk del native-deps

@@ -1,4 +1,6 @@
-# Run docker containers via metapage in the browser
+# Run docker containers as metaframes in the browser
+
+`metaframe-docker` runs docker containers on user-supplied workers. The queue management is open and public
 
 Any time the inputs change (and on start) the configured docker contaner is run:
  - `/inputs` is the location where inputs are copied as files
@@ -32,8 +34,10 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    1.
 3. Run a worker (or a bunch):
    ```
-   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp ghcr.io/metapages/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1 --gpus=true
+   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapage/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1
    ```
+
+Append the ` --gpus=true` argument if you want your docker jobs to have GPU access
 
 ## Repository
 [https://github.com/metapages/metaframe-docker](https://github.com/metapages/metaframe-docker)

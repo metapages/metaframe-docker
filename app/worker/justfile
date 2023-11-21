@@ -4,14 +4,12 @@ set dotenv-load                    := true
 # export SERVER_ORIGIN  := env_var_or_default("SERVER_ORIGIN", "http://server:8080")
 export CI                          := env_var_or_default("CI", "")
 ###############################################################################
-# Docker image names
-export DOCKER_REGISTRY             := join(trim_end_matches(env_var_or_default("DOCKER_REGISTRY", "ghcr.io"), "/"), "")
 export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && GITHUB_ACTIONS=true deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.17/commands/docker_image_prefix.ts || echo ""`)
 export DOCKER_TAG                  := env_var_or_default("DOCKER_TAG", `(which git >/dev/null && git rev-parse --short HEAD) || echo local`)
 ###############################################################################
 NPM_MODULE            := `cat package.json | jq -r .name`
 NPM_TOKEN             := env_var_or_default("NPM_TOKEN", "")
-tsc                   := "node_modules/typescript/bin/tsc"
+tsc                   := if path_exists("node_modules/typescript/bin/tsc") == "true" { "node_modules/typescript/bin/tsc" } else { "../node_modules/typescript/bin/tsc" }
 # minimal formatting, bold is very useful
 bold                  := '\033[1m'
 normal                := '\033[0m'
@@ -35,7 +33,7 @@ build: clean (_tsc "--build --verbose")
     cp -r bin ./dist/
 
 # Run in development mode (automatic reloading)
-dev +args="--cpus=1 --queue=local1":
+dev +args="--cpus=1 --queue=local1": _npm_i
     @# ts-node-dev does not work with typescript project references https://github.com/TypeStrong/ts-node/issues/897
     watchexec --restart --watch ./src --watch ./justfile --watch ./package.json --watch ./tsconfig.json --watch ../shared/tsconfig-base.json --watch ../shared/src -- just run --id=local-dev "{{args}}"
 
@@ -84,11 +82,25 @@ unpublish version:
 publish_docker: (_require "DOCKER_TOKEN")
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin ghcr.io
+    echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin
     cd ../
-    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml build
-    DOCKER_TAG=$(cat worker/package.json | jq -r '.version') docker-compose -f docker-compose.yml push worker
-    echo "✅ ${DOCKER_REGISTRY}${DOCKER_IMAGE_PREFIX}worker:$(cat worker/package.json | jq -r '.version')"
+    export VERSION=$(cat worker/package.json | jq -r '.version')
+    # DOCKER_TAG=$VERSION docker-compose -f docker-compose.yml build
+    # DOCKER_TAG=$VERSION docker-compose -f docker-compose.yml push worker
+    docker buildx build --push \
+        --file worker/Dockerfile \
+        --target worker \
+        --build-arg DOCKER_TAG=${DOCKER_TAG:-cache} \
+        --platform linux/amd64,linux/arm64 \
+        --tag metapage/metaframe-docker-worker:$VERSION .
+
+
+    # context: .
+    #   dockerfile: worker/Dockerfile
+    #   target: worker
+    #   args:
+    #     DOCKER_TAG: ${DOCKER_TAG:-cache}
+    echo "✅ metapage/metaframe-docker-worker:$VERSION"
 
 # I don't just remove 'dist/' itself because it might be moutned into a docker-compose container
 @clean:
@@ -96,8 +108,11 @@ publish_docker: (_require "DOCKER_TOKEN")
     rm -rf tsconfig.tsbuildinfo
 
 # compile typescript src, may or may not emit artifacts
-_tsc +args="":
+_tsc +args="": _npm_i
     {{tsc}} {{args}}
 
 @_require env:
     if [ -z "{{env}}" ]; then echo "Missing {{env}}"; exit 1; fi
+
+_npm_i:
+    npm i

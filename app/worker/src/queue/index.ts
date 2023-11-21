@@ -1,2 +1,2 @@
-export * from "./DockerJob"
-export * from "./DockerJobQueue"
+export * from "./DockerJob.js"
+export * from "./DockerJobQueue.js"

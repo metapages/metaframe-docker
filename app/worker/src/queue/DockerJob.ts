@@ -1,10 +1,11 @@
-import { Writable } from "stream";
-import fse from "fs-extra";
-import * as Docker from "dockerode";
+import * as Docker from 'dockerode';
+import * as execa from 'execa';
+import fse from 'fs-extra';
+import { Writable } from 'stream';
+
+import { args as CliArgs } from '../args.js';
 // import { DockerRunResultWithOutputs } from '../../../shared/dist/shared/types.js';
-import * as StreamTools from "../docker/streamtools";
-import * as execa from "execa";
-import { args as CliArgs } from "../args";
+import * as StreamTools from '../docker/streamtools.js';
 
 // Minimal interface for interacting with docker jobs:
 //  inputs:

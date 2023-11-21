@@ -1,18 +1,19 @@
-import objectHash from "object-hash";
-import fetch from "isomorphic-fetch";
-import fetchRetry from "fetch-retry";
+import fetchRetry from 'fetch-retry';
+import fetch from 'isomorphic-fetch';
+import objectHash from 'object-hash';
 
 export const fetchRobust = fetchRetry(fetch, {
   retries: 8,
   retryDelay: (attempt:number, error:any, response:any) => {
     return Math.pow(2, attempt) * 500; // 500, 1000, 2000, 4000, 5000
   },
-  retryOn: (attempt:number, error:any, response:any) => {
+  retryOn: (attempt:number, error:any, response:Response | null) => {
     // retry on any network error, or 4xx or 5xx status codes
-    if (error !== null || response.status >= 400) {
+    if (error !== null || (response && response.status >= 400)) {
       console.log(`retrying, attempt number ${attempt + 1}`);
       return true;
     }
+    return false;
   },
 });
 

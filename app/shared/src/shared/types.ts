@@ -1,4 +1,4 @@
-import { DataRef } from "../dataref";
+import { DataRef } from '../dataref/index.js';
 
 export type Image = string;
 export type Command = string;

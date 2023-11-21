@@ -1,12 +1,23 @@
-
-import * as sourceMapSupport from "source-map-support";
-sourceMapSupport.install();
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import * as sourceMapSupport from 'source-map-support';
 import WebSocket from 'ws';
-import { DockerJobQueue, DockerJobQueueArgs } from './queue';
-import { BroadcastState, WebsocketMessage, WebsocketMessageType, WebsocketMessageSender } from '../../shared/dist/shared/types';
-import { args, VERSION } from "./args";
 
+import {
+  BroadcastState,
+  WebsocketMessage,
+  WebsocketMessageSender,
+  WebsocketMessageType,
+} from '../../shared/dist/shared/types.js';
+import {
+  args,
+  VERSION,
+} from './args.js';
+import {
+  DockerJobQueue,
+  DockerJobQueueArgs,
+} from './queue/index.js';
+
+sourceMapSupport.install();
 
 // running in docker doesn't automatically kill on ctrl-c
 // https://github.com/nodejs/node/issues/4182

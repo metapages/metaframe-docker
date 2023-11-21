@@ -3,7 +3,6 @@ set shell                          := ["bash", "-c"]
 set dotenv-load                    := true
 # Eg "ghcr.io". By default, the ci environment will set this.
 # Required for pulling/pushing images, not required for locally building and running.
-export DOCKER_REGISTRY             := env_var_or_default("DOCKER_REGISTRY", "ghcr.io")
 # Eg "yourname/yourrepo". By default, we'll try to get it whereever it might be available, no value means local development
 export DOCKER_IMAGE_PREFIX         := env_var_or_default("DOCKER_IMAGE_PREFIX", `which deno >/dev/null && which git >/dev/null && deno run --unstable --allow-all https://deno.land/x/metapages@v0.0.17/commands/docker_image_prefix.ts`)
 # By default, set by these scripts. Eg <git sha>, v1.2.3, or some other meaningful tag (cache|local)
@@ -117,7 +116,7 @@ dc +args="":
 
 # Internal docker-compose build command with env vars documented
 @_build +args="":
-    echo -e "🚪 {{bold}}DOCKER_TAG=$DOCKER_TAG DOCKER_REGISTRY=$DOCKER_REGISTRY DOCKER_IMAGE_PREFIX=$DOCKER_IMAGE_PREFIX {{DOCKER_COMPOSE}} -f docker-compose.cache.yml build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}{{normal}} 🚪 " && \
+    echo -e "🚪 {{bold}}DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} -f docker-compose.cache.yml build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}{{normal}} 🚪 " && \
     DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} build --build-arg BUILDKIT_INLINE_CACHE=1 {{args}}
 
 # docker-compose push the images
@@ -132,10 +131,6 @@ _push +images="":
     #fi
     if [ "{{images}}" = "" ]; then
         echo -e "🚪 <app/> {{bold}}DOCKER_TAG={{DOCKER_TAG}} {{DOCKER_COMPOSE}} -f docker-compose.cache.yml push $(just images){{normal}} 🚪";
-        if [[ -z "${DOCKER_REGISTRY}" ]]; then
-            echo "🔥🔥🔥 aborted because DOCKER_REGISTRY is missing. Run 'just ci/publish' (ci sets DOCKER_REGISTRY automatically) or set manually e.g. 'DOCKER_REGISTRY=ghcr.io/' in .env. ‼ NOTE THE TRAILING SLASH.";
-            exit 1;
-        fi
         DOCKER_TAG=$DOCKER_TAG {{DOCKER_COMPOSE}} -f docker-compose.cache.yml push $(just images);
     else
         echo -e "🚪 <app/> {{bold}}DOCKER_TAG={{DOCKER_TAG}} {{DOCKER_COMPOSE}} -f docker-compose.cache.yml push {{images}}{{normal}} 🚪";
@@ -144,11 +139,7 @@ _push +images="":
 
 # 🌱 Pull cached docker images (tag is literally "cache")
 @_pull +images="":
-    echo -e "🚪 <app/> {{bold}}DOCKER_REGISTRY=$DOCKER_REGISTRY DOCKER_IMAGE_PREFIX=$DOCKER_IMAGE_PREFIX DOCKER_TAG=cache {{DOCKER_COMPOSE}} -f docker-compose.cache.yml pull --ignore-pull-failures {{images}}{{normal}} 🚪"
-    if [[ -z "${DOCKER_REGISTRY}" ]]; then \
-        echo "docker-compose pull: skipping because DOCKER_REGISTRY is missing. Either 1) just ci/pull, or 2) set e.g. 'DOCKER_REGISTRY=ghcr.io/' in .env. ‼ NOTE THE TRAILING SLASH"; \
-        exit 0; \
-    fi
+    echo -e "🚪 <app/> {{bold}}DOCKER_TAG=cache {{DOCKER_COMPOSE}} -f docker-compose.cache.yml pull --ignore-pull-failures {{images}}{{normal}} 🚪"
     DOCKER_TAG=cache {{DOCKER_COMPOSE}} -f docker-compose.cache.yml pull --ignore-pull-failures {{images}}
 
 # # deno check

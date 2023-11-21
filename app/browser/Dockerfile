@@ -16,7 +16,7 @@ RUN apk --no-cache --update add \
 RUN cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem
 
 # Needs edge repo
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
     sd
 
 ###############################################################################

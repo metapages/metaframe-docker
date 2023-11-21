@@ -10,7 +10,7 @@
     "target": "es2018",
     "types": [],
     "paths": {
-      "/@shared*": ["./*"],
+      "/@shared*": ["./src/shared*"],
     },
   },
   "include": ["./src/**/*"],

@@ -1,0 +1,25 @@
+# Always use locally installed tools (always pin versions)
+set shell                          := ["bash", "-c"]
+set dotenv-load                    := true
+IMAGE := "metapage/harissa-cell-simulation:1.0.0"
+
+@_help:
+    just --list --unsorted --list-heading $'Commands:\n'
+    
+# Push docker image to dockerhub
+publish: (_require "DOCKER_TOKEN") && (build "--push")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "$DOCKER_TOKEN" | docker login --username metapage --password-stdin
+
+build +args="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    docker buildx build \
+        --file Dockerfile \
+        --platform linux/amd64,linux/arm64 \
+        --tag {{IMAGE}} \
+        {{args}} .
+
+@_require env:
+    if [ -z "{{env}}" ]; then echo "Missing {{env}}"; exit 1; fi

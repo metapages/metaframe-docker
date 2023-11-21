@@ -1,9 +1,33 @@
+import {
+  parse,
+  ParseEntry,
+} from 'shell-quote';
 
-import { parse, ParseEntry } from "shell-quote";
-import { DockerRunResult, dockerJobExecute, DockerJobArgs, DockerJobExecution, Volume } from './DockerJob'
-import { BroadcastState, WorkerRegistration, WebsocketMessageType, WebsocketMessageSender, DockerJobDefinitionRow, DockerJobState, StateChangeValueWorkerFinished, StateChangeValueRunning, DockerJobFinishedReason } from '../../../shared/dist/shared/types.js';
-import { convertIOToVolumeMounts, getOutputs } from "./IO"
-import { DockerRunResultWithOutputs } from '../../../shared/src/shared/types';
+import {
+  BroadcastState,
+  DockerJobDefinitionRow,
+  DockerJobFinishedReason,
+  DockerJobState,
+  StateChangeValueRunning,
+  StateChangeValueWorkerFinished,
+  WebsocketMessageSender,
+  WebsocketMessageType,
+  WorkerRegistration,
+} from '../../../shared/dist/shared/types.js';
+import {
+  DockerRunResultWithOutputs,
+} from '../../../shared/src/shared/types.js';
+import {
+  DockerJobArgs,
+  dockerJobExecute,
+  DockerJobExecution,
+  DockerRunResult,
+  Volume,
+} from './DockerJob.js';
+import {
+  convertIOToVolumeMounts,
+  getOutputs,
+} from './IO.js';
 
 export interface DockerJobQueueArgs extends WorkerRegistration {
     sender: WebsocketMessageSender;

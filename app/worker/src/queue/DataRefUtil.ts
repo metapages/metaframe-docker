@@ -1,9 +1,15 @@
-import * as path from "path"
-import fse from "fs-extra"
-import {pipeline} from "stream";
-import {promisify} from "util";
-import { DataRef, DataRefType, fetchRobust as fetch} from '../../../shared/dist/dataref/index.js';
-import { args } from "../args";
+import fse from 'fs-extra';
+import * as path from 'path';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+import {
+  DataRef,
+  DataRefType,
+  fetchRobust as fetch,
+} from '../../../shared/dist/dataref/index.js';
+import { args } from '../args.js';
+
 const streamPipeline = promisify(pipeline);
 
 export const dataRefToBuffer = async (ref: DataRef): Promise<Buffer> => {

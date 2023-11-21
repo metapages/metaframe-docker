@@ -1,16 +1,20 @@
-import * as path from "path";
-import fse from "fs-extra";
-import klaw from "klaw";
-import objectHash from "object-hash";
-import { Volume } from "./DockerJob";
+import fse from 'fs-extra';
+import klaw from 'klaw';
+import objectHash from 'object-hash';
+import * as path from 'path';
+
+import { DataRef } from '../../../shared/dist/dataref/index.js';
 import {
-  InputsRefs,
   DockerJobDefinitionRow,
-} from "../../../shared/dist/shared/types.js";
-import { asyncForEach } from "../../../shared/dist/shared/util.js";
-import { DataRef } from "../../../shared/dist/dataref/index.js";
-import { dataRefToFile, bufferToBase64Ref } from "./DataRefUtil";
-import { args } from "../args";
+  InputsRefs,
+} from '../../../shared/dist/shared/types.js';
+import { asyncForEach } from '../../../shared/dist/shared/util.js';
+import { args } from '../args.js';
+import {
+  bufferToBase64Ref,
+  dataRefToFile,
+} from './DataRefUtil.js';
+import { Volume } from './DockerJob.js';
 
 // const TMPDIR = process.env.XDG_RUNTIME_DIR || process.env.TMPDIR || '/tmp';
 const TMPDIR = "/tmp/asman";
