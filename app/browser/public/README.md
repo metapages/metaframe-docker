@@ -34,7 +34,7 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    1.
 3. Run a worker (or a bunch):
    ```
-   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapage/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1
+   docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapages/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1 --gpus=true
    ```
 
 **Coming soon:** GPU support
