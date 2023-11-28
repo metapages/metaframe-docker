@@ -4,6 +4,9 @@
   "description": "",
   "type": "module",
   "main": "dist/main/index.js",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "doc": "npm run start ONLY works with `just build`",
     "start": "DATABASE_DIRECTORY=.data/db BROWSER_ASSETS_DIRECTORY=browser/dist node --experimental-specifier-resolution=node ./server/dist/index.js"
