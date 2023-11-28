@@ -1,4 +1,4 @@
-import { DockerJobDefinitionInputRefs } from "/@shared";
+import { DockerJobDefinitionInputRefs } from '/@/shared';
 
 export type DockerJobDefinitionParamsInUrlHash = Omit<DockerJobDefinitionInputRefs, "inputs">;
 

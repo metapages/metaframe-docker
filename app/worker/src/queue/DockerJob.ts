@@ -4,7 +4,6 @@ import fse from 'fs-extra';
 import { Writable } from 'stream';
 
 import { args as CliArgs } from '../args.js';
-// import { DockerRunResultWithOutputs } from '../../../shared/dist/shared/types.js';
 import * as StreamTools from '../docker/streamtools.js';
 
 // Minimal interface for interacting with docker jobs:

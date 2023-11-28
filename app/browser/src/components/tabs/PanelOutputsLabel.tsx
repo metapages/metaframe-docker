@@ -1,5 +1,6 @@
-import { getOutputNames } from "./PanelOutputs";
-import { DockerJobDefinitionRow } from "/@shared";
+import { DockerJobDefinitionRow } from '/@/shared';
+
+import { getOutputNames } from './PanelOutputs';
 
 export const PanelOutputsLabel: React.FC<{
   job: DockerJobDefinitionRow | undefined;

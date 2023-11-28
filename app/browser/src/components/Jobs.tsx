@@ -1,16 +1,32 @@
-import { useCallback, useEffect, useState } from "react";
-import { Box, Button, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
-import { CloseIcon } from "@chakra-ui/icons";
-import { useServerState } from "../hooks/serverStateHook";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
 import {
   BroadcastState,
-  DockerJobState,
-  StateChangeValueQueued,
   DockerJobDefinitionRow,
-  WebsocketMessageType,
-  StateChange,
   DockerJobFinishedReason,
-} from "/@shared";
+  DockerJobState,
+  StateChange,
+  StateChangeValueQueued,
+  WebsocketMessageType,
+} from '/@/shared';
+
+import { CloseIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Button,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
+
+import { useServerState } from '../hooks/serverStateHook';
 
 export const Jobs: React.FC = () => {
   const serverState = useServerState();

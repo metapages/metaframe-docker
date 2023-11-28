@@ -1,7 +1,8 @@
-import fs from "fs";
-import { resolve } from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import fs from 'fs';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
+
+import react from '@vitejs/plugin-react';
 
 const HOST: string = process.env.HOST || "server1.localhost";
 const PORT: string = process.env.PORT || "4440";
@@ -18,7 +19,7 @@ export default defineConfig(({ command, mode }) => ({
   resolve: {
     alias: {
       "/@": resolve(__dirname, "./src"),
-      '/@shared': resolve(__dirname, '../shared/src'),
+      '/@/shared': resolve(__dirname, './src/shared'),
     },
   },
 

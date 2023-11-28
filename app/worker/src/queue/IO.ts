@@ -3,13 +3,13 @@ import klaw from 'klaw';
 import objectHash from 'object-hash';
 import * as path from 'path';
 
-import { DataRef } from '../../../shared/dist/dataref/index.js';
+import { args } from '../args.js';
 import {
+  asyncForEach,
+  DataRef,
   DockerJobDefinitionRow,
   InputsRefs,
-} from '../../../shared/dist/shared/types.js';
-import { asyncForEach } from '../../../shared/dist/shared/util.js';
-import { args } from '../args.js';
+} from '../shared/index.js';
 import {
   bufferToBase64Ref,
   dataRefToFile,

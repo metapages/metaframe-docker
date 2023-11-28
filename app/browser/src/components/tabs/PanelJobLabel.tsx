@@ -1,5 +1,5 @@
-import { DockerJobDefinitionRow } from "/@shared";
-import { StatusIcon } from "/@/components/StatusIcon";
+import { StatusIcon } from '/@/components/StatusIcon';
+import { DockerJobDefinitionRow } from '/@/shared';
 
 export const PanelJobLabel: React.FC<{
   job: DockerJobDefinitionRow | undefined;

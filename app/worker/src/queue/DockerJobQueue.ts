@@ -8,15 +8,13 @@ import {
   DockerJobDefinitionRow,
   DockerJobFinishedReason,
   DockerJobState,
+  DockerRunResultWithOutputs,
   StateChangeValueRunning,
   StateChangeValueWorkerFinished,
   WebsocketMessageSender,
   WebsocketMessageType,
   WorkerRegistration,
-} from '../../../shared/dist/shared/types.js';
-import {
-  DockerRunResultWithOutputs,
-} from '../../../shared/src/shared/types.js';
+} from '../shared/index.js';
 import {
   DockerJobArgs,
   dockerJobExecute,

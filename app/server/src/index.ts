@@ -1,21 +1,31 @@
+import envVar from 'env-var';
+import * as fastify from 'fastify';
+import fastifyBlipp from 'fastify-blipp';
+import fastifyCors from 'fastify-cors';
+import fastifyStatic from 'fastify-static';
+import fastifyws from 'fastify-websocket';
+import fs from 'fs';
+import {
+  IncomingMessage,
+  Server,
+  ServerResponse,
+} from 'http';
+import path from 'path';
 // inspired by https://github.com/sharenowTech/fastify-with-typescript-demo
-import * as sourceMapSupport from "source-map-support";
-sourceMapSupport.install();
+import * as sourceMapSupport from 'source-map-support';
 
-import { Server, IncomingMessage, ServerResponse } from "http";
-import path from "path";
-import fs from "fs";
-import * as fastify from "fastify";
-import fastifyws from "fastify-websocket";
-import fastifyBlipp from "fastify-blipp";
-import fastifyCors from "fastify-cors";
-import fastifyStatic from "fastify-static"
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
-import envVar from "env-var"
-import healthz from "./modules/routes/healthz";
-import { wsHandlerBrowser, wsHandlerWorker, WebsocketUrlParameters } from "./modules/websocket";
-import upload from "./modules/routes/upload";
-import download from "./modules/routes/download";
+
+import download from './modules/routes/download.js';
+import healthz from './modules/routes/healthz/index.js';
+import upload from './modules/routes/upload.js';
+import {
+  WebsocketUrlParameters,
+  wsHandlerBrowser,
+  wsHandlerWorker,
+} from './modules/websocket.js';
+
+sourceMapSupport.install();
 
 const BROWSER_ASSETS_DIRECTORY :string = path.resolve(envVar.get('BROWSER_ASSETS_DIRECTORY').default("../browser/dist/").asString());
 

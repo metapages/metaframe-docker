@@ -80,7 +80,6 @@ services:
     volumes:
       - node_modules:/app/browser/node_modules
       - deno:/root/.cache/deno
-      - /Users/dion/dev/git/metapages/deno:/Users/dion/dev/git/metapages/deno
       - ./package.json:/app/package.json
       - ./tsconfig.workspace.json:/app/tsconfig.workspace.json
       - ./shared:/app/shared

@@ -1,17 +1,24 @@
 /**
  * Gets the server state and a method to send state changes over a websocket connection
  */
-import { createContext } from "react";
-import { useEffect, useState, useContext } from "react";
-import ReconnectingWebSocket from "reconnecting-websocket";
-import { useHashParam } from "@metapages/hash-query";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
 import {
   BroadcastState,
   WebsocketMessage,
   WebsocketMessageSender,
   WebsocketMessageType,
-} from "/@shared";
-import { websocketConnectionUrl } from "../config";
+} from '/@/shared';
+import ReconnectingWebSocket from 'reconnecting-websocket';
+
+import { useHashParam } from '@metapages/hash-query';
+
+import { websocketConnectionUrl } from '../config';
 
 type Props = {
   // children: React.ReactNode;

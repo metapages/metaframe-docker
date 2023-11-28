@@ -1,3 +1,3 @@
-export * from "./shared/types"
-export * from "./shared/util"
-export * from "./dataref"
+export * from "./shared/types.js"
+export * from "./shared/util.js"
+export * from "./dataref/index.js"

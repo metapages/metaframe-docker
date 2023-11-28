@@ -1,5 +1,6 @@
-import { useServerState } from "./serverStateHook";
-import { DockerJobState } from "/@shared";
+import { DockerJobState } from '/@/shared';
+
+import { useServerState } from './serverStateHook';
 
 export const useActiveJobsCount = () => {
   const serverState = useServerState();

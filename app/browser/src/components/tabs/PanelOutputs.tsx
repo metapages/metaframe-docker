@@ -1,10 +1,19 @@
-import { Box, Table, Thead, Tr, Th, Td, Tbody } from "@chakra-ui/react";
-import { useHashParam } from "@metapages/hash-query";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "/@shared";
+} from '/@/shared';
+
+import {
+  Box,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
+import { useHashParam } from '@metapages/hash-query';
 
 export const JobDisplayOutputs: React.FC<{
   job: DockerJobDefinitionRow | undefined;

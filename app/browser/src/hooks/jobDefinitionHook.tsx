@@ -2,17 +2,34 @@
  * Via Context provide the current docker job definition which is combined from metaframe inputs
  * and URL query parameters, and the means to change (some of) them
  */
-import { createContext, useContext, useEffect, useState } from "react";
-import { DataRefSerialized, Metaframe } from "@metapages/metapage";
-import { useMetaframeAndInput } from "@metapages/metaframe-hook";
-import { useHashParamJson, useHashParam } from "@metapages/hash-query";
-import { JobInputs } from "../components/PanelInputs";
-import { copyLargeBlobsToCloud } from "/@/utils/dataref";
-import { DataRefType, DockerJobDefinitionInputRefs } from "/@shared";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
 import {
   DockerJobDefinitionMetadata,
   DockerJobDefinitionParamsInUrlHash,
-} from "/@/components/types";
+} from '/@/components/types';
+import {
+  DataRefType,
+  DockerJobDefinitionInputRefs,
+} from '/@/shared';
+import { copyLargeBlobsToCloud } from '/@/utils/dataref';
+
+import {
+  useHashParam,
+  useHashParamJson,
+} from '@metapages/hash-query';
+import { useMetaframeAndInput } from '@metapages/metaframe-hook';
+import {
+  DataRefSerialized,
+  Metaframe,
+} from '@metapages/metapage';
+
+import { JobInputs } from '../components/PanelInputs';
 
 type Props = {
   children: any;
@@ -140,7 +157,7 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
       setDefinitionMeta(newJobDefinition);
 
       return () => {
-        console.log("🍔😞 useEffect cancelled");
+        // console.log("🍔😞 useEffect cancelled");
         cancelled = true;
       };
     })();

@@ -1,9 +1,17 @@
-import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify"
-import { PluginMetadata } from "fastify-plugin";
-import { default as fp } from "fastify-plugin";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { DataRef, DataRefType } from '../../../../shared/dist/dataref/index.js';
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from 'fastify';
+import fp, { PluginMetadata } from 'fastify-plugin';
+
+import {
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+import { DataRefType } from '../../shared/index.js';
 
 interface UrlParameters {
     hash: string;

@@ -1,19 +1,21 @@
 import {
-  Box,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  TableCaption,
-} from "@chakra-ui/react";
-import { useServerState } from "../hooks/serverStateHook";
-import {
   BroadcastState,
   DockerJobState,
   StateChangeValueRunning,
-} from "/@shared";
+} from '/@/shared';
+
+import {
+  Box,
+  Table,
+  TableCaption,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
+
+import { useServerState } from '../hooks/serverStateHook';
 
 export const Workers: React.FC = () => {
   const serverState = useServerState();

@@ -1,14 +1,21 @@
-import { CheckIcon, WarningIcon } from "@chakra-ui/icons";
-import { Spinner } from "@chakra-ui/react";
-import { useHashParam, useHashParamJson } from "@metapages/hash-query";
-import { useServerState } from "/@/hooks/serverStateHook";
+import { DockerJobDefinitionParamsInUrlHash } from '/@/components/types';
+import { useServerState } from '/@/hooks/serverStateHook';
 import {
-  DockerJobFinishedReason,
   DockerJobDefinitionRow,
+  DockerJobFinishedReason,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "/@shared";
-import { DockerJobDefinitionParamsInUrlHash } from "/@/components/types";
+} from '/@/shared';
+
+import {
+  CheckIcon,
+  WarningIcon,
+} from '@chakra-ui/icons';
+import { Spinner } from '@chakra-ui/react';
+import {
+  useHashParam,
+  useHashParamJson,
+} from '@metapages/hash-query';
 
 export const StatusIcon: React.FC<{
   job?: DockerJobDefinitionRow;

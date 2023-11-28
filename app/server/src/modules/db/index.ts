@@ -1,13 +1,14 @@
 import BetterSqlite3 from 'better-sqlite3';
-import fse from "fs-extra";
-import path from "path";
-import envVar from "env-var"
-import {
-    DockerJobDefinitionRow,
-    StateChangeValueWorkerFinished,
-} from '../../../../shared/dist/shared/types';
+import envVar from 'env-var';
+import fse from 'fs-extra';
+import path from 'path';
 
-// https://glitch.happyfox.com/kb/article/22-do-you-have-built-in-persistence-or-a-database/
+import {
+  DockerJobDefinitionRow,
+  StateChangeValueWorkerFinished,
+} from '../../shared/index.js';
+
+// https://help.glitch.com/hc/en-us/articles/16287582103821-Do-you-have-built-in-persistence-or-a-database-
 const DATABASE_DIRECTORY :string = path.resolve(envVar.get('DATABASE_DIRECTORY').default("../../.data/").asString());// local: /app/.data/jobs.db
 fse.ensureDirSync(DATABASE_DIRECTORY);
 const JOBS_DB_FILE = path.join(DATABASE_DIRECTORY, "jobs.db");
@@ -62,7 +63,7 @@ export class DB {
     }
 
     queueGetAll(queue: string): DockerJobDefinitionRow[] {
-        const results: { id: string, job: string, created_at: number }[] = getQueueStatement.all({ queue });
+        const results = getQueueStatement.all({ queue }) as { id: string, job: string, created_at: number }[];
         return results.map(v => JSON.parse(v.job));
     }
 
@@ -71,7 +72,7 @@ export class DB {
     }
 
     resultCacheGet(id: string): StateChangeValueWorkerFinished | undefined {
-        const row: { id: string, created_at: number, result: string } = resultCacheGetStatement.get(id);
+        const row = resultCacheGetStatement.get(id) as { id: string, created_at: number, result: string };
         if (row) {
             return JSON.parse(row.result);
         }

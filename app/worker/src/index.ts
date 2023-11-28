@@ -3,12 +3,6 @@ import * as sourceMapSupport from 'source-map-support';
 import WebSocket from 'ws';
 
 import {
-  BroadcastState,
-  WebsocketMessage,
-  WebsocketMessageSender,
-  WebsocketMessageType,
-} from '../../shared/dist/shared/types.js';
-import {
   args,
   VERSION,
 } from './args.js';
@@ -16,6 +10,12 @@ import {
   DockerJobQueue,
   DockerJobQueueArgs,
 } from './queue/index.js';
+import {
+  BroadcastState,
+  WebsocketMessage,
+  WebsocketMessageSender,
+  WebsocketMessageType,
+} from './shared/index.js';
 
 sourceMapSupport.install();
 

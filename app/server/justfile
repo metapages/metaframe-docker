@@ -10,7 +10,7 @@ _help:
     @just --unsorted --list
 
 # Build the production code
-build: clean (_tsc "--build --verbose")
+build: clean _tsc
 
 # Run in development mode (automatic reloading)
 dev:

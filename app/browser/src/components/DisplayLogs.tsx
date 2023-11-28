@@ -1,9 +1,13 @@
-import { Stack, Code } from "@chakra-ui/react";
 import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "/@shared";
+} from '/@/shared';
+
+import {
+  Code,
+  Stack,
+} from '@chakra-ui/react';
 
 // show e.g. running, or exit code, or error
 export const DisplayLogs: React.FC<{

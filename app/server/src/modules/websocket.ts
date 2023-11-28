@@ -1,6 +1,7 @@
-import * as fastify from "fastify";
-import { SocketStream } from "fastify-websocket";
-import { UserDockerJobQueue } from "../docker-jobs/UserDockerJobQueue";
+import * as fastify from 'fastify';
+import { SocketStream } from 'fastify-websocket';
+
+import { UserDockerJobQueue } from '../docker-jobs/UserDockerJobQueue.js';
 
 export interface WebsocketUrlParameters {
   token: string;

@@ -2,7 +2,7 @@ import {
   DockerJobDefinitionRow,
   DockerJobState,
   StateChangeValueWorkerFinished,
-} from "/@shared";
+} from '/@/shared';
 
 export const PanelStdLabel: React.FC<{
   job: DockerJobDefinitionRow | undefined;

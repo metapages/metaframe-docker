@@ -28,7 +28,7 @@ normal                := '\033[0m'
     echo -e ""
 
 # Build the production code
-build: clean (_tsc "--build --verbose")
+build: clean _tsc
     cp package.json ./dist/
     cp -r bin ./dist/
 

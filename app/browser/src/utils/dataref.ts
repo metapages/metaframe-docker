@@ -1,15 +1,20 @@
-// helpers to upload large input blobs to the cloud, when required
-import objectHash from "object-hash";
-import { Unibabel } from "unibabel";
-import { DataRefSerializedBlob, MetaframeInputMap } from "@metapages/metapage";
 import {
-  InputsRefs,
   DataRef,
   DataRefType,
   DataRefTypeDefault,
   fetchRobust as fetch,
-} from "/@shared";
-import { UPLOAD_DOWNLOAD_BASE_URL } from "../config";
+  InputsRefs,
+} from '/@/shared';
+// helpers to upload large input blobs to the cloud, when required
+import objectHash from 'object-hash';
+import { Unibabel } from 'unibabel';
+
+import {
+  DataRefSerializedBlob,
+  MetaframeInputMap,
+} from '@metapages/metapage';
+
+import { UPLOAD_DOWNLOAD_BASE_URL } from '../config';
 
 const ENV_VAR_DATA_ITEM_LENGTH_MAX = 200;
 
@@ -103,9 +108,10 @@ export const convertJobOutputDataRefsToExpectedFormat = async (
         case DataRefType.base64:
           // well that was easy
           const internalBlobRefFromBase64: DataRefSerializedBlob = {
-            _c: "Blob",
             _s: true,
+            _c: "Blob",
             value: outputs[name].value,
+            size: 0,
             fileType: undefined, // TODO: can we figure this out?
           };
           newOutputs[name] = internalBlobRefFromBase64;
@@ -120,6 +126,7 @@ export const convertJobOutputDataRefsToExpectedFormat = async (
             _c: Blob.name,
             _s: true,
             value: Unibabel.bufferToBase64(arrayBuffer),
+            size: arrayBuffer.byteLength,
             fileType: undefined, // TODO: can we figure this out?
           };
           newOutputs[name] = internalBlobRefFromHash;
@@ -134,10 +141,11 @@ export const convertJobOutputDataRefsToExpectedFormat = async (
             outputs[name].hash || outputs[name].value
           );
           const internalBlobRefFromUrl: DataRefSerializedBlob = {
-            _c: Blob.name,
             _s: true,
+            _c: Blob.name,
             value: Unibabel.bufferToBase64(arrayBuffer),
             fileType: undefined, // TODO: can we figure this out?
+            size: arrayBuffer.byteLength,
           };
           newOutputs[name] = internalBlobRefFromUrl;
           break;

@@ -1,17 +1,27 @@
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "@chakra-ui/react";
-import { CloseIcon, RepeatClockIcon } from "@chakra-ui/icons";
-import { useHashParam } from "@metapages/hash-query";
-import { useServerState } from "../hooks/serverStateHook";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
 import {
   DockerJobDefinitionRow,
+  DockerJobFinishedReason,
   DockerJobState,
   StateChange,
-  DockerJobFinishedReason,
-  WebsocketMessageType,
-  StateChangeValueWorkerFinished,
   StateChangeValueQueued,
-} from "/@shared";
+  StateChangeValueWorkerFinished,
+  WebsocketMessageType,
+} from '/@/shared';
+
+import {
+  CloseIcon,
+  RepeatClockIcon,
+} from '@chakra-ui/icons';
+import { Button } from '@chakra-ui/react';
+import { useHashParam } from '@metapages/hash-query';
+
+import { useServerState } from '../hooks/serverStateHook';
 
 interface ButtonCancelOrRetryProps {
   job?: DockerJobDefinitionRow;

@@ -11,23 +11,27 @@
  *
  */
 
+import { assert } from 'console';
 // eventually this should be persisted but for now it's just in memory
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import * as WebSocket from 'ws';
-import { assert } from 'console';
+
+import { db } from '../modules/db/index.js';
 import {
-    DockerJobFinishedReason,
-    DockerJobDefinitionRow,
-    DockerJobState,
-    StateChangeValueQueued,
-    StateChangeValueRunning,
-    StateChangeValueWorkerFinished,
-    State,
-    StateChange,
-    BroadcastState, WebsocketMessageType, WebsocketMessage, WorkerRegistration
-} from '../../../shared/dist/shared/types';
-import { db } from "../modules/db"
+  BroadcastState,
+  DockerJobDefinitionRow,
+  DockerJobFinishedReason,
+  DockerJobState,
+  State,
+  StateChange,
+  StateChangeValueQueued,
+  StateChangeValueRunning,
+  StateChangeValueWorkerFinished,
+  WebsocketMessage,
+  WebsocketMessageType,
+  WorkerRegistration,
+} from '../shared/index.js';
 
 // 60 seconds
 const MAX_TIME_FINISHED_JOB_IN_QUEUE = 60 * 1000;

@@ -10,11 +10,11 @@
     "noEmit": true,
     "outDir": "./dist",
     "target": "ESNext",
-    "typeRoots": ["node_modules/@types", "src/types", "src/graphql/generated"],
+    "typeRoots": ["node_modules/@types", "src/types"],
     "types": ["vite/client"],
     "paths": {
       "/@/*": ["./src/*"],
-      "/@shared": ["../shared/src/index.ts"],
+      "/@/shared": ["./src/shared"],
     }
   },
   "include": ["./src/**/*"],
@@ -22,11 +22,5 @@
     "node_modules",
     // https://github.com/microsoft/TypeScript/issues/14538#issuecomment-654933955
     "dist"
-  ],
-  "references": [
-    {
-      // https://stackoverflow.com/questions/47729344/how-to-share-code-between-typescript-projects
-      "path": "../shared"
-    }
   ]
 }

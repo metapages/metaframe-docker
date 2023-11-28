@@ -3,12 +3,12 @@ import * as path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import { args } from '../args.js';
 import {
   DataRef,
   DataRefType,
   fetchRobust as fetch,
-} from '../../../shared/dist/dataref/index.js';
-import { args } from '../args.js';
+} from '../shared/index.js';
 
 const streamPipeline = promisify(pipeline);
 

@@ -1,33 +1,49 @@
-import { useEffect, useState } from "react";
-import { useHashParam, useHashParamInt } from "@metapages/hash-query";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
-import { useServerState } from "/@/hooks/serverStateHook";
-import { useDockerJobDefinition } from "/@/hooks/jobDefinitionHook";
-import { MetaframeInputMap, isIframe } from "@metapages/metapage";
-import { DisplayLogs } from "/@/components/DisplayLogs";
-import { useMetaframeAndInput } from "@metapages/metaframe-hook";
 import {
-  shaJobDefinition,
+  useEffect,
+  useState,
+} from 'react';
+
+import { DisplayLogs } from '/@/components/DisplayLogs';
+import { PanelInputs } from '/@/components/PanelInputs';
+import { PanelJob } from '/@/components/tabs/PanelJob';
+import { PanelJobLabel } from '/@/components/tabs/PanelJobLabel';
+import { JobDisplayOutputs } from '/@/components/tabs/PanelOutputs';
+import { PanelOutputsLabel } from '/@/components/tabs/PanelOutputsLabel';
+import { PanelQueue } from '/@/components/tabs/PanelQueue';
+import { PanelStdLabel } from '/@/components/tabs/PanelStdLabel';
+import { TabLabelQueue } from '/@/components/tabs/queue/TabLabelQueue';
+import { useDockerJobDefinition } from '/@/hooks/jobDefinitionHook';
+import { useServerState } from '/@/hooks/serverStateHook';
+import {
+  DockerJobDefinitionInputRefs,
   DockerJobDefinitionRow,
   DockerJobState,
+  shaJobDefinition,
   StateChange,
   StateChangeValueQueued,
+  StateChangeValueWorkerFinished,
   WebsocketMessage,
   WebsocketMessageType,
-  DockerJobDefinitionInputRefs,
-  StateChangeValueWorkerFinished,
-  InputsRefs,
-} from "/@shared";
-import { convertJobOutputDataRefsToExpectedFormat } from "/@/utils/dataref";
-import { JobDisplayOutputs } from "/@/components/tabs/PanelOutputs";
-import { TabLabelQueue } from "/@/components/tabs/queue/TabLabelQueue";
-import { PanelQueue } from "/@/components/tabs/PanelQueue";
-import { PanelOutputsLabel } from "/@/components/tabs/PanelOutputsLabel";
-import { PanelJob } from "/@/components/tabs/PanelJob";
-import { PanelJobLabel } from "/@/components/tabs/PanelJobLabel";
-import { PanelInputs } from "/@/components/PanelInputs";
-import { PanelStdLabel } from "/@/components/tabs/PanelStdLabel";
-import { QuestionIcon } from "@chakra-ui/icons";
+} from '/@/shared';
+import { convertJobOutputDataRefsToExpectedFormat } from '/@/utils/dataref';
+
+import { QuestionIcon } from '@chakra-ui/icons';
+import {
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@chakra-ui/react';
+import {
+  useHashParam,
+  useHashParamInt,
+} from '@metapages/hash-query';
+import { useMetaframeAndInput } from '@metapages/metaframe-hook';
+import {
+  isIframe,
+  MetaframeInputMap,
+} from '@metapages/metapage';
 
 export const TabMenu: React.FC = () => {
   const [tabIndex, setTabIndex] = useHashParamInt("tab", 0);
@@ -57,6 +73,11 @@ export const TabMenu: React.FC = () => {
   // );
   const [nocacheString] = useHashParam("nocache");
 
+  // debugging
+  // useEffect(() => {
+  //   console.log(`🍔 TabMenu: useEffect: dockerJob`, dockerJob)
+  // }, [dockerJob])
+
   // Update the local job hash (id) on change
   useEffect(() => {
     if (dockerJob.definitionMeta) {
@@ -64,7 +85,9 @@ export const TabMenu: React.FC = () => {
         dockerJob.definitionMeta.definition
       );
 
+      // console.log('🍔? jobHashCurrent', jobHashCurrent);
       if (jobHash !== jobHashCurrent) {
+        // console.log('🍔🍔 setJobHash', jobHashCurrent);
         setJobHash(jobHashCurrent);
       }
     } else {
@@ -84,15 +107,18 @@ export const TabMenu: React.FC = () => {
     if (!newJobState) {
       // only clear the job IF it's different from our last inputs
       if (jobHash !== jobHashCurrentOutputs) {
+        // console.log('🍔🍔 setJob undefined');
         setJob(undefined);
       }
     } else if (!job) {
+      // console.log('🍔🍔 setJob (bc !job)', newJobState);
       setJob(newJobState);
     } else {
       if (
         newJobState.hash !== job.hash ||
         newJobState.history.length !== job.history.length
       ) {
+        // console.log('🍔🍔 setJob (bc newJobState.hash !== job.hash) ', newJobState);
         setJob(newJobState);
       }
     }
