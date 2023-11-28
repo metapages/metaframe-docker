@@ -30,7 +30,7 @@ npm +args="":
     export TARGET=$(basename "$PWD") && cd .. && just build $TARGET
 
 # compile typescript src, may or may not emit artifacts
-_tsc +args="":
+_tsc +args="": _ensure_npm_modules
     {{tsc}} {{args}}
 
 # run node server
@@ -43,3 +43,6 @@ _run:
 @clean:
     rm -rf dist/*
     rm -rf tsconfig.tsbuildinfo
+
+@_ensure_npm_modules:
+    if [ ! -f "{{tsc}}" ]; then npm i; fi
