@@ -153,7 +153,7 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
         definition,
         nocache,
       };
-      // console.log(`🍔 setDefinitionMeta`, newJobDefinition)
+      console.log(`🍔 setDefinitionMeta`, newJobDefinition)
       setDefinitionMeta(newJobDefinition);
 
       return () => {

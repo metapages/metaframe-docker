@@ -1,15 +1,16 @@
-import { useCallback } from "react";
-import { MetaframeStandaloneComponent } from "@metapages/metapage-embed-react";
+import { useCallback } from 'react';
+
+import { EditIcon } from '@chakra-ui/icons';
 import {
+  IconButton,
   Modal,
-  ModalOverlay,
+  ModalCloseButton,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
+  ModalOverlay,
   useDisclosure,
-  IconButton,
-} from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
+} from '@chakra-ui/react';
+import { MetaframeStandaloneComponent } from '@metapages/metapage-embed-react';
 
 export interface EditorJsonProps {
   content: string;
@@ -24,10 +25,10 @@ export const ButtonModalEditor: React.FC<EditorJsonProps> = ({
 
   const onOutputs = useCallback(
     (outputs: any) => {
-      if (outputs["value"] === undefined || outputs["value"] === null) {
+      if (outputs["text"] === undefined || outputs["text"] === null) {
         return;
       }
-      const newValue = outputs["value"];
+      const newValue = outputs["text"];
       onUpdate(newValue);
       onClose();
     },
@@ -51,8 +52,8 @@ export const ButtonModalEditor: React.FC<EditorJsonProps> = ({
           <ModalCloseButton />
           <div>
             <MetaframeStandaloneComponent
-              url="https://editor.mtfm.io/#?options=eyJoaWRlbWVudWlmaWZyYW1lIjp0cnVlLCJtb2RlIjoic2giLCJzYXZlbG9hZGluaGFzaCI6ZmFsc2UsInRoZW1lIjoidnMtZGFyayJ9"
-              inputs={{ value: content }}
+              url="https://editor.mtfm.io/#?hm=disabled&options=JTdCJTIyaGlkZW1lbnVpZmlmcmFtZSUyMiUzQXRydWUlMkMlMjJtb2RlJTIyJTNBJTIyc2glMjIlMkMlMjJ0aGVtZSUyMiUzQSUyMnZzLWRhcmslMjIlN0Q="
+              inputs={{ text: content }}
               onOutputs={onOutputs as any}
             />
           </div>

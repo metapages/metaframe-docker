@@ -28,16 +28,11 @@ RUN echo -e '#!/bin/bash\njust "$@"' > /usr/bin/j && \
 ENV JUST_SUPPRESS_DOTENV_LOAD_WARNING=1
 
 
-RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+###############################################################################
+# watchexec for fast development reloading
+###############################################################################
+RUN apk add --no-cache -X https://dl-cdn.alpinelinux.org/alpine/edge/community \
     watchexec
-
-# watchexec for live reloading in development https://github.com/watchexec/watchexec
-# RUN VERSION=1.14.1 ; \
-#     SHA256SUM=34126cfe93c9c723fbba413ca68b3fd6189bd16bfda48ebaa9cab56e5529d825 ; \
-#     curl -L -O https://github.com/watchexec/watchexec/releases/download/$VERSION/watchexec-$VERSION-i686-unknown-linux-musl.tar.xz && \
-#     (echo "$SHA256SUM  watchexec-${VERSION}-i686-unknown-linux-musl.tar.xz" | sha256sum -c) && \
-#     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
-#     rm -rf watchexec-*
 
 # git on unconfigured systems requires these set for some operations
 RUN git config --global user.email "ci@rob.ot"

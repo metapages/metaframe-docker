@@ -74,9 +74,9 @@ export const TabMenu: React.FC = () => {
   const [nocacheString] = useHashParam("nocache");
 
   // debugging
-  // useEffect(() => {
-  //   console.log(`🍔 TabMenu: useEffect: dockerJob`, dockerJob)
-  // }, [dockerJob])
+  useEffect(() => {
+    console.log(`🍔 TabMenu: useEffect: dockerJob`, dockerJob?.definitionMeta?.definition?.inputs ? Object.keys(dockerJob?.definitionMeta?.definition?.inputs).length : 0)
+  }, [dockerJob])
 
   // Update the local job hash (id) on change
   useEffect(() => {
@@ -107,18 +107,18 @@ export const TabMenu: React.FC = () => {
     if (!newJobState) {
       // only clear the job IF it's different from our last inputs
       if (jobHash !== jobHashCurrentOutputs) {
-        // console.log('🍔🍔 setJob undefined');
+        console.log('🍔🍔 setJob undefined');
         setJob(undefined);
       }
     } else if (!job) {
-      // console.log('🍔🍔 setJob (bc !job)', newJobState);
+      console.log('🍔🍔 setJob (bc !job)', newJobState);
       setJob(newJobState);
     } else {
       if (
         newJobState.hash !== job.hash ||
         newJobState.history.length !== job.history.length
       ) {
-        // console.log('🍔🍔 setJob (bc newJobState.hash !== job.hash) ', newJobState);
+        console.log('🍔🍔 setJob (bc newJobState.hash !== job.hash) ', newJobState);
         setJob(newJobState);
       }
     }
