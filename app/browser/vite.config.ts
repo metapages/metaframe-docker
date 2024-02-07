@@ -20,6 +20,7 @@ export default defineConfig(({ command, mode }) => ({
     alias: {
       "/@": resolve(__dirname, "./src"),
     },
+    preserveSymlinks: true,
   },
 
   // this is really stupid this should not be necessary
