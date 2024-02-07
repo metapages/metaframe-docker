@@ -1,6 +1,6 @@
 # Run docker containers as metaframes in the browser
 
-`metaframe-docker` runs docker containers on user-supplied workers. The queue management is open and public
+`metaframe-docker` runs docker containers on user-supplied workers. The queue management is open and public: your work queue is simply 
 
 Any time the inputs change (and on start) the configured docker contaner is run:
  - `/inputs` is the location where inputs are copied as files
@@ -37,18 +37,14 @@ Versioned. Reproducible. No client install requirements, as long as you have at 
    docker run --restart unless-stopped -tid -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp metapages/metaframe-docker-worker:0.1.2 --cpus=2 --queue=public1 --gpus=true
    ```
 
-Append the ` --gpus=true` argument if you want your docker jobs to have GPU access
+**Coming soon:** GPU support
 
 ## Repository
 [https://github.com/metapages/metaframe-docker](https://github.com/metapages/metaframe-docker)
 
 
-## Versions
-
-[https://metapages.github.io/metaframe-docker/v/](https://metapages.github.io/metaframe-docker/v/)
-
-
 ## Example URL
 
-Python 3:
-https://docker-run.dev:8000/?command=cHJpbnQgXCggc2Rmc2RmMiBcKQ%3D%3D&image=python3#/queue/1?command=cHl0aG9uIC1jICdwcmludCgiaGVscCIpJw%3D%3D&image=python%3A3.8.8-alpine3.13
+Run the python command in a container:
+
+https://docker.mtfm.io/?command=cHJpbnQgXCggc2Rmc2RmMiBcKQ%3D%3D&image=python3#/queue/1?command=cHl0aG9uIC1jICdwcmludCgiaGVscCIpJw%253D%253D&image=python%253A3.8.8-alpine3.13&job=JTdCJTIyY29tbWFuZCUyMiUzQSUyMnB5dGhvbiUyMC1jJTIwJ3ByaW50KCU1QyUyMmhlbHAlNUMlMjIpJyUyMiUyQyUyMmltYWdlJTIyJTNBJTIycHl0aG9uJTNBMy4xMi4xLWFscGluZTMuMTklMjIlN0Q=&queue=public1
