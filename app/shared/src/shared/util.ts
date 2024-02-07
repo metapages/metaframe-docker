@@ -1,5 +1,6 @@
-import objectHash from "object-hash"
-import { DockerJobDefinitionInputRefs } from "./types"
+import objectHash from 'object-hash';
+
+import { DockerJobDefinitionInputRefs } from './types.ts';
 
 export const asyncForEach = < T extends {} > (array: T[], callback: any) :Promise<void> => {
     return new Promise(async (resolve, reject) => {
