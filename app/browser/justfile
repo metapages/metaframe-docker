@@ -14,16 +14,6 @@ export APP_PORT_BROWSER            := env_var_or_default("APP_PORT_BROWSER", "44
 # you have to manually set this to 'local'
 SERVER_ORIGIN                      := env_var_or_default("SERVER_ORIGIN", "https://docker-metapage-io.glitch.me")
 export ROOT                        := env_var_or_default("GITHUB_WORKSPACE", `(which git >/dev/null && git rev-parse --show-toplevel) || (cd ../.. && pwd)`)
-#`if [ "${GITHUB_WORKSPACE}" != "" ]; then echo "${GITHUB_WORKSPACE}"; else echo "$(git rev-parse --show-toplevel)"; fi`
-export CI                          := env_var_or_default("CI", "")
-PACKAGE_NAME_SHORT                 := file_name(`cat package.json | jq -r '.name' | sd '.*/' ''`)
-DIST_ROOT                          := ROOT + "/docs"
-# Store the CI/dev docker image in github
-# ghcr.io packages cannot have more than one "/" after the organization name
-export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/" + PACKAGE_NAME_SHORT
-# Always assume our current cloud ops image is versioned to the exact same app images we deploy
-export DOCKER_TAG                  := `if [ "${DOCKER_TAG}" != "" ]; then echo "${DOCKER_TAG}"; else if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi; fi`
-export DOCKER_IMAGE_NAME           := `basename $(pwd)`
 # The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 # Source of deno scripts. When developing we need to switch this
