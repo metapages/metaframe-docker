@@ -83,15 +83,29 @@ build BASE="": _ensure_npm_modules (_tsc "--build")
     HOST={{APP_FQDN}} \
     OUTDIR=dist \
     BASE={{BASE}} \
-        deno run --allow-all --unstable {{DENO_SOURCE}}/browser/vite-build.ts --versioning=true
+        deno run --allow-all --unstable {{DENO_SOURCE}}/browser/vite-build.ts
+    
 
 # Test: currently bare minimum: only building. Need proper test harness.
 @test: (_tsc "--build")
 
 # Publish to npm and github pages.
-publish: _githubpages_publish
-    @# Push the tags up
-    # git push origin v$(cat package.json | jq -r '.version')
+# publish: _githubpages_publish
+#     @# Push the tags up
+#     # git push origin v$(cat package.json | jq -r '.version')
+
+publish: _ensure_deployctl build
+  #!/usr/bin/env bash
+  set -euo pipefail
+  rm -rf deploy
+  mkdir -p deploy
+  mv dist deploy/browser
+  cp -r worker/server.ts deploy/
+  cd deploy
+  deployctl deploy --allow-sys --project=metaframe-docker --prod server.ts
+
+@_ensure_deployctl:
+    if ! command -v deployctl &> /dev/null; then echo '‼️ deployctl is being installed ‼️'; deno install --allow-all --no-check -r -f https://deno.land/x/deploy/deployctl.ts; fi
 
 # Deletes: .certs dist
 clean:
