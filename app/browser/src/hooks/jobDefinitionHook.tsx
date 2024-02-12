@@ -134,7 +134,12 @@ export const DockerJobDefinitionProvider = ({ children }: Props) => {
               value,
               type: DataRefType.utf8,
             };
-          } else {
+          } else if (typeof value === "number") {
+            definition.inputs![name] = {
+              value: `${value}`,
+              type: DataRefType.utf8,
+            };
+          }else {
             console.error(`I don't know how to handle input ${name}:`, value);
           }
           // Now all (non-blob) values are DataMode.utf8
